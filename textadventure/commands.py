@@ -221,7 +221,7 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
 
 
 class TakeCommandHandler(SimpleCommandHandler):
-    command_names = ["take", "grab", "tak", "steel", "pick", "pik", "pickup"]
+    command_names = ["take", "grab", "tak", "steal", "pick", "pik", "pickup"]
     description = "Allows you to take something from a location or someone. Aliases: take, grab, pickup\n" \
                   "Usage: take <item name>"
 
