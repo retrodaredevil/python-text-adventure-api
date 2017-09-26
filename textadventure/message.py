@@ -146,10 +146,12 @@ class KeyboardInput(PlayerInput, Thread):
         while True:
             inp = str(input(self.__input_prompt))
             self.__input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
-            if len(inp) == 0:  # ignore blank lines
-                if self.stream_output is not None and self.stream_output.is_unix:
+            if self.should_use_input(inp):  # ignore blank lines
+                if self.stream_output is not None:
                     # get rid of enter # back to prev: \033[F
-                    self.stream_output.stream.write("\033[K\033[u\033[1A")  # gosh, it was worth trying lots of things
+                    if self.stream_output.is_unix:
+                        self.stream_output.stream.write("\033[K\033[u\033[1A")  # gosh, it was worth trying lots of stuf
+                        self.stream_output.stream.flush()
                     # K: clear line, u: restore position, 1A: Move up 1 line   # ^ it works!!
 
                     '''
@@ -158,10 +160,14 @@ class KeyboardInput(PlayerInput, Thread):
                     Fuck this doesn't work on windows. I've been using gitbash. Fuck DOS operating system wtf
                     '''
 
-                    self.stream_output.stream.flush()
                     self.stream_output.print_immediate = True
                 continue
+
             self.inputs.append(inp)
+
+    @staticmethod
+    def should_use_input(inp: str):
+        return len(inp) != 0 and not inp.isspace()
 
     def take_input(self):
         r = None
