@@ -31,7 +31,8 @@ class Handler:
     def __init__(self):
         from textadventure.location import Location
         from textadventure.input import InputHandler
-        self.players: List[Player] = []
+        self.players: List[Player] = []  # if getting error. Use 3.6
+        # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
         self.locations: List[Location] = []
         self.input_handlers: List[InputHandler] = []
         self.living_things: List[Living] = []
