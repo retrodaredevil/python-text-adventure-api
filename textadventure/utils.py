@@ -9,9 +9,13 @@ Imports should not import any of the other modules we've made. It could conflict
 MessageConstant = Union[str, 'Message']
 """MessageConstant is used to represent a constant Message or string object that does not change"""
 
-
-NOT_IMPORTANT = ["the", "into", "to", "of", "with", "and", "in", "that", "my", "at", "near", "around"]
-"""Represents a list of strings that are unimportant to comparing input with. Note all words in list are lower case"""
+NOT_IMPORTANT = ["the", "into", "to", "of", "with", "and", "in", "that", "my", "at", "near", "around", "his", "her",
+                 "their", "our", "your", "from"]
+"""
+Represents a list of strings that are unimportant to comparing input with. Note all words in list are lower case
+These words may be important in determining what someone wants in an english sentence, however, since we aren't \
+    interpreting an english paper, we should be OK.
+"""
 
 CanDo = Tuple[bool, MessageConstant]
 """[0] is a boolean representing if a player can do the action. If [0] is True, then [1] tells why it is True. If\
@@ -70,6 +74,7 @@ def are_mostly_equal(a: str, b: str) -> bool:
             if index not in unimportant:
                 important.append(s)
         return " ".join(important)
+
     a = remove_for(a).lower()
     b = remove_for(b).lower()
 
@@ -120,4 +125,3 @@ DOWN = UP * -1
 ZERO = Point(0, 0, 0)
 
 DIRECTIONS = [NORTH, EAST, SOUTH, WEST, UP, DOWN]
-
