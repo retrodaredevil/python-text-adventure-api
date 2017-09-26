@@ -94,7 +94,7 @@ class InputObject:
                 r.append(s)
             else:
                 if start_comparing + ignored == i:  # the next one is the request argument
-                    if i + 1 in unimportant:  # if the next one is unimportant
+                    if i + 1 in unimportant or s.isspace():  # if the next one is unimportant
                         ignored += 1  # Needed to execute if first if statement again
                     else:  # the next one must be important
                         appending = True
@@ -105,12 +105,7 @@ class InputObject:
 
     @staticmethod
     def join(to_join: List[str]) -> str:
-        r = ""
-        for s in to_join:
-            r += s
-            r += " "
-        r = r[:-1]
-        return r
+        return " ".join(to_join)  # before this line, I wrote about 5 lines. I don't even know python lol
 
 
 class InputHandler(ABC):
