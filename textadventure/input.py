@@ -15,17 +15,18 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
         NOT_HANDLED        Used to represent when there was no action taken
         HANDLED            Used to represent when there was a noticeable action taken (don't act unless needed after)
         PARTIALLY_HANDLED  Used to represent when there was an action taken, but not something too important
-        RESPONDED_TO       Used to represent when there was action taken but barely noticeable (should respond to)
+        UNNOTICEABLE       Used to represent when there was action taken but barely noticeable (should respond to)\
+                                if returned, and no other responses, it should say Command not recognized.
         REMOVE_HANDLER     Used to tell the caller of the event to remove the handler(indicates a noticeable action too)
         REMOVE_HANDLER_ALLOW_RESPONSE same as REMOVE_HANDLER but you can respond if you would like (no notic action)
         INCORRECT_RESPONSE Represents when a response was incorrect and the handler doesn't want you to try to use input
-        HANDLE_AND_DONE    Represents when a response has been handled and should never be responded to again
-                                            (Normally use HANDLED)
+        HANDLE_AND_DONE    Represents when a response has been handled and should never be responded to again \
+                               (Normally use HANDLED) (It won't allow anything to respond at all after this is returned)
     """
     NOT_HANDLED = auto()
     HANDLED = auto()
     PARTIALLY_HANDLED = auto()
-    RESPONDED_TO = auto()
+    UNNOTICEABLE = auto()
     REMOVE_HANDLER = auto()
     REMOVE_HANDLER_ALLOW_RESPONSE = auto()
     INCORRECT_RESPONSE = auto()
@@ -36,8 +37,10 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
         Indicates whether there should be more responses allowed
         @return: True if there are more responses allowed. False if it is advised against that
         """
-        return self is self.__class__.NOT_HANDLED or self is self.__class__.REMOVE_HANDLER_ALLOW_RESPONSE or \
-            self is self.__class__.RESPONDED_TO
+        # return self is self.__class__.NOT_HANDLED or self is self.__class__.REMOVE_HANDLER_ALLOW_RESPONSE or \
+        #     self is self.__class__.UNNOTICEABLE
+        return self in [self.__class__.NOT_HANDLED, self.__class__.REMOVE_HANDLER_ALLOW_RESPONSE,
+                        self.__class__.UNNOTICEABLE]
 
 
 class InputObject:
@@ -76,7 +79,8 @@ class InputObject:
             Use this method multiple times)
         Note that this does not change anything to lower case. Beware when comparing
         @param index: The index for the arg. Starts at 0. Using a number less than 0 will produce an unexpected result
-        @param ignore_unimportant_before Set to True if you want filter out unimportant words before the argument
+        @param ignore_unimportant_before Set to True if you want filter out unimportant words before the argument \
+                note that it will never ignore unimportant AFTER the requested index.
         @return: A list of the requested argument and all arguments after it. (Requested arg is in [0])
         """
         split = self.get_split()

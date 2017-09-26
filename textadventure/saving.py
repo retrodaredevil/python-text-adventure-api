@@ -117,7 +117,7 @@ class SaveCommandHandler(SimpleCommandHandler):
             self.send_help(player)
             return InputHandleType.HANDLED
         if not is_path_valid(path):
-            player.send_message("The path '{}' is not valid. The save file must end in .data")
+            player.send_message("The path '{}' is not valid. The save file must end in .data".format(path.name))
             return InputHandleType.HANDLED
 
         result = save(handler, player, path, True)  # TODO ask the player if they want override_file to be True
@@ -144,7 +144,7 @@ class LoadCommandHandler(SimpleCommandHandler):
             self.send_help(player)
             return InputHandleType.HANDLED
         if not is_path_valid(path):
-            player.send_message("The path '{}' is not valid. The save file must end in .data")
+            player.send_message("The path '{}' is not valid. The save file must end in .data".format(path.name))
             return InputHandleType.HANDLED
         # DONEish, most of the code above this is copy pasted. Fix it lol
 

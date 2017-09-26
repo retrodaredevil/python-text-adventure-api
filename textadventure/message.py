@@ -146,7 +146,7 @@ class KeyboardInput(PlayerInput, Thread):
         while True:
             inp = str(input(self.__input_prompt))
             self.__input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
-            if self.should_use_input(inp):  # ignore blank lines
+            if not self.should_use_input(inp):  # ignore blank lines
                 if self.stream_output is not None:
                     # get rid of enter # back to prev: \033[F
                     if self.stream_output.is_unix:

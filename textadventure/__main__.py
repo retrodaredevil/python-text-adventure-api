@@ -12,7 +12,7 @@ from textadventure.game.locations import Entrance, InsideEntrance, EastInsideEnt
     EntranceSpiderWebForest, CenterSpiderWebForest
 from textadventure.game.data import EventsObject
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
-    UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler
+    UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler
 from textadventure.saving import SaveCommandHandler, LoadCommandHandler
 
 
@@ -30,7 +30,8 @@ def default_load(player: 'Player', handler: 'Handler'):
 
 
 def setup():
-    handler = Handler()
+    handler: Handler = Handler()  # if getting error. Use 3.6
+    # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 
     stream_output = StreamOutput()
     stream_output.is_unix = "y" in input("Is your terminal unix based? (y/n) (No if you don't know) > ").lower()
@@ -44,6 +45,7 @@ def setup():
                                    YellCommandHandler(), UseCommandHandler(), SaveCommandHandler(),
                                    LoadCommandHandler(), NameCommandHandler(), InventoryCommandHandler(),
                                    LocateCommandHandler()])
+    handler.input_handlers.extend([DirectionInputHandler()])
     handler.living_things.extend([OtherPerson(), LauraPerson(), NinjaDude()])
 
     handler.players.append(player)

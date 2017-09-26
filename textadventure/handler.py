@@ -1,20 +1,21 @@
-from typing import List, Optional
-
+from typing import List, Optional, TypeVar
 
 from textadventure.message import Message, MessageType, StreamOutput
 from textadventure.player import Player, Living
 from textadventure.utils import Point
 
+T = TypeVar("T")
 
-def has_only(the_list: List, only):
+
+def has_only(the_list: List[T], only_list: List[T]):
     """
-    Makes sure that all the items in a list are equal to only
+    Makes sure that all the items in a list are equal to one of the items in only_list
     @param the_list: The list to check
-    @param only: The object to compare to every item in the list
+    @param only_list: The list of acceptable objects to make sure that every item in the list is one of these objects
     @return: True if all the items in the list are equal to only, Also True if there are no items in list.
     """
     for ele in the_list:
-        if ele != only:
+        if ele not in only_list:
             return False
     return True
 
@@ -31,8 +32,7 @@ class Handler:
     def __init__(self):
         from textadventure.location import Location
         from textadventure.input import InputHandler
-        self.players: List[Player] = []  # if getting error. Use 3.6
-        # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
+        self.players: List[Player] = []
         self.locations: List[Location] = []
         self.input_handlers: List[InputHandler] = []
         self.living_things: List[Living] = []
@@ -63,17 +63,18 @@ class Handler:
         already_handled: List[InputHandleType] = []
         for input_handle in list(input_handles):  # copy list so we can delete stuff
             handle_type = input_handle.handle(already_handled)  # note not method # let it decide to take
-            assert handle_type is not None, "An InputHandle's handle callable cannot return None. {} broke this rule"\
+            assert handle_type is not None, "An InputHandle's handle callable cannot return None. {} broke this rule" \
                 .format(type(input_handle))  # cannot be None because it said it would handle it
 
             already_handled.append(handle_type)
-            if handle_type is InputHandleType.REMOVE_HANDLER or \
-                    handle_type is InputHandleType.REMOVE_HANDLER_ALLOW_RESPONSE:
+            if handle_type is InputHandleType.REMOVE_HANDLER or handle_type is \
+                    InputHandleType.REMOVE_HANDLER_ALLOW_RESPONSE:
                 self.input_handlers.remove(input_handle.input_handler)
             elif handle_type is InputHandleType.HANDLED_AND_DONE:
                 break  # we don't care what others have to say. We're done handling this input
         # player.send_line()  # for the debug
-        if len(already_handled) == 0 or has_only(already_handled, InputHandleType.NOT_HANDLED):
+        if len(already_handled) == 0 or has_only(already_handled,
+                                                 [InputHandleType.NOT_HANDLED, InputHandleType.UNNOTICEABLE]):
             player.send_message("Command: \"" + input_object.get_command() + "\" not recognized.")
 
     def get_input_handlers(self) -> List['InputHandler']:
@@ -116,6 +117,7 @@ class Handler:
                 return location
         return None
 
+
 from textadventure.input import InputHandler, InputObject, InputHandleType, InputHandle
 
 
@@ -154,4 +156,3 @@ class SettingsHandler(InputHandler):
             return InputHandleType.HANDLED_AND_DONE
 
         return InputHandle(0, handle_function, self)
-

@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from textadventure.command import LocationCommandHandler, SimpleCommandHandler
 from textadventure.handler import Handler
-from textadventure.input import InputObject, InputHandleType
+from textadventure.input import InputObject, InputHandleType, InputHandler, InputHandle
 from textadventure.item import FiveSensesHandler, Item
 from textadventure.location import Location
 from textadventure.message import Message, MessageType
@@ -204,9 +204,13 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
             self.send_help(player)
             return InputHandleType.HANDLED
         rest = " ".join(first_arg)
-        point = get_point(handler, player, rest)
+        self.__class__.player_go(handler, player, rest)
+
+    @staticmethod
+    def player_go(handler: 'Handler', player: 'Player', first_argument: str) -> InputHandleType:
+        point = get_point(handler, player, first_argument)
         if point is None:
-            player.send_message("Cannot find location: \"" + rest + "\"")
+            player.send_message("Cannot find location: \"" + first_argument + "\"")
             return InputHandleType.HANDLED
         new_location = handler.get_point_location(point)
         if new_location == player.location:
@@ -218,6 +222,24 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
         if not result[0]:
             player.send_message(result[1])
         return InputHandleType.HANDLED
+
+
+class DirectionInputHandler(InputHandler):
+    def __init__(self):
+        super().__init__()
+
+    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+        def handle_function(already_handled: List[InputHandleType]) -> InputHandleType:
+            if not self._should_handle_input(already_handled):
+                return InputHandleType.NOT_HANDLED
+            return GoCommandHandler.player_go(handler, player, player_input.get_command())
+
+        if len(player_input.get_arg(0)) == 0:  # make sure the length is always 1 (there should be no args cuz command)
+            command_name = player_input.get_command()
+
+            if get_point(handler, player, command_name) is not None:  # we'll let the GoCommandHandler do what it wants
+                return InputHandle(7, handle_function, self)
+        return None
 
 
 class TakeCommandHandler(SimpleCommandHandler):

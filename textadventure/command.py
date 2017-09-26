@@ -23,8 +23,8 @@ class CommandHandler(InputHandler):
         def handle_function(already_handled: List[InputHandleType]):
             if not self._should_handle_input(already_handled):
                 return InputHandleType.NOT_HANDLED
-            second_arg = player_input.get_arg(1)
-            if len(second_arg) != 0 and second_arg[0] == "help":
+            first_arg = player_input.get_arg(0, False)
+            if len(first_arg) != 0 and first_arg[0].lower() == "help":
                 self.send_help(player)
                 return InputHandleType.HANDLED
             return self._handle_command(handler, player, player_input)
