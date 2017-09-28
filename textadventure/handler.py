@@ -50,7 +50,7 @@ class Handler:
             for location in self.locations:
                 location.update(self)
 
-    def __do_input(self, player: 'Player', inp: str):
+    def __do_input(self, player: Player, inp: str):
         from textadventure.input import InputObject, InputHandleType, InputHandle
         input_object = InputObject(inp)
         input_handles: List[InputHandle] = []
@@ -64,7 +64,7 @@ class Handler:
         for input_handle in list(input_handles):  # copy list so we can delete stuff
             handle_type = input_handle.handle(already_handled)  # note not method # let it decide to take
             assert handle_type is not None, "An InputHandle's handle callable cannot return None. {} broke this rule" \
-                .format(type(input_handle))  # cannot be None because it said it would handle it
+                .format(type(input_handle.input_handler))  # cannot be None because it said it would handle it
 
             already_handled.append(handle_type)
             if handle_type is InputHandleType.REMOVE_HANDLER or handle_type is \
@@ -122,13 +122,13 @@ from textadventure.input import InputHandler, InputObject, InputHandleType, Inpu
 
 
 class SettingsHandler(InputHandler):
-    def __init__(self, allowed_player: 'Player'):
+    def __init__(self, allowed_player: Player):
         """
         @param allowed_player: The only player that this will react to
         """
         self.allowed_player = allowed_player
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
 
         if player != self.allowed_player or player_input.get_command().lower() != "setting" \
                 or type(player.player_output) is not StreamOutput:

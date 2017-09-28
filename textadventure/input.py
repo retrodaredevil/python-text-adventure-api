@@ -114,13 +114,13 @@ class InputObject:
 
 class InputHandler(ABC):
     @abstractmethod
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject) -> Optional['InputHandle']:
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject) -> Optional['InputHandle']:
         """
         The reason this doesn't handle the input is because we want all the input handlers to be able to give\
         us their priority and depending on that, we'll call the lower priority number first\
         (lower number higher priority. Explained in InputHandle)
         @param handler: The handler object
-        @type handler: 'Handler'
+        @type handler: Handler
         @param player: the player object that gave the input
         @param player_input: The InputObject that contains the string input and other useful data
         @rtype: Optional[InputHandle]

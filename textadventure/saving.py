@@ -111,7 +111,7 @@ class SaveCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: 'InputObject') -> InputHandleType:
+    def _handle_command(self, handler: Handler, player: Player, player_input: 'InputObject') -> InputHandleType:
         path = get_path(player_input)
         if path is None:
             self.send_help(player)
@@ -138,7 +138,7 @@ class LoadCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         path = get_path(player_input)
         if path is None:
             self.send_help(player)

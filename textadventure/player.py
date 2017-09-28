@@ -12,7 +12,7 @@ class Player(Entity, Holder):
         super().__init__(name, 30, 30, None)  # TODO max_health, current_health, location
         self.player_input = player_input
         self.player_output = player_output
-        # self.__getitem__(PlayerFriend): 'Living' = None
+        # self.__getitem__(PlayerFriend): Living = None
         self.handled_objects = []
         # self.__getitem__(EventsObject): 'EventsObject' = data_object
 
@@ -37,7 +37,7 @@ class Player(Entity, Holder):
                 return
         self.handled_objects.append(value)
 
-    def get_used_name(self, living: 'Living'):
+    def get_used_name(self, living: Living):
         if living == self:
             return "You"
         return super().get_used_name(living)

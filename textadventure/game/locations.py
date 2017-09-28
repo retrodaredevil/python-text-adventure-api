@@ -33,15 +33,15 @@ def create_leave_message(location: Location) -> Message:
 
 
 class NameTaker(InputHandler):
-    def __init__(self, player: 'Player'):
+    def __init__(self, player: Player):
         self.current_name = None
         self.current_friend_name = None
-        self.player: 'Player' = player
+        self.player: Player = player
 
         message = "Oh hey! You've just accepted to start your journey too! I just did too. Wait, what's you name again?"
         player[PlayerFriend].tell(player, message)
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject) -> Optional[InputHandle]:
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject) -> Optional[InputHandle]:
         if player != self.player:
             return None
 
@@ -98,13 +98,13 @@ class Entrance(Location):  # players should only be in this location when starti
                                        "An interesting area that has a large door that goes into the trail.",
                                        Point(0, 0))
 
-    def on_enter(self, player, previous_location: 'Location', handler: 'Handler'):
+    def on_enter(self, player, previous_location: 'Location', handler: Handler):
         if previous_location is None:
             player.send_message("Welcome to the entrance to The Trail.")
             player.send_wait(0.3)
             player.send_message("Would you like to start your journey on this trail?")
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: 'InputObject'):
+    def on_input(self, handler: Handler, player: Player, player_input: 'InputObject'):
         if not self.should_take_input(handler, player, player_input):
             return None
 
@@ -134,23 +134,23 @@ class Entrance(Location):  # players should only be in this location when starti
 
         return InputHandle(10, handle_function, self)
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         player.send_message(self.__class__.FEEL_MESSAGE)
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         player.send_message("You hear birds chirping and the occasional car go by.")
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         player.send_message("You see two large double doors." +
                             " Maybe you can start your journey if you stopped typing commands and just said 'yeah'.")
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message("You smell leaves around you and the Autumn smell")
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         player.send_message("You taste bugs inside your mouth. JK JK. Just say you want to start your journey already!")
 
-    def go_to_other_location(self, handler: 'Handler', new_location, direction: Point, player: 'Player') -> CanDo:
+    def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player) -> CanDo:
         return (False, "Well, I see a player who's trying to go to another location. Just say that you "
                        "want to start your journey already.")
 
@@ -161,12 +161,12 @@ class InsideEntrance(Location):
                                              "There are double doors and lots of trees",
                                              Point(0, 1))
 
-    def on_enter(self, player: 'Player', previous_location: 'Location', handler: 'Handler'):
+    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
         player.send_message(
             "You now see a very long trail ahead of you. You see forests on both sides and double doors behind you")
         player.send_line()
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         if not self.should_take_input(handler, player, player_input):
             return None
 
@@ -177,23 +177,23 @@ class InsideEntrance(Location):
 
         return InputHandle(10, handle_function, self)
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         player.send_message(Entrance.FEEL_MESSAGE)
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         player.send_message(DONT_HEAR)
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         player.send_message("You see a long trail ahead of you with light peeking through the trees " +
                             "down the trail but very dark forests on each side.")
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         player.send_message(DONT_TASTE)
 
-    def go_to_other_location(self, handler: 'Handler', new_location, direction: Point, player: 'Player') -> CanDo:
+    def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player) -> CanDo:
         if new_location is None:
             return CANT_MOVE_DIRECTION
         # debug("point: {}".format(str(direction)))
@@ -229,7 +229,7 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
                          "There just enough light peeking through the trees to see.",
                          Point(1, 1))
 
-    def on_enter(self, player: 'Player', previous_location: 'Location', handler: 'Handler'):
+    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
         self.send_welcome(player)
         if not player[EventsObject].been_introduced_to_furry:
             player.send_message("You hear screaming.")
@@ -242,7 +242,7 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
             wallet.change_holder(None, player.location)
             penny.change_holder(None, wallet)
 
-    def go_to_other_location(self, handler: 'Handler', new_location, direction: Point, player: 'Player') -> CanDo:
+    def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player) -> CanDo:
         if not player[EventsObject].been_introduced_to_furry:
             return False, "You should probably try to save your friend."
         if new_location is None:
@@ -259,10 +259,10 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
             return CANT_MOVE_DIRECTION
         return CANT_JUMP_LOCATION
 
-    def on_take(self, handler: 'Handler', item: Item):
+    def on_take(self, handler: Handler, item: Item):
         if not isinstance(item.holder, Player):
             return
-        player: 'Player' = item.holder
+        player: Player = item.holder
         if isinstance(item, Wallet):
             if player[EventsObject].been_introduced_to_furry:
                 handler.get_livings(OtherPerson, 1)[0].tell(player, "Hey that's not yours!")
@@ -285,31 +285,31 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
                         "She's pretty shy so you can use the yell command to yell out to her.")
             friend.tell(player, "Well, 'shy' isn't really the word. Good luck.")
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         if player[EventsObject].been_introduced_to_furry:
             player.send_message("You see nothing. There is just enough light to move around.")
         else:
             player.send_message("You see your friend being chased by a furry monster.")
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         if player[EventsObject].been_introduced_to_furry:
             player.send_message(DONT_HEAR)
         else:
             player.send_message("You hear your friend screaming.")
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         if player[EventsObject].been_introduced_to_furry:
             player.send_message("You remember the moment you met the furry monster.")
         else:
             player.send_message("You feel scared. You should probably do something about the furry monster")
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         player.send_message(DONT_TASTE)
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         return None
 
 
@@ -320,10 +320,10 @@ class WestInsideEntrance(Location):  # introduce Laura
                          "Lots of trees around with the only exit going back to the double doors.",
                          Point(-1, 1))
 
-    def on_enter(self, player: 'Player', previous_location: 'Location', handler: 'Handler'):
+    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
         self.send_welcome(player)
 
-    def go_to_other_location(self, handler: 'Handler', new_location, direction: Point, player: 'Player'):
+    def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player):
         if new_location is None:
             return CANT_MOVE_DIRECTION
 
@@ -342,28 +342,28 @@ class WestInsideEntrance(Location):  # introduce Laura
 
         return CAN_GO_TO_LOCATION
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         player.send_message("You see lots of trees and an exit back to the double doors")
 
-    def listen(self, handler: 'Handler', player: 'Player'):  # test
+    def listen(self, handler: Handler, player: Player):  # test
         if player[EventsObject].knows_laura or not player[EventsObject].been_introduced_to_furry:
             player.send_message(DONT_HEAR)
         else:
             player.send_message("You hear someone in the bushes. Maybe you can yell out to them.")
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         player.send_message("You feel a little bit spooked.")
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         player.send_message(DONT_TASTE)
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject) -> Optional[InputHandle]:
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject) -> Optional[InputHandle]:
         return None
 
-    def on_yell(self, handler: 'Handler', player: 'Player', player_input: 'InputObject', is_there_response=False):
+    def on_yell(self, handler: Handler, player: Player, player_input: 'InputObject', is_there_response=False):
         if player[EventsObject].knows_laura:
             super().on_yell(handler, player, player_input, False)
         else:
@@ -399,13 +399,13 @@ class EntranceSpiderWebForest(Location):
                          "There are lots of spider webs around. No spiders though.",
                          Point(0, 2))
 
-    def on_enter(self, player: 'Player', previous_location: 'Location', handler: 'Handler'):
+    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
         self.send_welcome(player)
         if not player[EventsObject].been_introduced_to_furry:
             player.send_message("You hear your friend off in the distance screaming. "
                                 "It's coming from the east of the double doors")
 
-    def go_to_other_location(self, handler: 'Handler', new_location, direction: Point, player: 'Player') -> CanDo:
+    def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player) -> CanDo:
         if new_location is None:
             return CANT_MOVE_DIRECTION
 
@@ -427,39 +427,39 @@ class EntranceSpiderWebForest(Location):
         player.location.on_enter(player, previous_location, handler)
         return CAN_GO_TO_LOCATION
 
-    def on_item_use(self, handler: 'Handler', player: 'Player', item: Item):
+    def on_item_use(self, handler: Handler, player: Player, item: Item):
         if isinstance(item, Sword):
             self.do_player_clear(player)
         else:
             super().on_item_use(handler, player, item)
 
     @staticmethod
-    def do_player_clear(player: 'Player'):
+    def do_player_clear(player: Player):
         if player[EventsObject].has_cleared_spider_webs_at_entrance:
             player.send_message("You've already cleared the spider webs")
         else:
             player.send_message("You used your sword to clear the spider webs")
             player[EventsObject].has_cleared_spider_webs_at_entrance = True
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         return None
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         if player[EventsObject].has_cleared_spider_webs_at_entrance:
             player.send_message("You see a lot of spider webs and an entrance north and south.")
         else:
             player.send_message("You see a lot of spider webs. It doesn't look passable.")
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         player.send_message("Silence. Kinda spooky.")
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         player.send_message("You feel that it's cooler here than at the entrance.")
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         player.send_message(DONT_TASTE)
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
 
 
@@ -469,38 +469,38 @@ class CenterSpiderWebForest(Location):
                          "There's an old fountain in the middle that doesn't work and lots of spider webs",
                          Point(0, 3))
 
-    def send_welcome(self, player: 'Player'):
+    def send_welcome(self, player: Player):
         player.send_line()
         player.send_message(Message("The {}.", named_variables=[self]))
         player.send_message(self.description)
         player.send_line()
 
-    def on_enter(self, player: 'Player', previous_location: 'Location', handler: 'Handler'):
+    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
         self.send_welcome(player)
         events_object = player[EventsObject]
         if not events_object.has_been_in_center_spider_web_forest:
             events_object.has_been_in_center_spider_web_forest = True
             # TODO 
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         player.send_message("You hear nothing except for the occasional drop of water out of the fountain.")
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         player.send_message("You see an old fountain and a ninja dude ")
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message("You smell BO. It's yours!")
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         player.send_message("You feel glad you've made it this far.")
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         player.send_message(DONT_TASTE)
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         return None
 
-    def go_to_other_location(self, handler: 'Handler', new_location, direction: 'Point', player: 'Player'):
+    def go_to_other_location(self, handler: Handler, new_location, direction: 'Point', player: Player):
         if new_location is None:
             return CANT_MOVE_DIRECTION
 

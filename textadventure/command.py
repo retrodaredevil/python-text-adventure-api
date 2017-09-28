@@ -16,7 +16,7 @@ class CommandHandler(InputHandler):
     def __init__(self):
         pass
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         if not self.should_handle_player(player) or not self._should_handle_command(player_input):
             return None
 
@@ -32,14 +32,14 @@ class CommandHandler(InputHandler):
         return InputHandle(8, handle_function, self)  # 8 because most locations should return 10
 
     @abstractmethod
-    def send_help(self, player: 'Player'):
+    def send_help(self, player: Player):
         """
         Called inside from the handle_function in on_input and passed through the InputHandle returned by on_input
         """
         pass
 
     @abstractmethod
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject) -> InputHandleType:
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
         """
         The _ means that this method is meant to be "protected" and should only be called within classes and subclasses
         @param handler: The handler object
@@ -59,7 +59,7 @@ class CommandHandler(InputHandler):
         """
         pass
 
-    def should_handle_player(self, player: 'Player') -> bool:
+    def should_handle_player(self, player: Player) -> bool:
         """
         Tells whether or not a certain command will have an effect for a player(Normally returns true unless overridden)
         called in on_input
@@ -83,7 +83,7 @@ class SimpleCommandHandler(CommandHandler):
     def _should_handle_command(self, player_input: InputObject):
         return player_input.get_command().lower() in self.command_names
 
-    def send_help(self, player: 'Player'):
+    def send_help(self, player: Player):
         player.send_message(self.description)
 
 
@@ -95,7 +95,7 @@ class LocationCommandHandler(SimpleCommandHandler):
         super(LocationCommandHandler, self).__init__(command_names, description)
         self.location = location
 
-    def should_handle_player(self, player: 'Player') -> bool:
+    def should_handle_player(self, player: Player) -> bool:
         """
         @return: return self.location is None or player.location == self.location
         """

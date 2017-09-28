@@ -19,10 +19,10 @@ class Living(ABC):
         super().__init__()  # notice that this calls the object init, but it helps with multiple inheritance
         self.name = name
 
-    def get_used_name(self, living: 'Living') -> str:
+    def get_used_name(self, viewer: 'Living') -> str:
         """
         By default, returns self.name but can be overridden to create the effect that someone doesn't know this person
-        @param living: The person that the returned name will be showed to
+        @param viewer: The person that the returned name will be showed to
         @return: The string that represents the name the passed 'living' will be shown
         """
         return self.name

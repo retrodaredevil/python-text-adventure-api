@@ -36,34 +36,34 @@ class Sword(Weapon):
         super().__init__("{} sword".format(sword_type.value[0]))
         self.sword_type = sword_type
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         player.send_message(Message("You see a nice {}.", named_variables=[self]))
 
-    def can_smell(self, player: 'Player'):
+    def can_smell(self, player: Player):
         return True, "You can smell this"
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message("It smells like a sword.")
 
-    def can_feel(self, player: 'Player'):
+    def can_feel(self, player: Player):
         return True, "You can feel this"
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         player.send_message(Message("It feels like a nice, sharp {}.", named_variables=[self]))
 
-    def can_taste(self, player: 'Player'):
+    def can_taste(self, player: Player):
         return True, "You can taste this."
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         player.send_message("It tastes like a... Eww. don't lick your sword.")
 
-    def can_use(self, player: 'Player'):
+    def can_use(self, player: Player):
         return True, "You can use this as long as you're in the right place"
 
-    def use_item(self, handler: 'Handler', player: 'Player'):
+    def use_item(self, handler: Handler, player: Player):
         player.send_message(create_use_message(self))
         return True
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         raise NotImplementedError("Cannot listen to a sword")
 

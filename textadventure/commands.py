@@ -13,7 +13,7 @@ from textadventure.utils import Point, NORTH, EAST, SOUTH, WEST, UP, DOWN, ZERO,
 """This file holds some nice commands and util methods that help out with it. Most of the commands are essential."""
 
 
-def get_reference(player: 'Player', string_args: str) -> Optional[Item]:
+def get_reference(player: Player, string_args: str) -> Optional[Item]:
     """
     Senses command handler has a good code snippet that shows how you should use this method
     Note: Remember, this can return None.
@@ -30,7 +30,7 @@ def get_reference(player: 'Player', string_args: str) -> Optional[Item]:
     return None
 
 
-def get_point(handler: 'Handler', player: 'Player', string_args: str) -> Optional[Point]:
+def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Point]:
     """
     Gets the location using the player, and it's string_args
     @param handler: The Handler object
@@ -69,7 +69,7 @@ class HelpCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super(HelpCommandHandler, self).__init__(["help"], "The help for this command isn't very helpful now it it?")
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject) -> InputHandleType:
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
         message_type = MessageType.WAIT
         player.send_message(Message("Get help for commands: '<command> help'", message_type=message_type))
         player.send_message(
@@ -89,15 +89,15 @@ class SensesCommandHandler(LocationCommandHandler):
         super(SensesCommandHandler, self).__init__(command_names, description, location)
 
     @abstractmethod
-    def sense(self, sense_handler: FiveSensesHandler, handler: 'Handler', player: 'Player'):
+    def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         """Should be overridden and should only call the method from """
         pass
 
     @abstractmethod
-    def can_sense(self, item: Item, player: 'Player') -> CanDo:
+    def can_sense(self, item: Item, player: Player) -> CanDo:
         pass
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject) -> InputHandleType:
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
         first_arg = player_input.get_arg(0)
         if len(first_arg) != 0:  # thing stuff
             # here to
@@ -126,10 +126,10 @@ class LookCommandHandler(SensesCommandHandler):
     def __init__(self, location: Location):
         super(LookCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
 
-    def sense(self, sense_handler: FiveSensesHandler, handler: 'Handler', player: 'Player'):
+    def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.see(handler, player)
 
-    def can_sense(self, item: Item, player: 'Player') -> CanDo:
+    def can_sense(self, item: Item, player: Player) -> CanDo:
         return item.can_see(player)
 
 
@@ -140,10 +140,10 @@ class ListenCommandHandler(SensesCommandHandler):
     def __init__(self, location: Location):
         super(ListenCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
 
-    def sense(self, sense_handler: FiveSensesHandler, handler: 'Handler', player: 'Player'):
+    def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.listen(handler, player)
 
-    def can_sense(self, item: Item, player: 'Player') -> CanDo:
+    def can_sense(self, item: Item, player: Player) -> CanDo:
         return item.can_listen(player)
 
 
@@ -154,10 +154,10 @@ class FeelCommandHandler(SensesCommandHandler):
     def __init__(self, location: Location):
         super(FeelCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
 
-    def sense(self, sense_handler: FiveSensesHandler, handler: 'Handler', player: 'Player'):
+    def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.feel(handler, player)
 
-    def can_sense(self, item: Item, player: 'Player'):
+    def can_sense(self, item: Item, player: Player):
         return item.can_feel(player)
 
 
@@ -168,10 +168,10 @@ class SmellCommandHandler(SensesCommandHandler):
     def __init__(self, location: Location):
         super(SmellCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
 
-    def sense(self, sense_handler: FiveSensesHandler, handler: 'Handler', player: 'Player'):
+    def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.smell(handler, player)
 
-    def can_sense(self, item: Item, player: 'Player'):
+    def can_sense(self, item: Item, player: Player):
         return item.can_smell(player)
 
 
@@ -182,10 +182,10 @@ class TasteCommandHandler(SensesCommandHandler):
     def __init__(self, location: Location):
         super(TasteCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
 
-    def sense(self, sense_handler: FiveSensesHandler, handler: 'Handler', player: 'Player'):
+    def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.taste(handler, player)
 
-    def can_sense(self, item: Item, player: 'Player'):
+    def can_sense(self, item: Item, player: Player):
         return item.can_taste(player)
 
 
@@ -198,16 +198,16 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject) -> InputHandleType:
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
         first_arg = player_input.get_arg(0)
         if len(first_arg) == 0:
             self.send_help(player)
             return InputHandleType.HANDLED
         rest = " ".join(first_arg)
-        self.__class__.player_go(handler, player, rest)
+        return self.__class__.player_go(handler, player, rest)
 
     @staticmethod
-    def player_go(handler: 'Handler', player: 'Player', first_argument: str) -> InputHandleType:
+    def player_go(handler: Handler, player: Player, first_argument: str) -> InputHandleType:
         point = get_point(handler, player, first_argument)
         if point is None:
             player.send_message("Cannot find location: \"" + first_argument + "\"")
@@ -228,7 +228,7 @@ class DirectionInputHandler(InputHandler):
     def __init__(self):
         super().__init__()
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         def handle_function(already_handled: List[InputHandleType]) -> InputHandleType:
             if not self._should_handle_input(already_handled):
                 return InputHandleType.NOT_HANDLED
@@ -250,7 +250,7 @@ class TakeCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         first_arg = player_input.get_arg(0)
         if len(first_arg) == 0:
             self.send_help(player)
@@ -283,7 +283,7 @@ class PlaceCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         first_arg = player_input.get_arg(0)
         if len(first_arg) == 0:
             self.send_help(player)
@@ -316,10 +316,10 @@ class YellCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def can_yell(self, player: 'Player') -> bool:
+    def can_yell(self, player: Player) -> bool:
         return True
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         first_arg = player_input.get_arg(0, False)
         if len(first_arg) == 0:
             self.send_help(player)
@@ -339,7 +339,7 @@ class UseCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         first_arg = player_input.get_arg(0)
         if len(first_arg) == 0:
             self.send_help(player)
@@ -366,7 +366,7 @@ class NameCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         player.send_message(Message("Your name is {}.", named_variables=[player]))
         return InputHandleType.HANDLED
 
@@ -378,7 +378,7 @@ class InventoryCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         amount = len(player.items)
         if amount == 0:
             player.send_message("You don't have anything in your inventory")
@@ -400,7 +400,7 @@ class LocateCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         player.send_message(
             Message("You are at {}, which is '{}'", named_variables=[player.location.point, player.location]))
         return InputHandleType.HANDLED

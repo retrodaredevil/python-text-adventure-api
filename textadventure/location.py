@@ -70,7 +70,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         return are_mostly_equal(self.name, reference)
 
-    def on_take(self, handler: 'Handler', item: Item) -> None:
+    def on_take(self, handler: Handler, item: Item) -> None:
         """
         By default, doesn't do anything. Is called after the item's change_holder is called and should not be called\
             inside the item's change_holder function
@@ -81,7 +81,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         pass
 
-    def on_place(self, handler: 'Handler', item: Item, player: 'Player') -> None:
+    def on_place(self, handler: Handler, item: Item, player: Player) -> None:
         """
         Just like on_take , it's called after item's change_holder and is not called by that method
         The item's holder is already this location. The player is what placed it
@@ -94,7 +94,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         pass
 
-    def on_yell(self, handler: 'Handler', player: 'Player', player_input: InputObject, is_there_response=False) -> None:
+    def on_yell(self, handler: Handler, player: Player, player_input: InputObject, is_there_response=False) -> None:
         """
         There is a default player implementation for this
         is_there_response is only meant to be changed by inheriting classes (It shouldn't be changed by YellCommandHa..)
@@ -110,7 +110,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         if not is_there_response:
             player.send_message(self.__class__.NO_YELL_RESPONSE)
 
-    def on_item_use(self, handler: 'Handler', player: 'Player', item: Item) -> None:
+    def on_item_use(self, handler: Handler, player: Player, item: Item) -> None:
         """
         Should be called by the UseCommandHandler.
         If overridden, it's recommended that you call the super method (this method)
@@ -122,10 +122,10 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         player.send_message("You can't use that item here.")
         # TODO here, we will eventually handle simple things that all locations should be able to handle
 
-    def send_welcome(self, player: 'Player'):
+    def send_welcome(self, player: Player):
         player.send_message(self.name + ": " + self.description)
 
-    def update(self, handler: 'Handler'):
+    def update(self, handler: Handler):
         """
         By default, doesn't do anything unless overridden
         This method should be called on the infinite loop by handler
@@ -134,7 +134,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         pass
 
     @abstractmethod
-    def on_enter(self, player: 'Player', previous_location: Optional['Location'], handler: 'Handler'):
+    def on_enter(self, player: Player, previous_location: Optional['Location'], handler: Handler):
         """
         Should be called when the player's location is changed (this method doesn't set the players location)
         If for whatever reason, this method may change the player's location back to the previous (update if becomes t)
@@ -149,7 +149,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         pass
 
     @abstractmethod
-    def go_to_other_location(self, handler: 'Handler', new_location, direction: Point, player: 'Player') -> CanDo:
+    def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player) -> CanDo:
         """
         Called when a player tried to go to another location using the go command. Different implementation for each loc
         Note that when overriding this method, try not use use the type reference to other locations as the compiler\
@@ -172,7 +172,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
                 r.append(player)
         return r
 
-    def should_take_input(self, handler: 'Handler', player: 'Player', player_input: InputObject):
+    def should_take_input(self, handler: Handler, player: Player, player_input: InputObject):
         return player.location == self
 
     def is_lit_up(self):

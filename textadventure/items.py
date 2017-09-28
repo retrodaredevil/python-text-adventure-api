@@ -30,10 +30,10 @@ class Coin(Item):
 
         return super().change_holder(previous_holder, new_holder)
 
-    def can_feel(self, player: 'Player'):
+    def can_feel(self, player: Player):
         return True, "You can feel this"
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         name: str = self.coin_type.value[1]
         if self.coin_type is CoinType.DOLLAR:
             player.send_message("You feel a nice GOLDEN coin. It's worth a lot! It's a {}!".format(name))
@@ -48,28 +48,28 @@ class Coin(Item):
         else:
             player.send_message("There are {} more of this type of coin.".format(amount_more))
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         player.send_message("You see a coin. You need to feel it to tell how much it's worth")
 
-    def can_taste(self, player: 'Player'):
+    def can_taste(self, player: Player):
         return True, "You can taste this"
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         if self.coin_type is CoinType.DOLLAR:
             player.send_message("Wow, even though this tastes really bad, it's worth a lot!")
         else:
             player.send_message("Eww, why would you want to taste this? It tastes bad!")
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         raise NotImplementedError("You can't listen to a coin")
 
-    def use_item(self, handler: 'Handler', player: 'Player'):
+    def use_item(self, handler: Handler, player: Player):
         raise NotImplementedError("You can't 'use' a coin")
 
-    def can_smell(self, player: 'Player'):
+    def can_smell(self, player: Player):
         return True, "You can smell this"
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message("It doesn't smell that great.")
 
 
@@ -94,35 +94,35 @@ class Wallet(Item, Holder):
     def can_hold(self, item: Item):  # from Holder
         return isinstance(item, Coin)
 
-    def can_take(self, player: 'Player'):
+    def can_take(self, player: Player):
         return True, "You can take this"
 
-    def can_smell(self, player: 'Player'):
+    def can_smell(self, player: Player):
         return True, "You can smell this"
 
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         player.send_message("Smells pretty bad.")
 
-    def can_taste(self, player: 'Player'):
+    def can_taste(self, player: Player):
         return True, "You can taste this"
 
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         player.send_message("Tastes like an old wallet")
 
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         player.send_message("It looks like an old wallet.")
 
-    def can_feel(self, player: 'Player'):
+    def can_feel(self, player: Player):
         return True, "You can feel this"
 
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         player.send_message("It feels uh... Well, hmm. I still need to program this. Maybe you have a lot of money,"
                             "maybe you don't. I'm not quite sure.")
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         raise NotImplementedError("Can't listen to wallet")
 
-    def use_item(self, handler: 'Handler', player: 'Player'):
+    def use_item(self, handler: Handler, player: Player):
         raise NotImplementedError("You can't use a wallet")
 
 
@@ -141,11 +141,11 @@ class Weapon(Item):
 
     # TODO add abstract methods that are called when the weapon will be used to attack something ex: damage_entity(en)
 
-    def can_take(self, player: 'Player'):
+    def can_take(self, player: Player):
         return True, "You can take this"
 
-    def can_put(self, player: 'Player'):
+    def can_put(self, player: Player):
         return True, "I guess you can put this. You may need it tho."
 
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         raise NotImplementedError("Can't listen to a weapon")

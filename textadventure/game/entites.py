@@ -30,7 +30,7 @@ class LauraPerson(Living):
     def __init__(self):
         super().__init__("Laura")
 
-    def get_used_name(self, living: 'Living'):
+    def get_used_name(self, living: Living):
         if isinstance(living, Player) and not living[EventsObject].knows_laura:
             return self.__class__.UNKNOWN_LIVING_NAME
         return super().get_used_name(living)

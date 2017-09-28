@@ -15,23 +15,23 @@ class FiveSensesHandler(ABC):
     """
 
     @abstractmethod
-    def see(self, handler: 'Handler', player: 'Player'):
+    def see(self, handler: Handler, player: Player):
         pass
 
     @abstractmethod
-    def listen(self, handler: 'Handler', player: 'Player'):
+    def listen(self, handler: Handler, player: Player):
         pass
 
     @abstractmethod
-    def feel(self, handler: 'Handler', player: 'Player'):
+    def feel(self, handler: Handler, player: Player):
         pass
 
     @abstractmethod
-    def smell(self, handler: 'Handler', player: 'Player'):
+    def smell(self, handler: Handler, player: Player):
         pass
 
     @abstractmethod
-    def taste(self, handler: 'Handler', player: 'Player'):
+    def taste(self, handler: Handler, player: Player):
         pass
 
 
@@ -59,8 +59,9 @@ class Item(Savable, FiveSensesHandler):
     """
 
     def __new__(cls, *args, **kwargs):
+        """Needed for saving and so the non_serialized attribute actually works"""
         instance = object.__new__(cls)
-        for item in cls.non_serialized:
+        for item in cls.non_serialized:  # item is a string
             setattr(instance, item, None)
         return instance
 
@@ -69,6 +70,7 @@ class Item(Savable, FiveSensesHandler):
         An object that is in a location with properties that define how it should react when players type commands
         Once created, to change/add the holder call the change_holder method
         @param name: The name of the object
+        @param needs_light_to_see: Should almost always be true
         """
         super().__init__()  # for multiple inheritance
         self.name = name
@@ -89,7 +91,8 @@ class Item(Savable, FiveSensesHandler):
                         may not react to the changing or trying to change of the holder (You shouldn't react)
         @param previous_holder test
         """
-        assert new_holder is not None
+        assert new_holder is not None, "Why would you change the holder to None?"
+        # change in future if needs to delete item.
 
         self.holder = new_holder
         if previous_holder is not None and self in previous_holder.items:
@@ -114,7 +117,7 @@ class Item(Savable, FiveSensesHandler):
         """
         return are_mostly_equal(self.name, reference)
 
-    def can_reference(self, player: 'Player') -> CanDo:
+    def can_reference(self, player: Player) -> CanDo:
         from textadventure.location import Location
         if isinstance(self.holder, Location):
             if self.holder.is_lit_up() or not self.__needs_light:
@@ -123,7 +126,7 @@ class Item(Savable, FiveSensesHandler):
             return True, "You have the thing on you"
         return self.__class__.CANNOT_SEE
 
-    def can_see(self, player: 'Player') -> CanDo:
+    def can_see(self, player: Player) -> CanDo:
         from textadventure.location import Location
         if isinstance(self.holder, Location):
             return True, "You can see this since self.holder is a Location"
@@ -131,37 +134,37 @@ class Item(Savable, FiveSensesHandler):
             return False, "You cannot look at something on you!"
         return self.__class__.CANNOT_SEE
 
-    def can_listen(self, player: 'Player') -> CanDo:
+    def can_listen(self, player: Player) -> CanDo:
         return self.__class__.CANNOT_LISTEN
 
-    def can_feel(self, player: 'Player') -> CanDo:
+    def can_feel(self, player: Player) -> CanDo:
         return self.__class__.CANNOT_FEEL
 
-    def can_smell(self, player: 'Player') -> CanDo:
+    def can_smell(self, player: Player) -> CanDo:
         return self.__class__.CANNOT_SMELL
 
-    def can_taste(self, player: 'Player') -> CanDo:
+    def can_taste(self, player: Player) -> CanDo:
         return self.__class__.CANNOT_TASTE
 
-    def can_take(self, player: 'Player') -> CanDo:
+    def can_take(self, player: Player) -> CanDo:
         if self.holder == player:
             return self.__class__.CANNOT_TAKE_ON_PERSON
         return self.__class__.CANNOT_TAKE
 
-    def can_put(self, player: 'Player') -> CanDo:
+    def can_put(self, player: Player) -> CanDo:
         from textadventure.location import Location
         if isinstance(self.holder, Location):  # cannot place because player doesn't have it
             return self.__class__.CANNOT_PUT_IN_LOCATION
         return self.__class__.CANNOT_PUT
 
-    def can_use(self, player: 'Player') -> CanDo:
+    def can_use(self, player: Player) -> CanDo:
         if self in player.items:
             return True, "You can use this because you have it"
         else:
             return self.__class__.CANNOT_USE_DONT_HAVE
 
     @abstractmethod
-    def use_item(self, handler: 'Handler', player: 'Player') -> bool:
+    def use_item(self, handler: Handler, player: Player) -> bool:
         """
         By default does nothing. can_use should only return true if this has been overridden
         This method should be called by the Location class and from no where else
