@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum, unique, auto
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from textadventure.battling.team import Team
 from textadventure.entity import Entity
@@ -23,15 +23,19 @@ class Target:
 
         self.outcomes: Dict[Move, bool] = {}
 
-    def set_outcome(self, move: 'Move', did_hit: bool):
+    def set_outcome(self, move: 'Move', did_hit: bool):  # maybe change the did_hit to something other than bool later
         self.outcomes[move] = did_hit
 
-    def did_hit(self, key):
+    def did_hit(self, key: Union[Move, Entity]):
         if isinstance(key, Move):
             return self.outcomes[key]
         elif isinstance(key, Entity):
-            for key, value in self.outcomes.items():
-                if key.
+            for k, value in self.outcomes.items():
+                if k.entity == key:
+                    return value
+            return None
+        else:
+            raise ValueError("key must be an instance of a Move or an Entity object. You must have type checks off.")
 
 
 class MoveOption(ABC):  # like an interface
