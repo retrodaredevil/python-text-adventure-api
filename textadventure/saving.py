@@ -91,7 +91,7 @@ def load(handler, player: Player, path: 'Path'=DEFAULT_PATH) -> CanDo:
         return False, "The contents of the file were in the wrong format: {}".format(type(content))
 
 
-def get_path(player_input: 'InputObject') -> Optional[Path]:
+def get_path(player_input: InputObject) -> Optional[Path]:
     path = DEFAULT_PATH
     if len(player_input.get_arg(1, False)) != 0:  # they should only have one argument
         return None
@@ -111,7 +111,7 @@ class SaveCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: Handler, player: Player, player_input: 'InputObject') -> InputHandleType:
+    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
         path = get_path(player_input)
         if path is None:
             self.send_help(player)

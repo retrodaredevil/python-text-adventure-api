@@ -20,7 +20,7 @@ class Target:
         self.entity = entity
         self.team = team
         self.moves_left = 1  # one move per turn (Duh!)
-
+        self.used_moves: List[Move] = []
         self.outcomes: Dict[Move, bool] = {}
 
     def set_outcome(self, move: 'Move', did_hit: bool):  # maybe change the did_hit to something other than bool later

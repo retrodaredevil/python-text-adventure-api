@@ -104,7 +104,7 @@ class Entrance(Location):  # players should only be in this location when starti
             player.send_wait(0.3)
             player.send_message("Would you like to start your journey on this trail?")
 
-    def on_input(self, handler: Handler, player: Player, player_input: 'InputObject'):
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         if not self.should_take_input(handler, player, player_input):
             return None
 
@@ -363,7 +363,7 @@ class WestInsideEntrance(Location):  # introduce Laura
     def on_input(self, handler: Handler, player: Player, player_input: InputObject) -> Optional[InputHandle]:
         return None
 
-    def on_yell(self, handler: Handler, player: Player, player_input: 'InputObject', is_there_response=False):
+    def on_yell(self, handler: Handler, player: Player, player_input: InputObject, is_there_response=False):
         if player[EventsObject].knows_laura:
             super().on_yell(handler, player, player_input, False)
         else:
