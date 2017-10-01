@@ -25,3 +25,6 @@ class Team:
                 name += str(member)
 
         self.name = name
+
+    def __contains__(self, item):
+        return item in self.members

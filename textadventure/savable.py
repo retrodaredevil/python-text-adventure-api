@@ -57,7 +57,7 @@ class Savable(ABC):
         @type handler: Handler
 
         # @return: [0] is True if you can save, [0] is False if you can't and [1] will be the reason why
-        @return None
+        @return: None
         """
         pass
 
