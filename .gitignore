@@ -6,6 +6,7 @@ build
 *.pyo
 */__pycache__/*
 */*/__pycache__/*
+*cpython*
 
 #  https://stackoverflow.com/questions/3719243/recommended-gitignore-file-for-python-projects
 # Byte-compiled / optimized / DLL files
