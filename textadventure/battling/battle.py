@@ -1,5 +1,6 @@
 from typing import List
 
+from textadventure.battling.move import Turn
 from textadventure.battling.team import Team
 from textadventure.handler import Handler
 from textadventure.input import InputHandler, InputHandleType, InputObject
@@ -10,6 +11,7 @@ class Battle(InputHandler):
     def __init__(self, teams: List[Team]):
         self.teams = teams
 
+        self.turns: List[Turn] = []
         self.has_started = False
         self.has_ended = False
 
