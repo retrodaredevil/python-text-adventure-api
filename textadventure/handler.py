@@ -51,7 +51,7 @@ class Handler:
                 location.update(self)
 
     def __do_input(self, player: Player, inp: str):
-        from textadventure.input import InputObject, InputHandleType, InputHandle
+        from textadventure.input import InputObject, InputHandleType
         input_object = InputObject(inp)
         input_handles: List[InputHandle] = []
         for input_handler in self.get_input_handlers():
@@ -72,6 +72,7 @@ class Handler:
                 self.input_handlers.remove(input_handle.input_handler)
             elif handle_type is InputHandleType.HANDLED_AND_DONE:
                 break  # we don't care what others have to say. We're done handling this input
+        
         # player.send_line()  # for the debug
         if len(already_handled) == 0 or has_only(already_handled,
                                                  [InputHandleType.NOT_HANDLED, InputHandleType.UNNOTICEABLE]):
