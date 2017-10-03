@@ -1,8 +1,12 @@
+import typing
 from abc import ABC, abstractmethod
 from typing import List, Dict, Union
 
 from textadventure.battling.team import Team
 from textadventure.entity import Entity
+
+if typing.TYPE_CHECKING:
+    from textadventure.battling.choosing import MoveOption, MoveChooser
 
 
 class Target:
@@ -10,7 +14,7 @@ class Target:
     An object that stores information on the current turn and what moves it can use
     """
 
-    def __init__(self, entity: Entity, team: Team, turn_number: int):
+    def __init__(self, entity: Entity, team: Team, move_chooser: 'MoveChooser', turn_number: int):
         """
 
         @param entity: The entity
@@ -18,6 +22,7 @@ class Target:
         """
         self.entity = entity
         self.team = team
+        self.move_chooser = move_chooser
         self.turn_number = turn_number
 
         self.moves_left = 1  # one move per turn (Duh!)
@@ -40,12 +45,23 @@ class Target:
         else:
             raise ValueError("key must be an instance of a Move or an Entity object. You must have type checks off.")
 
+    def get_move_options(self) -> List['MoveOption']:
+        from textadventure.battling.weapon import Weapon
+        r = []
+        for item in self.entity.items:
+            if isinstance(item, Weapon):
+                move_option = item.move_option
+                if move_option is not None:
+                    r.append(move_option)
+
+        return r
+
     def create_target_next_turn(self, turn_number: int) -> 'Target':
         """
         Creates a new Target that should be used on the next turn
         @return: The Target to use for the next turn
         """
-        target = Target(self.entity, self.team, turn_number)
+        target = Target(self.entity, self.team, self.move_chooser, turn_number)
         return target
 
 

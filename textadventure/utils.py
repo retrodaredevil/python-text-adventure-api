@@ -40,7 +40,7 @@ def error(values):
 
 
 def is_string_true(string_input: str):
-    return "y" in string_input
+    return "y" in string_input.lower()
 
 
 def get_unimportant(to_change: List[str], unimportant_list=NOT_IMPORTANT) -> List[int]:

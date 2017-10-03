@@ -34,7 +34,7 @@ class SwordType(Enum):
 
 class Sword(Weapon):
     def __init__(self, sword_type: SwordType):
-        super().__init__("{} sword".format(sword_type.value[0]))
+        super().__init__("{} sword".format(sword_type.value[0]), None)  # TODO create a sword move option
         self.sword_type = sword_type
 
     def see(self, handler: Handler, player: Player):

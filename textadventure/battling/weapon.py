@@ -1,3 +1,6 @@
+from typing import Optional
+
+from textadventure.battling.choosing import MoveOption
 from textadventure.handler import Handler
 from textadventure.item import Item
 from textadventure.player import Player
@@ -9,12 +12,20 @@ class Weapon(Item):
         to change data for the item. Ex: A Weapon could be your right fist, but if you use the command use right fist,\
         it would do something. That's why all Weapons will be items. Thanks for listening.
 
+    A weapon can also be something like a potion. Basically, a weapon is just something that you use in a battle
+
     Remember, by default, everything is set to false and you need to override all methods except listen (since you \
         don't need that) By default can_take and can_put return CanDo s with True values at [0]
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str, move_option: Optional[MoveOption]):
+        """
+
+        @param name: The name of the item
+        @param move_option: The MoveOption object or None. I'm not sure why you'd inherit Weapon and make this None.
+        """
         super().__init__(name, True)
+        self.move_option: MoveOption = move_option
 
     # NOTDO I had the idea that I'd put methods here to damage entities or something. I'll be using the MoveOption class
 

@@ -1,3 +1,4 @@
+import random
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
@@ -49,3 +50,30 @@ class MoveChooser(ABC):
         @return: The chosen move or None if no Move has been chosen yet
         """
         pass
+
+
+class RandomMoveChooser(MoveChooser):
+    def __init__(self, entity: Entity):
+        super().__init__(entity)
+
+    def get_targets(self, turn: Turn, option: MoveOption) -> List[Target]:
+        # TODO
+        pass
+
+    def try_choose(self, turn: Turn, user: Target, option: MoveOption) -> Optional[Move]:
+        if not option.can_use_move(user):
+            return None
+        targets = self.get_targets(turn, option)
+        if option.can_choose(user, targets):
+            return option.create_move(user, targets)
+        return None
+
+    def get_move(self, turn: Turn, user: Target) -> Optional[Move]:
+        options = user.get_move_options()
+        assert len(options) > 0, "I wasn't prepared for this. We need to create a struggle like move."
+
+        move: Move = None
+        while move is None:  # this could be made as a recursive function but I'll keep it like this
+            move = self.try_choose(turn, user, random.choice(options))
+
+        return move

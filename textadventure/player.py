@@ -7,7 +7,7 @@ from textadventure.message import *
 T = TypeVar("T")
 
 
-class Player(Entity, Holder):
+class Player(Entity):
     def __init__(self, player_input: PlayerInput, player_output: PlayerOutput, name: str):
         super().__init__(name, 30, 30, None)  # TODO max_health, current_health, location
         self.player_input = player_input

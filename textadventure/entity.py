@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from textadventure.holder import Holder
 from textadventure.message import Message
 from textadventure.utils import MessageConstant
 
@@ -57,13 +58,14 @@ class Living(ABC):
         return message
 
 
-class Entity(Living):
-    def __init__(self, name, max_health, current_health, location):
-        from textadventure.location import Location
+class Entity(Living, Holder):
+    def __init__(self, name: str, max_health: int, current_health: int, location):
         super().__init__(name)
+        from textadventure.location import Location
+
         self.max_health = max_health
         self.current_health = current_health
-        self.location: 'Location' = location
+        self.location: Location = location
 
     def damage(self, damage):
         raise NotImplementedError("damage method not implemented")
