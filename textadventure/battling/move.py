@@ -54,6 +54,9 @@ class Turn:
         self.number = number
         self.targets = targets
 
+        self.is_done = False
+        self.is_started = True  # by default, whenever creating a Turn, we will be on that turn
+
 
 class Move(ABC):
     def __init__(self, user: Target):
