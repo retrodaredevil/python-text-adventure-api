@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from textadventure.holder import Holder
 from textadventure.message import Message
-from textadventure.utils import MessageConstant
+from textadventure.utils import MessageConstant, CanDo
 
 
 class Living(ABC):
@@ -58,17 +58,44 @@ class Living(ABC):
         return message
 
 
+class Health:
+    def __init__(self, current_health: int, max_health: int):
+        self.current_health = current_health
+        self.max_health = max_health
+
+
 class Entity(Living, Holder):
-    def __init__(self, name: str, max_health: int, current_health: int, location):
+    def __init__(self, name: str, health: Health, location):
         super().__init__(name)
         from textadventure.location import Location
 
-        self.max_health = max_health
-        self.current_health = current_health
+        self.health = health
         self.location: Location = location
+
+    def can_entity_pass(self, entity: 'Entity') -> CanDo:
+        """
+        Called when a entity, usually a player, is trying to go to another location.
+        This will be called if this entity is in the same location as the entity trying to move to another location
+        @param entity: The entity trying to move to another location
+        @return: A CanDo tuple where [0] is a boolean value representing the the entity can pass and if False,\
+                    [1] is the reason why the entity can't pass. (It will be displayed)
+        """
+        return True, "You can pass, a hostile entity might say otherwise, though."
 
     def damage(self, damage):
         raise NotImplementedError("damage method not implemented")
 
     def damage_amount(self, amount):
         self.current_health -= amount
+
+
+class HostileEntity(Entity):
+    def __init__(self, name: str, health: Health, location):
+        super().__init__(name, health, location)
+
+    def can_entity_pass(self, entity: 'Entity'):
+        from textadventure.player import Player
+        if isinstance(entity, Player):
+            entity.send_message("Hello I'm a hostile entity")
+
+        return super().can_entity_pass(entity)

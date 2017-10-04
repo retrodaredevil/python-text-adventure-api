@@ -1,9 +1,9 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import Optional
 
 from textadventure.handler import Handler
 from textadventure.holder import Holder
-from textadventure.player import Player, ABC
+from textadventure.player import Player
 from textadventure.savable import Savable, is_saving
 from textadventure.utils import are_mostly_equal, CanDo
 

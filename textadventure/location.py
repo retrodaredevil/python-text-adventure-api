@@ -172,7 +172,16 @@ class Location(Holder, InputHandler, FiveSensesHandler):
                 r.append(player)
         return r
 
-    def should_take_input(self, handler: Handler, player: Player, player_input: InputObject):
+    def _should_take_input(self, handler: Handler, player: Player, player_input: InputObject):
+        """
+        A method that is called by a subclass of Location usually when handling input.
+        The default implementation (That probably shouldn't be changed) checks to see if the player's location is self
+        In the default implementation, handler and player_input are not used
+        @param handler:
+        @param player:
+        @param player_input:
+        @return:
+        """
         return player.location == self
 
     def is_lit_up(self):

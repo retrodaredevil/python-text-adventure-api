@@ -1,15 +1,14 @@
 from typing import TypeVar, Type
 
-from textadventure.entity import *
-from textadventure.holder import Holder
-from textadventure.message import *
+from textadventure.entity import Entity, Health, Living
+from textadventure.message import PlayerOutput, PlayerInput, Message, MessageType
 
 T = TypeVar("T")
 
 
 class Player(Entity):
     def __init__(self, player_input: PlayerInput, player_output: PlayerOutput, name: str):
-        super().__init__(name, 30, 30, None)  # TODO max_health, current_health, location
+        super().__init__(name, Health(30, 30), None)  # TODO max_health, current_health, location
         self.player_input = player_input
         self.player_output = player_output
         # self.__getitem__(PlayerFriend): Living = None
@@ -79,6 +78,7 @@ class Player(Entity):
 
     def get_wallet(self):
         """
+        This method returns the Wallet item. It is here so there aren't any import errors whenever you want to use it.
         @rtype Wallet
         @return: The wallet that's in the player's items or None if there is no Wallet
         """

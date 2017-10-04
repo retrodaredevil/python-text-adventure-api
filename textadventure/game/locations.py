@@ -105,7 +105,7 @@ class Entrance(Location):  # players should only be in this location when starti
             player.send_message("Would you like to start your journey on this trail?")
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-        if not self.should_take_input(handler, player, player_input):
+        if not self._should_take_input(handler, player, player_input):
             return None
 
         def handle_function(already_handled: List[InputHandleType]):
@@ -167,7 +167,7 @@ class InsideEntrance(Location):
         player.send_line()
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-        if not self.should_take_input(handler, player, player_input):
+        if not self._should_take_input(handler, player, player_input):
             return None
 
         def handle_function(already_handled: List[InputHandleType]):

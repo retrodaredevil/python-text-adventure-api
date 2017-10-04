@@ -48,6 +48,8 @@ class InputObject:
     This object contains a string_input which is the unchanged string that was inputted
     This object also contains the string split up (split_input) which is an array
 
+    Not to be mistaken for PlayerInput, there may be instances in the code where I can an InputObject variable \
+        player_input but it's really an InputObject
     """
 
     def __init__(self, string_input: str):
