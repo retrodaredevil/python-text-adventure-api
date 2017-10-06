@@ -72,15 +72,15 @@ class Entity(Living, Holder):
         self.health = health
         self.location: Location = location
 
-    def can_entity_pass(self, entity: 'Entity') -> CanDo:
-        """
-        Called when a entity, usually a player, is trying to go to another location.
-        This will be called if this entity is in the same location as the entity trying to move to another location
-        @param entity: The entity trying to move to another location
-        @return: A CanDo tuple where [0] is a boolean value representing the the entity can pass and if False,\
-                    [1] is the reason why the entity can't pass. (It will be displayed)
-        """
-        return True, "You can pass, a hostile entity might say otherwise, though."
+    # def can_entity_pass(self, entity: 'Entity') -> CanDo:
+    #     """ Not going to use this
+    #     Called when a entity, usually a player, is trying to go to another location.
+    #     This will be called if this entity is in the same location as the entity trying to move to another location
+    #     @param entity: The entity trying to move to another location
+    #     @return: A CanDo tuple where [0] is a boolean value representing the the entity can pass and if False,\
+    #                 [1] is the reason why the entity can't pass. (It will be displayed)
+    #     """
+    #     return True, "You can pass, a hostile entity might say otherwise, though."
 
     def damage(self, damage):
         raise NotImplementedError("damage method not implemented")
@@ -93,7 +93,12 @@ class HostileEntity(Entity):
     def __init__(self, name: str, health: Health, location):
         super().__init__(name, health, location)
 
-    def can_entity_pass(self, entity: 'Entity'):
+    def can_entity_pass(self, entity: 'Entity') -> CanDo:
+        """
+        Will be used by the HostileEntityManager
+        @param entity: The entity that is trying to go to another location
+        @return: A CanDo
+        """
         from textadventure.player import Player
         if isinstance(entity, Player):
             entity.send_message("Hello I'm a hostile entity")

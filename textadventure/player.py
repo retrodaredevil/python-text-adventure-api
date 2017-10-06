@@ -57,7 +57,7 @@ class Player(Entity):
         self.send_message(Message("", MessageType.IMMEDIATE, ending=ending))
 
     def clear_screen(self):
-        self.send_line(100)
+        self.send_line(100)  # do I need to use a constant variable PLTW? I do? No voy hacerlo
 
     def update(self, handler) -> None:
         """
