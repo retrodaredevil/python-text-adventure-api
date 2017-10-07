@@ -375,7 +375,7 @@ class WestInsideEntrance(Location):  # introduce Laura
             laura = handler.get_livings(LauraPerson, 1)[0]
             laura.tell(player, "Who are you?")
             player.send_wait(0.5)
-            laura.tell(player, Message("You have {}'s wallet! What did you do to him?",
+            laura.tell(player, Message("You have {}'s wallet! What did you do to them?",
                                        named_variables=[player[PlayerFriend]]))
             player.send_wait(0.3)
             player.tell(player, "He's my fri-")

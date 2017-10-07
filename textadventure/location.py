@@ -120,7 +120,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         @return: None because the this Location should choose how it wants to handle the using of this item
         """
         player.send_message("You can't use that item here.")
-        # TODO here, we will eventually handle simple things that all locations should be able to handle
+        # ONEDAY here, we will eventually handle simple things that all locations should be able to handle
 
     def send_welcome(self, player: Player):
         player.send_message(self.name + ": " + self.description)
@@ -187,6 +187,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     def is_lit_up(self):
         """
         Tells if the location is lit up. Note that the locations's state affects this and not the player's state
+        Note that I am not sure about the way we will eventually handle light, so think of this as deprecated
         @return: True if the location is lit up
         """
         return True

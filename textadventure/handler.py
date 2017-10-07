@@ -1,5 +1,7 @@
 from typing import List, Optional, TypeVar
 
+from textadventure.action import Action
+from textadventure.manager import Manager
 from textadventure.message import Message, MessageType, StreamOutput
 from textadventure.player import Player, Living
 from textadventure.utils import Point
@@ -35,6 +37,7 @@ class Handler:
         self.players: List[Player] = []
         self.locations: List[Location] = []
         self.input_handlers: List[InputHandler] = []
+        self.managers: List[Manager] = []
         self.living_things: List[Living] = []
 
     def start(self):
@@ -49,6 +52,8 @@ class Handler:
                     self.__do_input(player, inp)
             for location in self.locations:
                 location.update(self)
+            for manager in self.managers:
+                manager.update(self)
 
     def __do_input(self, player: Player, inp: str):
         from textadventure.input import InputObject, InputHandleType
@@ -77,6 +82,15 @@ class Handler:
         if len(already_handled) == 0 or has_only(already_handled,
                                                  [InputHandleType.NOT_HANDLED, InputHandleType.UNNOTICEABLE]):
             player.send_message("Command: \"" + input_object.get_command() + "\" not recognized.")
+
+    def do_action(self, action: Action):
+        """
+        for each manager in managers call on_action with action
+        @param action: The action to be called
+        @return: None, but you the action's state should change if one of the managers acted on it
+        """
+        for manager in self.managers:
+            manager.on_action(self, action)
 
     def get_input_handlers(self) -> List['InputHandler']:
         r = []

@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from enum import unique, Enum
 
+from textadventure.action import Action
 from textadventure.holder import Holder
 from textadventure.message import Message
 from textadventure.utils import MessageConstant, CanDo
@@ -63,6 +65,14 @@ class Health:
         self.current_health = current_health
         self.max_health = max_health
 
+    def is_fainted(self):
+        return self.current_health <= 0
+
+    def is_full(self):
+        if self.max_health == 0:
+            return False
+        return self.current_health == self.max_health
+
 
 class Entity(Living, Holder):
     def __init__(self, name: str, health: Health, location):
@@ -73,7 +83,7 @@ class Entity(Living, Holder):
         self.location: Location = location
 
     # def can_entity_pass(self, entity: 'Entity') -> CanDo:
-    #     """ Not going to use this
+    #     """ Not going to use this - define in HostileEntity
     #     Called when a entity, usually a player, is trying to go to another location.
     #     This will be called if this entity is in the same location as the entity trying to move to another location
     #     @param entity: The entity trying to move to another location
@@ -85,15 +95,12 @@ class Entity(Living, Holder):
     def damage(self, damage):
         raise NotImplementedError("damage method not implemented")
 
-    def damage_amount(self, amount):
-        self.current_health -= amount
-
 
 class HostileEntity(Entity):
     def __init__(self, name: str, health: Health, location):
         super().__init__(name, health, location)
 
-    def can_entity_pass(self, entity: 'Entity') -> CanDo:
+    def can_entity_pass(self, entity: Entity) -> CanDo:
         """
         Will be used by the HostileEntityManager
         @param entity: The entity that is trying to go to another location
@@ -103,4 +110,22 @@ class HostileEntity(Entity):
         if isinstance(entity, Player):
             entity.send_message("Hello I'm a hostile entity")
 
-        return super().can_entity_pass(entity)
+        if self.health.is_fainted():
+            return True, "Welp, the monster is ded so yeah, go right ahead"
+
+        return True, "Returning true because we just wanted to test this out and send a debug message."
+        # return super().can_entity_pass(entity)
+
+
+class EntityAction(Action):
+    """
+    Used when there's an entity involved in an action (or multiple entities where the entity stored in this class\
+        is the one that caused it, usually being the Player (There is no PlayerAction this is it)
+    """
+    def __init__(self, entity: Entity):
+        """
+
+        @param entity: The main entity involved and the one that is basically requesting to do this action
+        """
+        super().__init__()
+        self.entity = entity
