@@ -1,4 +1,4 @@
-from typing import TypeVar, Type
+from typing import TypeVar, Type, Optional
 
 from textadventure.entity import Entity, Health, Living
 from textadventure.message import PlayerOutput, PlayerInput, Message, MessageType
@@ -7,7 +7,7 @@ T = TypeVar("T")
 
 
 class Player(Entity):
-    def __init__(self, player_input: PlayerInput, player_output: PlayerOutput, name: str):
+    def __init__(self, player_input: PlayerInput, player_output: PlayerOutput, name: Optional[str]):
         super().__init__(name, Health(30, 30), None)  # TODO max_health, current_health, location
         self.player_input = player_input
         self.player_output = player_output

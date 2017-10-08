@@ -14,16 +14,20 @@ class Savable(ABC):
         nothing. You must have another object/part of code that handles saving this. For this reason, if you want to\
         save all the data in your class at one point in your code, you can implement this class. Beware, if this object\
         gets into a wrong list, it could be saved.
-    If you don't want to save all of the data in the class, it is recommended to store the object that you want to be\
-        saved as a field making that a Savable, however, that object will usually have to make it into a list\
-        of an object that handles it, or the class storing the Savable will have to make sure that somewhere in\
-        the code it saves it.
+    If you don't want to save all data in a single class, don't inherit Savable in that class, instead, create another\
+        class that will store information from the original class in the new class. If you don't think you should \
+        create another class, you can always put the field names that you don't want to be saved into \
+        the non_serialized field
+    Also, make sure that a class that inherits Thread is not saved
+    Remember when loading a Savable, its __init__ will not be called
 
     Now that you've read all that, basically it says: "Implementing this doesn't automatically make this save and\
-        if this is stored somewhere, there might be side effects from implementing this"
+        if this is stored somewhere, there might be side effects from implementing this and that unless you do \
+        something with non_serialized, all data will be saved"
     Data in each instance/implementation should be player specific TODO edit comment
 
-    If you are getting a KeyError, remember to override __new__ and set any fields that are in the non_serialized list.
+    If you are getting a KeyError, remember to override __new__ and set any fields that are in the non_serialized list.\
+        You can look in the Item in item.py class for an example
     """
 
     def __init__(self):

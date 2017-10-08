@@ -4,7 +4,8 @@ append = sys.path[0].replace("\\", "/").replace("/textadventure", "")  # when it
 sys.path.append(append)
 
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
-    UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler
+    UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
+    HelpCommandHandler
 from textadventure.game.data import EventsObject
 from textadventure.game.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
 from textadventure.game.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
@@ -14,6 +15,7 @@ from textadventure.message import KeyboardInput, StreamOutput
 from textadventure.player import Player
 from textadventure.playersavable import PlayerSavable
 from textadventure.saving import SaveCommandHandler, LoadCommandHandler
+from textadventure.battling.managing import HostileEntityManager
 
 
 def default_load(player: Player, handler: Handler):
@@ -44,12 +46,13 @@ def setup():
     handler.input_handlers.extend([GoCommandHandler(), TakeCommandHandler(), PlaceCommandHandler(),
                                    YellCommandHandler(), UseCommandHandler(), SaveCommandHandler(),
                                    LoadCommandHandler(), NameCommandHandler(), InventoryCommandHandler(),
-                                   LocateCommandHandler()])
+                                   LocateCommandHandler(), HelpCommandHandler()])
     handler.input_handlers.extend([DirectionInputHandler()])
     handler.living_things.extend([OtherPerson(), LauraPerson(), NinjaDude()])
 
-    handler.players.append(player)
+    handler.entities.append(player)
     handler.input_handlers.append(SettingsHandler(player))
+    handler.managers.append(HostileEntityManager())
 
     default_load(player, handler)
 

@@ -1,4 +1,5 @@
 from textadventure.action import Action
+from textadventure.entity import HostileEntity
 from textadventure.manager import Manager
 
 
@@ -10,6 +11,12 @@ class HostileEntityManager(Manager):
         pass
 
     def on_action(self, handler, action: Action):
-        from textadventure.entity import EntityAction
-        if isinstance(action, EntityAction):
-            pass
+        from textadventure.location import GoAction
+        # print("we got and action: {}".format(action)) works
+        if isinstance(action, GoAction):
+            for entity in action.previous_location.get_entities(handler):
+                if isinstance(entity, HostileEntity):
+                    can_pass = entity.can_entity_pass(action.entity)
+                    if not can_pass[0]:
+                        action.can_do = can_pass
+                        return

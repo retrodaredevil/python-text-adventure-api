@@ -1,18 +1,22 @@
+import warnings
 from abc import abstractmethod
-from typing import List, Optional
+from typing import List, Optional, TypeVar, Type
 
+from textadventure.entity import EntityAction, Entity
+from textadventure.handler import Handler
 from textadventure.holder import Holder
 from textadventure.input import InputHandler
 from textadventure.input import InputObject
 from textadventure.item import Item, FiveSensesHandler
 from textadventure.message import Message, MessageType
+from textadventure.player import Player
 from textadventure.utils import Point, MessageConstant, are_mostly_equal, CanDo
 
 
-class Location(Holder, InputHandler, FiveSensesHandler):
-    from textadventure.player import Player
-    from textadventure.handler import Handler
+T = TypeVar('T')
 
+
+class Location(Holder, InputHandler, FiveSensesHandler):
     NO_YELL_RESPONSE: MessageConstant = "There was no response."
 
     """
@@ -34,10 +38,6 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         self.command_handlers: List[CommandHandler] = []
         self.__add_command_handlers()
 
-        self.compare_names: List[str] = []
-        """By default, it has only the name of the location. You can append to add more"""
-        self.__add_compare_names()
-
     def __str__(self):
         return self.name
 
@@ -53,14 +53,6 @@ class Location(Holder, InputHandler, FiveSensesHandler):
             TasteCommandHandler, ListenCommandHandler
         self.command_handlers.extend([LookCommandHandler(self), FeelCommandHandler(self), SmellCommandHandler(self),
                                       TasteCommandHandler(self), ListenCommandHandler(self)])
-
-    def __add_compare_names(self) -> None:
-        """
-        If overridden, remember to call super
-        By default, adds the name to the list compare_names and name with unimportant words like "the" removed
-        @return: None
-        """
-        self.compare_names.append(self.name)  # TODO actually implement this somewhere in the code
 
     def is_reference(self, reference: str) -> bool:
         """
@@ -165,11 +157,21 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         pass
 
-    def get_players(self, handler) -> List[Player]:
+    def get_players(self, handler: Handler) -> List[Player]:
+        return self.get_entities(handler, Player)
+
+    def get_entities(self, handler: Handler, entity_type: Type[T] = Entity) -> List[T]:
+        """
+        Gets the list of entities in this location, including players
+        @param handler: the handler object
+        @param entity_type: The type of the entity you are looking for. Defaults to Entity (gets all types of entities)
+        @return: The list of entities in this location
+        """
         r = []
-        for player in handler.players:
-            if player.location == self:
-                r.append(player)
+        for entity in handler.entities:
+            if entity.location == self and isinstance(entity, entity_type):
+                r.append(entity)
+
         return r
 
     def _should_take_input(self, handler: Handler, player: Player, player_input: InputObject):
@@ -191,3 +193,24 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         @return: True if the location is lit up
         """
         return True
+
+
+class GoAction(EntityAction):
+    def __init__(self, entity: Entity, previous_location: Location, new_location: Location,
+                 leave_message: MessageConstant):
+        super().__init__(entity)
+        self.previous_location = previous_location
+        self.new_location = new_location
+        self.leave_message = leave_message
+
+        if not isinstance(entity, Player):
+            warnings.warn("Are you sure you should be sending this for an entity?")
+
+    def _do_action(self, handler: Handler):
+        self.entity.send_message(self.leave_message)
+
+        self.entity.location = self.new_location
+
+        if isinstance(self.entity, Player):
+            self.entity.location.on_enter(self.entity, self.previous_location, handler)
+        return self.can_do

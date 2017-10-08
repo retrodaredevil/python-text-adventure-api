@@ -1,6 +1,7 @@
 from typing import List, Optional, TypeVar
 
 from textadventure.action import Action
+from textadventure.entity import Entity
 from textadventure.manager import Manager
 from textadventure.message import Message, MessageType, StreamOutput
 from textadventure.player import Player, Living
@@ -34,7 +35,7 @@ class Handler:
     def __init__(self):
         from textadventure.location import Location
         from textadventure.input import InputHandler
-        self.players: List[Player] = []
+        self.entities: List[Entity] = []
         self.locations: List[Location] = []
         self.input_handlers: List[InputHandler] = []
         self.managers: List[Manager] = []
@@ -45,13 +46,15 @@ class Handler:
          Starts the infinite loop for the game
         """
         while True:
-            for player in self.players:
+            for player in self.get_players():
                 player.update(self)
                 inp = player.take_input()  # this does not pause the thread
                 if inp is not None:  # since taking input doesn't pause the thread this could be null
                     self.__do_input(player, inp)
+
             for location in self.locations:
                 location.update(self)
+
             for manager in self.managers:
                 manager.update(self)
 
@@ -86,6 +89,8 @@ class Handler:
     def do_action(self, action: Action):
         """
         for each manager in managers call on_action with action
+        This method just makes sure all of self.managers's on_action methods are called and does NOTHING ELSE\
+            (You must call try_action on your own)
         @param action: The action to be called
         @return: None, but you the action's state should change if one of the managers acted on it
         """
@@ -109,6 +114,13 @@ class Handler:
             if type(location) is location_type:
                 return location
         return None
+
+    def get_players(self) -> List[Player]:
+        r = []
+        for entity in self.entities:
+            if isinstance(entity, Player):
+                r.append(entity)
+        return r
 
     def get_livings(self, living_type: type, expected_amount: Optional[int] = None) -> List[Living]:
         """

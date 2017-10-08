@@ -110,7 +110,7 @@ class HostileEntity(Entity):
         if isinstance(entity, Player):
             entity.send_message("Hello I'm a hostile entity")
 
-        if self.health.is_fainted():
+        if self.health.is_fainted():  # tbh I just put this here cuz I wanted PyCharm to stop bugging me about static
             return True, "Welp, the monster is ded so yeah, go right ahead"
 
         return True, "Returning true because we just wanted to test this out and send a debug message."
@@ -129,3 +129,9 @@ class EntityAction(Action):
         """
         super().__init__()
         self.entity = entity
+
+    def try_action(self, handler) -> CanDo:
+        can_do = super().try_action(handler)
+        if not can_do[0]:
+            self.entity.send_message(can_do[1])
+        return can_do

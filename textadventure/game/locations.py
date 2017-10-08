@@ -8,7 +8,7 @@ from textadventure.input import InputHandler
 from textadventure.input import InputObject, InputHandle, InputHandleType
 from textadventure.item import Item
 from textadventure.items import Wallet, Coin, CoinType
-from textadventure.location import Location
+from textadventure.location import Location, GoAction
 from textadventure.message import Message, MessageType
 from textadventure.player import Player
 from textadventure.utils import is_string_true, Point, SOUTH, EAST, WEST, NORTH, UP, DOWN, DIRECTIONS, CanDo
@@ -25,7 +25,7 @@ CANT_MOVE_DIRECTION: CanDo = (False, "There's no noticeable entrance/exit in thi
 # we don't have a CANT_MOVE_NOW because many locations will want to give custom reasons
 CANT_PASS: CanDo = (False, "You cannot pass.")
 
-LEAVING_LOCATION: str = "You are leaving '{}'."
+LEAVING_LOCATION: str = "You are leaving'{}'."
 
 
 def create_leave_message(location: Location) -> Message:
@@ -212,14 +212,16 @@ class InsideEntrance(Location):
             return CANT_MOVE_DIRECTION
         else:
             return CANT_JUMP_LOCATION
-        player.send_message(create_leave_message(self))
-
-        previous_location = player.location  # I know this is self, but shut up. I've already done this for 4 of these
-        player.location = new_location
-
-        player.location.on_enter(player, previous_location, handler)
-
-        return CAN_GO_TO_LOCATION
+        # player.send_message(create_leave_message(self)) < original code which was moved into GoAction's _do_action
+        #
+        # previous_location = player.location  # I know this is self, but shut up. I've already done this for 4 of these
+        # player.location = new_location
+        #
+        # player.location.on_enter(player, previous_location, handler)
+        action = GoAction(player, player.location, new_location, create_leave_message(self))
+        action.can_do = CAN_GO_TO_LOCATION
+        handler.do_action(action)
+        return action.try_action(handler)
 
 
 class EastInsideEntrance(Location):  # where the furry monster is/was
@@ -249,12 +251,10 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
             return CANT_MOVE_DIRECTION
 
         if direction == WEST:
-            player.send_message(create_leave_message(self))
-            previous_location = player.location
-            player.location = new_location
-
-            player.location.on_enter(player, previous_location, handler)
-            return CAN_GO_TO_LOCATION
+            action = GoAction(player, player.location, new_location, create_leave_message(self))
+            action.can_do = CAN_GO_TO_LOCATION
+            handler.do_action(action)
+            return action.try_action(handler)
         elif direction in DIRECTIONS:
             return CANT_MOVE_DIRECTION
         return CANT_JUMP_LOCATION
@@ -334,13 +334,10 @@ class WestInsideEntrance(Location):  # introduce Laura
         else:
             return CANT_JUMP_LOCATION
 
-        player.send_message(create_leave_message(self))
-        previous_location = player.location
-        player.location = new_location
-
-        player.location.on_enter(player, previous_location, handler)
-
-        return CAN_GO_TO_LOCATION
+        action = GoAction(player, player.location, new_location, create_leave_message(self))
+        action.can_do = CAN_GO_TO_LOCATION
+        handler.do_action(action)
+        return action.try_action(handler)
 
     def see(self, handler: Handler, player: Player):
         player.send_message("You see lots of trees and an exit back to the double doors")
@@ -420,12 +417,11 @@ class EntranceSpiderWebForest(Location):
             return CANT_MOVE_DIRECTION
         else:
             return CANT_JUMP_LOCATION
-        player.send_message(create_leave_message(self))
-        previous_location = player.location
-        player.location = new_location
 
-        player.location.on_enter(player, previous_location, handler)
-        return CAN_GO_TO_LOCATION
+        action = GoAction(player, player.location, new_location, create_leave_message(self))
+        action.can_do = CAN_GO_TO_LOCATION
+        handler.do_action(action)
+        return action.try_action(handler)
 
     def on_item_use(self, handler: Handler, player: Player, item: Item):
         if isinstance(item, Sword):
@@ -521,9 +517,8 @@ class CenterSpiderWebForest(Location):
             return CANT_MOVE_DIRECTION
         else:
             return CANT_JUMP_LOCATION
-        player.send_message(create_leave_message(self))
-        previous_location = player.location
-        player.location = new_location
 
-        player.location.on_enter(player, previous_location, handler)
-        return CAN_GO_TO_LOCATION
+        action = GoAction(player, player.location, new_location, create_leave_message(self))
+        action.can_do = CAN_GO_TO_LOCATION
+        handler.do_action(action)
+        return action.try_action(handler)

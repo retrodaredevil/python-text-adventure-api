@@ -208,6 +208,7 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
 
     @staticmethod
     def player_go(handler: Handler, player: Player, first_argument: str) -> InputHandleType:
+        # note that first_argument doesn't have to be a single word
         point = get_point(handler, player, first_argument)
         if point is None:
             player.send_message("Cannot find location: \"" + first_argument + "\"")
@@ -225,6 +226,11 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
 
 
 class DirectionInputHandler(InputHandler):
+    """
+    This class just checks to see if the player typed a single word and if that word matches a direction or location,
+        treat the command just like the go command by called GoCommandHandler.player_go
+    This InputHandler is called before normal command handles since this isn't actually a command handler
+    """
     def __init__(self):
         super().__init__()
 

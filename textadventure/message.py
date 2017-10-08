@@ -133,7 +133,7 @@ class KeyboardInput(PlayerInput, Thread):
 
         @param stream_output: The stream output or None if the PlayerOutput object isn't a StreamOutput
         """
-        super(KeyboardInput, self).__init__()
+        super().__init__()
         self.inputs: List[str] = []
         self.stream_output = stream_output
         self.__input_prompt: str = self.__class__.DEFAULT_INPUT_PROMPT
