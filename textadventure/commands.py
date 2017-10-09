@@ -378,7 +378,7 @@ class NameCommandHandler(SimpleCommandHandler):
 
 
 class InventoryCommandHandler(SimpleCommandHandler):
-    command_names = ["inv", "inventory", "inve", "items"]
+    command_names = ["inv", "inventory", "inve", "invet", "invetory", "items"]
     description = "Allows you to see what's in your inventory"
 
     def __init__(self):
