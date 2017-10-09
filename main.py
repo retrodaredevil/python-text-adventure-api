@@ -1,7 +1,7 @@
-import sys
-
-append = sys.path[0].replace("\\", "/").replace("/textadventure", "")  # when it's run in the command line
-sys.path.append(append)
+# import sys
+#
+# append = sys.path[0].replace("\\", "/").replace("/textadventure", "")  # when it's run in the command line
+# sys.path.append(append)
 
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
     UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
