@@ -1,5 +1,5 @@
+from game.data import EventsObject
 from textadventure.entity import *
-from textadventure.game.data import EventsObject
 from textadventure.player import Player
 from textadventure.savable import Savable
 

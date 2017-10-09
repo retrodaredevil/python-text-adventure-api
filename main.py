@@ -2,20 +2,26 @@
 #
 # append = sys.path[0].replace("\\", "/").replace("/textadventure", "")  # when it's run in the command line
 # sys.path.append(append)
+# above was used for when main.py was not inside the root of the project
 
+from textadventure.game.data import EventsObject
+from textadventure.game.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
+
+from game.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
+    EntranceSpiderWebForest, CenterSpiderWebForest
+from textadventure.battling.managing import HostileEntityManager
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
     UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
     HelpCommandHandler
-from textadventure.game.data import EventsObject
-from textadventure.game.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
-from textadventure.game.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
-    EntranceSpiderWebForest, CenterSpiderWebForest
 from textadventure.handler import SettingsHandler, Handler
 from textadventure.message import KeyboardInput, StreamOutput
 from textadventure.player import Player
 from textadventure.playersavable import PlayerSavable
 from textadventure.saving import SaveCommandHandler, LoadCommandHandler
-from textadventure.battling.managing import HostileEntityManager
+
+"""
+This file is an example game for my text adventure api using the game package
+"""
 
 
 def default_load(player: Player, handler: Handler):
