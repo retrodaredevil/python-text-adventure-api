@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import unique, Enum
+from typing import Type, List
 
 from textadventure.action import Action
 from textadventure.holder import Holder
@@ -78,9 +79,14 @@ class Entity(Living, Holder):
     def __init__(self, name: str, health: Health, location):
         super().__init__(name)
         from textadventure.location import Location
-
         self.health = health
+
         self.location: Location = location
+        """
+        The location of the entity. Unless, initializing for the first time, you almost should never set this
+        By yourself because you probably want to do it with GoAction or something similar that abstracts a few 
+        details away.
+        """
 
     # def can_entity_pass(self, entity: 'Entity') -> CanDo:
     #     """ Not going to use this - define in HostileEntity
@@ -93,31 +99,50 @@ class Entity(Living, Holder):
     #     return True, "You can pass, a hostile entity might say otherwise, though."
 
     def damage(self, damage):
-        raise NotImplementedError("damage method not implemented")
+        raise Exception("damage method not implemented")
 
 
-class HostileEntity(Entity):
+class HostileEntity(Entity):  # abstract
     def __init__(self, name: str, health: Health, location):
         super().__init__(name, health, location)
 
+    @abstractmethod
     def can_entity_pass(self, entity: Entity) -> CanDo:
         """
         Will be used by the HostileEntityManager
         @param entity: The entity that is trying to go to another location
         @return: A CanDo
         """
-        from textadventure.player import Player
-        if isinstance(entity, Player):
-            entity.send_message("Hello I'm a hostile entity")
-
-        if self.health.is_fainted():  # tbh I just put this here cuz I wanted PyCharm to stop bugging me about static
-            return True, "Welp, the monster is ded so yeah, go right ahead"
-
-        return True, "Returning true because we just wanted to test this out and send a debug message."
         # return super().can_entity_pass(entity)
+        pass
 
 
-class EntityAction(Action):
+class SimpleHostileEntity(HostileEntity):
+
+    def __init__(self, name: str, health: Health, location, hostile_to_types: List[Type[Entity]]):
+        super().__init__(name, health, location)
+        self.hostile_to_types = hostile_to_types
+
+        self.hostile_now = True
+        self.can_not_pass: CanDo = (False, "You can't pass because an entity wants to eat you")
+
+    def can_entity_pass(self, entity: Entity):
+        if not self.hostile_now:
+            return True, "I'm not hostile right now"
+
+        if self.health.is_fainted():
+            return True, "I can't get you because I'm dead."
+
+        for t in self.hostile_to_types:
+            if isinstance(entity, t):
+                return self.can_not_pass
+        return True, "I don't really want to eat you."
+
+    def send_message(self, message):
+        pass
+
+
+class EntityAction(Action):  # abstract
     """
     Used when there's an entity involved in an action (or multiple entities where the entity stored in this class\
         is the one that caused it, usually being the Player (There is no PlayerAction this is it)

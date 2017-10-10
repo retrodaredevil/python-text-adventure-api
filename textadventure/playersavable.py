@@ -17,7 +17,7 @@ class PlayerSavable(Savable):
         from textadventure.item import Item
         super().__init__()
         self.point: Point = Point(0, 0)
-        self.items: List['Item'] = []
+        self.items: List[Item] = []
         self.name = None
 
     def __str__(self):

@@ -14,6 +14,13 @@ from textadventure.message import Message, MessageType
 from textadventure.player import Player
 from textadventure.utils import is_string_true, Point, SOUTH, EAST, WEST, NORTH, UP, DOWN, DIRECTIONS, CanDo
 
+
+"""
+Don't be scared by the size of this file, each location has a few abstract methods that must be implemented, and \
+    each method may be very short or a bit long (ex: The go_to_other_location method is long)
+"""
+
+
 DONT_HEAR = "You don't hear anything."
 DONT_SMELL = "You don't smell anything."
 DONT_TASTE = "You don't taste anything."
@@ -22,11 +29,11 @@ DONT_TASTE = "You don't taste anything."
 CAN_GO_TO_LOCATION: CanDo = (True, "The player was able to change locations.")
 
 CANT_JUMP_LOCATION: CanDo = (False, "You can't jump locations.")
-CANT_MOVE_DIRECTION: CanDo = (False, "There's no noticeable entrance/exit in this direction.")
+CANT_MOVE_DIRECTION: CanDo = (False, "There's no noticeable opening in this direction.")
 # we don't have a CANT_MOVE_NOW because many locations will want to give custom reasons
 CANT_PASS: CanDo = (False, "You cannot pass.")
 
-LEAVING_LOCATION: str = "You are leaving'{}'."
+LEAVING_LOCATION: str = "You are leaving '{}'."
 
 
 def create_leave_message(location: Location) -> Message:
@@ -164,19 +171,11 @@ class InsideEntrance(Location):
 
     def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
         player.send_message(
-            "You now see a very long trail ahead of you. You see forests on both sides and double doors behind you")
+            "You now see a very long trail ahead of you. You see forests on both sides and double doors behind you.")
         player.send_line()
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-        if not self._should_take_input(handler, player, player_input):
-            return None
-
-        def handle_function(already_handled: List[InputHandleType]):
-            if not self._should_handle_input(already_handled):
-                return InputHandleType.NOT_HANDLED
-            return InputHandleType.NOT_HANDLED  # we aren't gonna do anything here
-
-        return InputHandle(10, handle_function, self)
+        return None
 
     def feel(self, handler: Handler, player: Player):
         player.send_message(Entrance.FEEL_MESSAGE)
@@ -185,8 +184,7 @@ class InsideEntrance(Location):
         player.send_message(DONT_HEAR)
 
     def see(self, handler: Handler, player: Player):
-        player.send_message("You see a long trail ahead of you with light peeking through the trees " +
-                            "down the trail but very dark forests on each side.")
+        player.send_message("You see double doors behind you and openings all around you.")
 
     def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
@@ -523,3 +521,18 @@ class CenterSpiderWebForest(Location):
         action.can_do = CAN_GO_TO_LOCATION
         handler.do_action(action)
         return action.try_action(handler)
+
+
+class EastCenterSpiderWebForest(Location):
+
+    def __init__(self):
+        super().__init__("East of the Center of the Spider Web Forest",
+                         "A nice big field with trees all around. You can see the exit to the fountain.",
+                         Point(1, 3))
+
+    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
+        return None
+
+    def listen(self, handler: Handler, player: Player):
+        pass  # TODO
+

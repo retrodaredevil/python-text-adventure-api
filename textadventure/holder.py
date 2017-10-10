@@ -9,7 +9,7 @@ class Holder:  # kind of like an interface
     def __init__(self):
         super().__init__()  # for multiple inheritance
         from textadventure.item import Item
-        self.items: List['Item'] = []
+        self.items: List[Item] = []
 
     def can_hold(self, item):
         """

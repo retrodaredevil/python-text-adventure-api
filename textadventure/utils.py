@@ -19,7 +19,7 @@ These words may be important in determining what someone wants in an english sen
 
 CanDo = Tuple[bool, MessageConstant]
 """[0] is a boolean representing if a player can do the action. If [0] is True, then [1] tells why it is True. If\
-False, then [1] is an error message that should be sent to the player"""
+False, then [1] is an error message that should be sent to the player. If [0] is True, then [1] is basically debug"""
 
 
 def debug(values):

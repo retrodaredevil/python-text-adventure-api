@@ -49,3 +49,8 @@ class NinjaDude(Living):
     def send_message(self, message):
         raise NotImplementedError("You do not have permission to speak with the Amazing Ninja Dude. "
                                   "But really, this is an actual error.")
+
+
+class NinjaEntity(SimpleHostileEntity):
+    def __init__(self):
+        pass
