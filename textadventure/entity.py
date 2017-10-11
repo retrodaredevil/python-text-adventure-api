@@ -124,7 +124,8 @@ class SimpleHostileEntity(HostileEntity):
         self.hostile_to_types = hostile_to_types
 
         self.hostile_now = True
-        self.can_not_pass: CanDo = (False, "You can't pass because an entity wants to eat you")
+        self.can_not_pass: CanDo = (False, Message("You can't pass because {} wants to eat you.",
+                                                   named_variables=[self]))
 
     def can_entity_pass(self, entity: Entity):
         if not self.hostile_now:

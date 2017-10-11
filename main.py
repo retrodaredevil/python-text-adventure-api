@@ -4,8 +4,8 @@
 # sys.path.append(append)
 # above was used for when main.py was not inside the root of the project
 
-from textadventure.game.data import EventsObject
-from textadventure.game.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
+from game.data import EventsObject
+from game.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
 
 from game.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
     EntranceSpiderWebForest, CenterSpiderWebForest

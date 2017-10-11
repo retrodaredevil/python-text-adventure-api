@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from textadventure.game.data import EventsObject
-from textadventure.game.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend
+from game.data import EventsObject
+from game.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend
 
 from game.items import Sword, SwordType
 from textadventure.handler import Handler

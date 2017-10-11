@@ -21,7 +21,7 @@ class MoveOption(ABC):  # like an interface
     @abstractmethod
     def can_choose(self, user: Target, targets: List[Target]) -> CanDo:
         """
-
+        Similar to can_use_move, however, this is specifically for reporting if the user can target the targets
         @param user: The user that will end up using this Move
         @param targets: The list of targets that the player is trying to target
         @return: A CanDo tuple where [0] is a boolean value that determines whether or not the user can target targets

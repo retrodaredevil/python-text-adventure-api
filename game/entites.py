@@ -32,7 +32,7 @@ class LauraPerson(Living):
 
     def get_used_name(self, living: Living):
         if isinstance(living, Player) and not living[EventsObject].knows_laura:
-            return self.__class__.UNKNOWN_LIVING_NAME
+            return self.__class__.UNKNOWN_LIVING_NAME  # this makes it so if the player hasn't met, name will be "???"
         return super().get_used_name(living)
 
     def send_message(self, message):
@@ -41,7 +41,7 @@ class LauraPerson(Living):
 
 class NinjaDude(Living):
     """
-    Ninja Dude is actually the boss but the player won't find that out until the end
+    Ninja Dude is actually the boss but the player won't find that out until the end (Make NinjaDude a boss class later)
     """
     def __init__(self):
         super().__init__("Ninja Dude")
@@ -52,5 +52,7 @@ class NinjaDude(Living):
 
 
 class NinjaEntity(SimpleHostileEntity):
-    def __init__(self):
-        pass
+    def __init__(self, name, health, location):
+        super().__init__(name, health, location, [Player])
+
+

@@ -20,14 +20,19 @@ class Target:
         @param entity: The entity
         @param team: The team that the entity is on
         """
+        from textadventure.battling.effect import Effect  # to avoid import errors
         self.entity = entity
         self.team = team
         self.move_chooser = move_chooser
-        self.turn_number = turn_number
+        self.turn_number = turn_number  # turn object not passed to avoid import errors and avoid passing a reference\
+        #  of self somehow to the Turn object
+
+        self.effects: List[Effect] = []
 
         self.moves_left = 1  # one move per turn (Duh!)
         self.used_moves: List[Move] = []
         self.outcomes: Dict[Move, bool] = {}
+        """Tells whether or not a certain move hit this Target object."""
 
     def set_outcome(self, move: 'Move', did_hit: bool):  # maybe change the did_hit to something other than bool later
         self.outcomes[move] = did_hit
@@ -71,15 +76,28 @@ class Turn:
         self.targets = targets
 
         self.is_done = False
-        self.is_started = True  # by default, whenever creating a Turn, we will be on that turn
+        self.is_started = False
+
+    def can_start(self):
+
+        for target in self.targets:
+            pass
+
+        return True
+
+    def start(self, battle):
+        pass
+
+
 
 
 class Move(ABC):
-    def __init__(self, user: Target):
+    def __init__(self, user: Target, targets: List[Target]):
         self.user = user
+        self.targets = targets
 
     @abstractmethod
-    def do_move(self, turn: Turn, user: Entity, targets: List[Target]):
+    def do_move(self, turn: Turn):
         pass
 
 
