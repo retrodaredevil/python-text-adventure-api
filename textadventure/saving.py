@@ -105,7 +105,7 @@ class SaveCommandHandler(SimpleCommandHandler):
     from textadventure.handler import Handler
 
     command_names = ["save"]
-    description = "Allows you to save your game to a file. (Usually save.data)\n" \
+    description = "Allows you to save your ninjagame to a file. (Usually save.data)\n" \
                   "Usage: save [file name/path]"
 
     def __init__(self):
@@ -122,7 +122,7 @@ class SaveCommandHandler(SimpleCommandHandler):
 
         result = save(handler, player, path, True)  # TODO ask the player if they want override_file to be True
         if result[0]:
-            player.send_message("You successfully saved your game to '{}'".format(path.name))
+            player.send_message("You successfully saved your ninjagame to '{}'".format(path.name))
         else:
             player.send_message(result[1])
         return InputHandleType.HANDLED
@@ -132,7 +132,7 @@ class LoadCommandHandler(SimpleCommandHandler):
     from textadventure.handler import Handler
 
     command_names = ["load"]
-    description = "Allows you to load a saved game.\n" \
+    description = "Allows you to load a saved ninjagame.\n" \
                   "Usage: load [file name/path]"
 
     def __init__(self):
@@ -151,7 +151,7 @@ class LoadCommandHandler(SimpleCommandHandler):
         was_loaded = load(handler, player, path)
 
         if was_loaded[0]:
-            player.send_message("You successfully loaded your game from '{}'".format(path.name))
+            player.send_message("You successfully loaded your ninjagame from '{}'".format(path.name))
         else:
             player.send_message(was_loaded[1])
         return InputHandleType.HANDLED

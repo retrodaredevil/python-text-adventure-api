@@ -189,7 +189,7 @@ class TasteCommandHandler(SensesCommandHandler):
         return item.can_taste(player)
 
 
-class GoCommandHandler(SimpleCommandHandler):  # written on friday with a football game
+class GoCommandHandler(SimpleCommandHandler):  # written on friday with a football ninjagame
 
     command_names = ["go", "move", "mov", "ove", "va", "voy", "walk", "step"]
     description = "Allows you to go to another location usually nearby. Aliases: go, move\n" \

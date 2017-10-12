@@ -15,6 +15,8 @@ class Battle(InputHandler):
         self.has_started = False
         self.has_ended = False
 
+        self.current_turn: Turn = None
+
     def should_update(self):
         return self.has_started and not self.has_ended
 
@@ -25,6 +27,11 @@ class Battle(InputHandler):
         @return
         """
         assert self.should_update(), "You shouldn't be calling update."
+        assert self.current_turn is not None, "this shouldn't be None unless start hasn't been called before. (Bad)"
+
+        if not self.current_turn.is_started:
+            self.current_turn.start(self)
+
 
     def _on_end(self, handler: Handler):
         self.has_ended = True

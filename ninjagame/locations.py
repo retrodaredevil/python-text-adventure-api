@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-from game.data import EventsObject
-from game.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend
+from ninjagame.data import EventsObject
+from ninjagame.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend
 
-from game.items import Sword, SwordType
+from ninjagame.items import Sword, SwordType
 from textadventure.handler import Handler
 from textadventure.input import InputHandler
 from textadventure.input import InputObject, InputHandle, InputHandleType
@@ -97,7 +97,7 @@ class NameTaker(InputHandler):
         return InputHandle(2, handle_function, self)
 
 
-class Entrance(Location):  # players should only be in this location when starting the game
+class Entrance(Location):  # players should only be in this location when starting the ninjagame
 
     FEEL_MESSAGE = "You feel your clothes on your back and a nice Autumn day."
 

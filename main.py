@@ -4,10 +4,10 @@
 # sys.path.append(append)
 # above was used for when main.py was not inside the root of the project
 
-from game.data import EventsObject
-from game.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
+from ninjagame.data import EventsObject
+from ninjagame.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
 
-from game.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
+from ninjagame.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
     EntranceSpiderWebForest, CenterSpiderWebForest
 from textadventure.battling.managing import HostileEntityManager
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
@@ -20,7 +20,7 @@ from textadventure.playersavable import PlayerSavable
 from textadventure.saving import SaveCommandHandler, LoadCommandHandler
 
 """
-This file is an example game for my text adventure api using the game package
+This file is an example ninjagame for my text adventure api using the ninjagame package
 """
 
 

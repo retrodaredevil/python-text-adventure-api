@@ -1,4 +1,4 @@
-from game.data import EventsObject
+from ninjagame.data import EventsObject
 from textadventure.entity import *
 from textadventure.player import Player
 from textadventure.savable import Savable

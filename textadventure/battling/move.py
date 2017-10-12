@@ -5,13 +5,16 @@ from typing import List, Dict, Union
 from textadventure.battling.team import Team
 from textadventure.entity import Entity
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # if removed, will cause type errors
     from textadventure.battling.choosing import MoveOption, MoveChooser
 
 
 class Target:
     """
     An object that stores information on the current turn and what moves it can use
+
+    Later, if the api is changed for a pokemon like game, we want to make sure this class doesn't heavily rely on
+        Entity when Entity could be changed drastically for a Pokemon game. Just a thought for future maintainability
     """
 
     def __init__(self, entity: Entity, team: Team, move_chooser: 'MoveChooser', turn_number: int):
@@ -75,20 +78,25 @@ class Turn:
         self.number = number
         self.targets = targets
 
-        self.is_done = False
         self.is_started = False
+        self.is_doing = False
+        self.is_done = False
 
-    def can_start(self):
+        self.chosen_moves: Dict[Target, 'MoveOption'] = {}
 
-        for target in self.targets:
-            pass
-
-        return True
 
     def start(self, battle):
-        pass
+        self.is_started = True
 
+    def update(self, battle):
+        for target in self.targets:
+            move = target.move_chooser
 
+    def _do_turn(self, battle):
+        self.is_doing = True
+
+    def _on_end(self, battle):
+        self.is_done = True
 
 
 class Move(ABC):

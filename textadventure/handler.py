@@ -43,7 +43,7 @@ class Handler:
 
     def start(self):
         """
-         Starts the infinite loop for the game
+         Starts the infinite loop for the ninjagame
         """
         while True:
             for player in self.get_players():
