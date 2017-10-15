@@ -25,7 +25,7 @@ class Weapon(Item):
         @param move_option: The MoveOption object or None. I'm not sure why you'd inherit Weapon and make this None.
         """
         super().__init__(name, True)
-        self.move_option: MoveOption = move_option
+        self.move_option: Optional[MoveOption] = move_option
 
     # NOTDO I had the idea that I'd put methods here to damage entities or something. I'll be using the MoveOption class
 

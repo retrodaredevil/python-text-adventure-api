@@ -1,4 +1,5 @@
 from enum import Enum, unique
+from typing import Tuple
 
 from textadventure.battling.weapon import Weapon
 from textadventure.handler import Handler
@@ -23,8 +24,7 @@ class MaterialType(Enum):
 
 @unique
 class SwordType(Enum):
-    # each is a Tuple[str, int]
-    # [1] is the material type
+    # all: Tuple[str, MaterialType]
     WOODEN = ("wooden", MaterialType.WOOD)
     IRON = ("iron", MaterialType.IRON)
     STEEL = ("steel", MaterialType.STEEL)

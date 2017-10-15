@@ -88,7 +88,7 @@ class Point:
         Used on locations by having an x, y and z position (z is normally 0)
         @param x: The x position on the map
         @param y: The y position on the map
-        @param z: Used for the height/level (usually 0)
+        @param z: Used for the height/priority (usually 0)
         """
         self.x = x
         self.y = y

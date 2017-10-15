@@ -144,12 +144,12 @@ class InputHandler(ABC):
 
 
 class InputHandle:  # returned and used to indicate when the handle function should be called
-    def __init__(self, level: int, handle: Callable[[List[InputHandleType]], InputHandleType],
+    def __init__(self, priority: int, handle: Callable[[List[InputHandleType]], InputHandleType],
                  input_handler: InputHandler):
         """
-        @param level: determines the order to call things in. Lower called first. Ex: 0 then 2 then 10
+        @param priority: determines the order to call things in. Lower called first. Ex: 0 then 2 then 10
         @param handle: A function that should return a InputHandleType and should expect a list of InputHandleType
         """
-        self.level = level
+        self.priority = priority
         self.handle = handle
         self.input_handler = input_handler

@@ -14,6 +14,7 @@ Make sure this isn't imported at the top of any files in this package because it
 class Effect(ABC):
     """
     Note that the methods are defined in the order that they are called. Their documentation should say that too.
+
     """
     # TODO add a method that helps with forcefully removing an effect (A way for recovery moves to remove effects)
 
@@ -26,6 +27,7 @@ class Effect(ABC):
     @abstractmethod
     def can_choose(self, targets: List[Target], option: MoveOption) -> CanDo:
         """
+        Called first because it's called before the Move object is created
         Should be used to test for things like if you can choose a certain type of move, if you can target so many\
             people. Should not call any of option's can_use methods because that will already be handled for you
         @param targets: The targets the user is trying to target
@@ -39,7 +41,8 @@ class Effect(ABC):
         """
         Basically says if the move has been missed or not. Maybe there's an affect that makes each move have a %50\
             chance of hitting it. An this method could run a test to see if the move should hit.
-        If it returns false, the player will not be able to choose a different move because this one failed.
+        If it returns false, the player will not be able to choose a different move because this one failed. And\
+            move.do_move will NOT be called
         Could be renamed to will_move_be_success if you want to think about it like that
         @param move: The move that is about to be used. It contains the user and the targets
         @return: whether or not the move should be performed. If [0] is false, the move will fail and [1] will be \

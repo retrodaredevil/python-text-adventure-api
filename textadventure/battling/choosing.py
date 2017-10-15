@@ -45,6 +45,9 @@ class MoveChooser(ABC):
     @abstractmethod
     def get_move(self, turn: Turn, user: Target) -> Optional[Move]:
         """
+        The reason we pass user (A Target) in this method is because we only store the entity in this calss and  \
+            user changes every turn
+        Remember to check the user's effects to see if the user can_choose that move
         @param turn: The current turn
         @param user: The target that will be using the returned move. user.entity is always equal to this class's entity
         @return: The chosen move or None if no Move has been chosen yet
@@ -60,11 +63,16 @@ class RandomMoveChooser(MoveChooser):
         # TODO
         pass
 
-    def try_choose(self, turn: Turn, user: Target, option: MoveOption) -> Optional[Move]:
+    def __try_choose(self, turn: Turn, user: Target, option: MoveOption) -> Optional[Move]:
         if not option.can_use_move(user):
             return None
         targets = self.get_targets(turn, option)
-        if option.can_choose(user, targets):
+        can_choose = option.can_choose(user, targets)
+        if not can_choose:
+            return None
+        for effect in user.effects:
+            can_choose = effect.can_choose(targets, option)
+        if can_choose:
             return option.create_move(user, targets)
         return None
 
@@ -74,6 +82,6 @@ class RandomMoveChooser(MoveChooser):
 
         move: Move = None
         while move is None:  # this could be made as a recursive function but I'll keep it like this
-            move = self.try_choose(turn, user, random.choice(options))
+            move = self.__try_choose(turn, user, random.choice(options))
 
         return move

@@ -67,7 +67,7 @@ class Handler:
             if handle is not None:
                 input_handles.append(handle)
 
-        input_handles.sort(key=lambda k: k.level)  # sort by level
+        input_handles.sort(key=lambda k: k.priority)  # sort by priority
         already_handled: List[InputHandleType] = []
         for input_handle in list(input_handles):  # copy list so we can delete stuff
             handle_type = input_handle.handle(already_handled)  # note not method # let it decide to take
