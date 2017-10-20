@@ -46,7 +46,7 @@ def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Po
     add: Point = None
     if "nor" in string_args:
         add = NORTH
-    elif "eas" in string_args or "ast" in string_args:
+    elif "eas" in string_args or "ast" in string_args:  # can't put est here because of west
         add = EAST
     elif "sou" in string_args:
         add = SOUTH
@@ -58,7 +58,7 @@ def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Po
         add = DOWN
     elif "her" in string_args:
         add = ZERO
-    else:
+    else:  # note that this is the only clause that returns.
         return None
     if add is None:
         raise Exception("Should not have happened")
@@ -67,7 +67,7 @@ def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Po
 
 class HelpCommandHandler(SimpleCommandHandler):
     def __init__(self):
-        super(HelpCommandHandler, self).__init__(["help"], "The help for this command isn't very helpful now it it?")
+        super().__init__(["help"], "The help for this command isn't very helpful now it it?")
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
         message_type = MessageType.WAIT

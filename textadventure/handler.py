@@ -1,11 +1,11 @@
-from typing import List, Optional, TypeVar
+from typing import List, Optional, TypeVar, Type, Union
 
 from textadventure.action import Action
 from textadventure.entity import Entity
 from textadventure.manager import Manager
 from textadventure.message import Message, MessageType, StreamOutput
 from textadventure.player import Player, Living
-from textadventure.utils import Point
+from textadventure.utils import Point, get_type_from_list
 
 T = TypeVar("T")
 
@@ -122,21 +122,13 @@ class Handler:
                 r.append(entity)
         return r
 
-    def get_livings(self, living_type: type, expected_amount: Optional[int] = None) -> List[Living]:
-        """
-        Returns a list of Living with the type living_type
-        @param living_type: The type to get
-        @param expected_amount: The expected length of the list that will be returned. \
-                                    If not None, assert len(the list) == expected_amount
-        @return: A list of Living with the type living_type
-        """
-        r = []
-        for living in self.living_things:
-            if type(living) is living_type:
-                r.append(living)
-        if expected_amount is not None:
-            assert len(r) == expected_amount
-        return r
+    def get_managers(self, manager_types: Union[List[Manager], Type[Manager]], expected_amount: Optional[int] = None) \
+            -> List[Manager]:
+        return get_type_from_list(self.managers, manager_types, expected_amount)
+
+    def get_livings(self, living_types: Union[List[Living], Type[Living]], expected_amount: Optional[int] = None) \
+            -> List[Living]:
+        return get_type_from_list(self.living_things, living_types, expected_amount)
 
     def get_point_location(self, point: Point):
         for location in self.locations:

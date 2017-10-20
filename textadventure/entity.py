@@ -5,7 +5,7 @@ from typing import Type, List
 from textadventure.action import Action
 from textadventure.holder import Holder
 from textadventure.message import Message
-from textadventure.utils import MessageConstant, CanDo
+from textadventure.utils import MessageConstant, CanDo, are_mostly_equal
 
 
 class Living(ABC):
@@ -43,17 +43,22 @@ class Living(ABC):
         message.text = "|" + self.get_used_name(living) + ":| " + message.text
         living.send_message(message)
 
+    def is_reference(self, reference: str) -> bool:
+        return are_mostly_equal(reference, self.name)
+
     def __str__(self):
         """Should be used in Message to replace named_variables with"""
         return self.name
 
-    def get_message(self, message: MessageConstant) -> Message:
+    @staticmethod
+    def get_message(message: MessageConstant) -> Message:
         """
         Converts a MessageConstant to a Message
         Makes sure that the passed message value is returned as a Message object
         @param message: The message or string to make sure or change to a Message
         @return: A message object
         """
+
         if type(message) is str:
             message = Message(message)
         if type(message) is not Message:

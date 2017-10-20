@@ -22,7 +22,10 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     """
     The Location is an abstract base class used for all Locations. Many of the methods aren't meant to be called \
     randomly outside of a specific set of classes that handle those methods. Most of the methods in here should never\
-    be called randomly unless it's something like get_players or is_lit_up. 
+    be called randomly unless it's something like get_players or is_lit_up.
+    
+    Also note one of the primary features of this class is that it is also an input handler but you have to call \
+        _should_take_input to make sure that the player is in this location.  
     Attributes:
         command_handlers: Keeps a list of command_handlers. After __init__ is called, Handler should call these \
                           when location is getting its on_input called
@@ -179,12 +182,23 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         A method that is called by a subclass of Location usually when handling input.
         The default implementation (That probably shouldn't be changed) checks to see if the player's location is self
         In the default implementation, handler and player_input are not used
+
+        When handling input in an implementation of Location, this should almost always be called first to make sure\
+            the player is at this location.
         @param handler:
         @param player:
         @param player_input:
         @return:
         """
         return player.location == self
+
+    def get_referenced_entity(self, handler: Handler, reference: str):
+
+        for entity in self.get_entities(handler):
+            if entity.is_reference(reference):
+                return entity
+
+        return None
 
     def is_lit_up(self):
         """

@@ -3,6 +3,7 @@ from typing import List
 
 from textadventure.battling.choosing import MoveOption
 from textadventure.battling.move import Move, Target, Turn
+from textadventure.battling.outcome import MoveOutcome
 from textadventure.utils import CanDo
 
 
@@ -53,7 +54,7 @@ class Effect(ABC):
     @abstractmethod
     def before_turn(self, turn: Turn, move: Move):
         """
-        Called after can_move and can_choose before the all of the moves have happened
+        Called after can_move and can_choose_targets before the all of the moves have happened
         @param turn: the turn that is ongoing
         @param move: The move that is about to be performed
         @return: None
@@ -61,11 +62,15 @@ class Effect(ABC):
         pass
 
     @abstractmethod
-    def after_move(self, turn: Turn, move: Move):
+    def after_move(self, turn: Turn, move: Move, outcome: MoveOutcome):
         """
         Called right after the move has happened.
+        With the MoveOutcome object, if you would like to (and you probably should) you can add to the parts when\
+            you act on something
         @param turn: The turn that will soon finish after every other Target performs their move
         @param move: The move that was just performed by the user
+        @param outcome: The outcome of the move represented by a MoveOutcome object. Feel free to do something and add \
+                        outcome parts
         @return: None
         """
         pass

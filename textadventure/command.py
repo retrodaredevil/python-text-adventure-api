@@ -17,7 +17,7 @@ class CommandHandler(InputHandler):
         pass
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-        if not self.should_handle_player(player) or not self._should_handle_command(player_input):
+        if not self._should_handle_player(player) or not self._should_handle_command(player_input):
             return None
 
         def handle_function(already_handled: List[InputHandleType]):
@@ -35,6 +35,8 @@ class CommandHandler(InputHandler):
     def send_help(self, player: Player):
         """
         Called inside from the handle_function in on_input and passed through the InputHandle returned by on_input
+        By default, the on_input method will call this method if the first argument of the command is equal to "help"\
+            so even if you don't call this in your overridden _handle_command, it can still be called.
         """
         pass
 
@@ -42,6 +44,7 @@ class CommandHandler(InputHandler):
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
         """
         The _ means that this method is meant to be "protected" and should only be called within classes and subclasses
+        Should not be called outside of CommandHandler
         @param handler: The handler object
         @param player:  The player object
         @param player_input: The player's input
@@ -54,15 +57,17 @@ class CommandHandler(InputHandler):
         """
         Overridden by subclasses of CommandHandler and returns whether or not a command should be handled
         Called in on_input
+        Should not be called in places other than the CommandHandler class
         @param player_input:
         @return: returns True if a command should be handled (even if argsuments are incorrect)
         """
         pass
 
-    def should_handle_player(self, player: Player) -> bool:
+    def _should_handle_player(self, player: Player) -> bool:
         """
         Tells whether or not a certain command will have an effect for a player(Normally returns true unless overridden)
         called in on_input
+        Called by the CommandHandler class and doesn't ever need to be called on your own. Feel free to override
         @param player: The player to check
         @return: A boolean, True if this command should handle a player False otherwise
         """
@@ -95,7 +100,7 @@ class LocationCommandHandler(SimpleCommandHandler):
         super(LocationCommandHandler, self).__init__(command_names, description)
         self.location = location
 
-    def should_handle_player(self, player: Player) -> bool:
+    def _should_handle_player(self, player: Player) -> bool:
         """
         @return: return self.location is None or player.location == self.location
         """

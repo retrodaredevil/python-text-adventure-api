@@ -1,6 +1,6 @@
 import sys
 from difflib import SequenceMatcher
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, TypeVar, Type, Optional
 
 """
 Imports should not import any of the other modules we've made. It could conflict when trying to import utils
@@ -15,6 +15,7 @@ NOT_IMPORTANT = ["the", "into", "to", "of", "with", "and", "in", "that", "my", "
 Represents a list of strings that are unimportant to comparing input with. Note all words in list are lower case
 These words may be important in determining what someone wants in an english sentence, however, since we aren't \
     interpreting an english paper, we should be OK.
+Note that the list does not include an empty string ("") because that may mess up stuff.
 """
 
 CanDo = Tuple[bool, MessageConstant]
@@ -43,6 +44,42 @@ def is_string_true(string_input: str):
     return "y" in string_input.lower()
 
 
+T = TypeVar('T')
+
+
+def get_type_from_list(the_list, allowed_types: Union[Type[T], List[T]], expected_amount: Optional[int] = None,
+                       is_exact_type: bool = False) -> List[T]:
+    """
+    Helps you get object(s) from a list that are of a certain type along with providing an expected return length of \
+        the list to be returned
+    @param the_list: The list that you want to grab object(s) from
+    @param allowed_types: The type(s) allowed to be returned
+    @param expected_amount: The expected amount of items in the list that will be returned or None if any length will \
+                            be tolerated
+    @param is_exact_type: By default False, if True, types will be compared using type(object) == an_allowed_type, \
+                            otherwise, types will be compared using using isinstance
+    @return: A list of objects from the list that are of a certain type
+    """
+    def is_type_tolerated(ob) -> bool:
+        object_type = type(ob)  # not used unless is_exact_type is True
+        for t in allowed_types:
+            if (is_exact_type and object_type == t) or (not is_exact_type and isinstance(ob, t)):
+                return True
+
+        return False
+
+    if not isinstance(allowed_types, List):  # if the passed object isn't a list, make it one
+        # if python supported overloading methods, I would definitely choose that here.
+        allowed_types = [allowed_types]
+    r = []
+    for element in the_list:
+        if is_type_tolerated(element):
+            r.append(element)
+    if expected_amount is not None:
+        assert len(r) == expected_amount
+    return r
+
+
 def get_unimportant(to_change: List[str], unimportant_list=NOT_IMPORTANT) -> List[int]:
     """
     Should be used for comparing input to a string. If the input will eventually be outputted, don't print this, \
@@ -65,6 +102,13 @@ def get_unimportant(to_change: List[str], unimportant_list=NOT_IMPORTANT) -> Lis
 
 
 def are_mostly_equal(a: str, b: str) -> bool:
+    """
+    Checks to see if the provided strings are mostly equal.
+    Converts both to lowercase and removes words from the unimportant list so a: "my the bike" b: "bike" will be True
+    @param a: First string
+    @param b: Second string
+    @return: True if the strings are mostly equal
+    """
     def remove_for(change: str):
         split = change.split(" ")
 

@@ -1,10 +1,11 @@
 import typing
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 
+from textadventure.battling.outcome import MoveOutcome, OutcomePart
 from textadventure.battling.team import Team
 from textadventure.entity import Entity
-from textadventure.utils import CanDo
+from textadventure.utils import CanDo, MessageConstant
 
 if typing.TYPE_CHECKING:  # if removed, will cause type errors
     from textadventure.battling.choosing import MoveOption, MoveChooser
@@ -80,6 +81,11 @@ class Target:
 
 
 class Turn:
+    """
+    A class that holds data for a single turn and that contains methods that can be called to initiate the turn.
+    The reason this has methods to initiate and to do the turn, is because it should be divided from the Battle class\
+        what better way to use all of the data in a turn than using its own methods.
+    """
     def __init__(self, number: int, targets: List[Target]):
         self.number = number
         self.targets = targets  # remember, this is stored like this because a Team has entities as members
@@ -92,10 +98,22 @@ class Turn:
         # MoveChooser handle that stuff
 
     def start(self, battle: 'Battle'):
+        """
+        Called when this Turn is being set to the Battle's current turn
+        @param battle: The battle handling this Turn object
+        """
         self.is_started = True
 
     def update(self, battle: 'Battle'):  # should be called by the Battle class
-        do_turn = True
+        """
+        Called by the Battle class every time its update method is called.
+        Calling update is how the turn actually works (There is no method to actually DO the turn) (This method will \
+            call private methods _do_turn and _on_end
+        @param battle:
+        @return:
+        """
+
+        do_turn = True  # set to False if we can't do the turn because not everyone has already chosen their moves
         for target in self.targets:
             move = self.chosen_moves[target]
             if move is None:
@@ -118,11 +136,11 @@ class Turn:
             moves.append(move)
         moves.sort(key=lambda k: k.priority)  # sort by priority
 
-        for move in moves:  # we will call before turn
-            # in separate for loop than the other one because we want before_turn to be called before move.do_move
+        for move in moves:  # we will call before_turn
+            # in separate for loop than the other one because we want before_turn to be called before all move.do_move
             for effect in move.user.effects:
-                # effect.can_choose let the MoveChooser handle this (We don't even have the MoveOption anyway)
-                effect.before_turn(self, move)  # call before turn (And before all moves
+                # effect.can_choose_targets let the MoveChooser handle this (We don't even have the MoveOption anyway)
+                effect.before_turn(self, move)  # call before turn (And before all moves)
         for move in moves:  # now we will call do_move
 
             can_move: CanDo = (True, "By default, you can move. An effect might say otherwise")
@@ -131,16 +149,25 @@ class Turn:
                 if not can_move[0]:
                     break  # another effect might say you can use it, so we want to make sure this one is 'heard'
 
-            # TODO make can_move like an outcome and 'combine' it with do_move's outcome idk
-            move.do_move(self)  # actually do the move
+            if can_move[0]:
+                result = move.do_move(self)  # actually do the move
+                # ^ Note the weird tuple returned
+                outcome = MoveOutcome(can_move, result[1])
+                outcome.parts.extend(result[0])
+            else:
+                outcome = MoveOutcome(can_move, (False, "The move wasn't even executed, so this shouldn't be printed."))
+
             for effect in move.user.effects:
-                effect.after_move(self, move)  # call after move
-        for move in moves:  # now we will call after turn
+                effect.after_move(self, move, outcome)  # call after move
+            # calling this after the loop used to call Effect's after_move because after_move could have done something
+            # if we needed to, here is where an Action would go related to the move
+
+        for move in moves:  # now we will call after_turn
             for effect in move.user.effects:
                 effect.after_turn(self, move)
 
         # now we are done with calling effects and all the moves have been invoked
-        # lets let _on_end handle the ending of a turn. We're done here
+        # lets let _on_end handle the ending of a turn. (We don't call it because the method calling this will)
 
     def _on_end(self, battle: 'Battle'):
         for target in self.targets:
@@ -157,7 +184,7 @@ class Move(ABC):
         """
 
         @param priority: The priority of the move where it will move first if it is lower
-        @param user: The user of the move
+        @param user: The user of the moveHello there how are you
         @param targets: The targets the user is targeting
         """
         self.priority = priority
@@ -165,11 +192,21 @@ class Move(ABC):
         self.targets = targets
 
     @abstractmethod
-    def do_move(self, turn: Turn):
+    def do_move(self, turn: Turn) -> Tuple[List[OutcomePart], CanDo]:
+        """
+        Called when the move should be executed
+        Note the order that the returned List at [0] matters because of the order the outcomes will be displayed
+        @param turn: The current turn that is ongoing and could possibly finish after this method is called (if this \
+                      is the last move)
+        @return: A tuple where [0] represents a list of MoveOutcomes (things that this method did) and [1] represents \
+                    CanDo representing if this move's main goal was reached. If it wasn't, [0] ([1][0]) \
+                     is False and [1] represents a message that will be broadcasted.
+        """
         pass
 
-
-
+    def get_outcome_messages(self, outcome: MoveOutcome) -> List[MessageConstant]:
+        # TODO
+        pass
 
 
 def main():

@@ -18,7 +18,7 @@ class Player(Entity):
     def damage(self, damage):
         super().damage(damage)
 
-    def __getitem__(self, item: Type[T]) -> T:
+    def __getitem__(self, item: Type[T]) -> Optional[T]:
         if not isinstance(item, Type):
             raise ValueError()
         for handled_object in self.handled_objects:

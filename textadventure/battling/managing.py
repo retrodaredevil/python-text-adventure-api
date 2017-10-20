@@ -1,22 +1,95 @@
+from typing import List, Tuple
+
 from textadventure.action import Action
-from textadventure.entity import HostileEntity
+from textadventure.battling.battle import Battle
+from textadventure.entity import HostileEntity, Entity
+from textadventure.handler import Handler
 from textadventure.manager import Manager
 
 
+"""
+We can import all this stuff because none of it should be referencing anything from the battle package \
+    except battle.py but that won't reference this file anyway
+If you do import this package, it is recommended to import locally
+"""
+
+
+class BattleManager(Manager):
+    """
+    A class that makes handles all the battles. And allows the battle api to function
+    Note that when adding a battle using add_battle, it will not automatically start the battle (has_started is not \
+        set) However, once the battle is updated and
+
+    Note: You must also add HostileEntityManager as a manager or it will not stop players from passing if there are HEs
+    """
+    def __init__(self):
+        super().__init__()
+        self.active_battles: List[Battle] = []
+
+        self.stop_entities_from_leaving_location: Tuple[bool, bool] = (True, True)
+        """A tuple where [0] represents whether or not entities changing locations should be stopped and [1] \
+        is only used if [0] is True. [1] is True when the entity should be stopped even if the battle hasn't started.
+        By default, both are True."""
+
+    def update(self, handler: Handler):
+        for battle in list(self.active_battles):
+            if battle.should_update():
+                battle.update(handler)
+            if battle.has_ended:
+                self.active_battles.remove(battle)  # the battle has ended so remove it
+
+    def add_battle(self, battle: Battle):
+        """
+        Adds a battle to the list of active_battles. If the battle has not started, it will not start the battle
+        @param battle: The battle you want to add
+        """
+        self.active_battles.append(battle)
+
+    def get_battles(self, entity: Entity) -> List[Battle]:
+        """
+        This gets a list of current battles the entity is currently in. It returns a list because it is possible for\
+            someone to be in multiple battles at once. (Usually only one should be started)
+            This is kept like this just in case people for whatever reason add an entity to multiple battles.
+        @param entity: The entity that you are trying to find the battles that it's in
+        @return: A list of the current battles the entity is in
+        """
+        r = []
+        for battle in self.active_battles:
+            if battle.get_team(entity) is not None:
+                r.append(battle)
+
+        return r
+
+    def on_action(self, handler: Handler, action: Action):
+        from textadventure.location import GoAction
+        if isinstance(action, GoAction):
+            if not self.stop_entities_from_leaving_location[0]:
+                return  # stopping entities is not wanted here
+            # now we know stopping entities from changing locations while in battle is wanted
+            battles = self.get_battles(action.entity)
+            for battle in battles:
+                if battle.is_going_on() or (not battle.has_started and self.stop_entities_from_leaving_location[1]):
+                    action.can_do = (False, "You can't leave! You've got to stay and fight!")
+                    return  # we cancelled the action so we good
+
+
 class HostileEntityManager(Manager):
+    """
+    A Manager that stops players from passing if there's a Hostile Entity in their way.
+    """
     def __init__(self):
         pass
 
     def update(self, handler):
         pass
 
-    def on_action(self, handler, action: Action):
+    def on_action(self, handler: Handler, action: Action):
         from textadventure.location import GoAction
         # print("we got and action: {}".format(action)) works
         if isinstance(action, GoAction):
-            for entity in action.previous_location.get_entities(handler):
-                if isinstance(entity, HostileEntity):
-                    can_pass = entity.can_entity_pass(action.entity)
-                    if not can_pass[0]:
-                        action.can_do = can_pass
-                        return
+            for entity in action.previous_location.get_entities(handler):  # go through all entities at current location
+                if isinstance(entity, HostileEntity):  # if it's a HostileEntity
+                    can_pass = entity.can_entity_pass(action.entity)  # check if the hostile entity wants to stop them
+                    if not can_pass[0]:  # if the hostile entity wants to stop them, V
+                        action.can_do = can_pass  # set the action's can_do to a CanDo with a [0] value of False
+                        return  # we don't need to do anything else
