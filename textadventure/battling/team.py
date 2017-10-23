@@ -1,6 +1,7 @@
 from typing import List
 
 from textadventure.entity import Entity
+from textadventure.utils import join_list
 
 
 class Team:
@@ -18,16 +19,11 @@ class Team:
         assert length > 0, "The members of a team cannot be 0."
         self.members = members
         if name is None:  # basically a default name
-            name = ""
-            for index, member in enumerate(self.members):
-                if index > 0:
-                    if index == length - 1:
-                        name += " and "
-                    else:
-                        name += ", "
-                name += str(member)
-
+            name = join_list(list(map(str, self.members)))
         self.name = name
+
+    def __str__(self):
+        return self.name
 
     def __contains__(self, item):
         return item in self.members

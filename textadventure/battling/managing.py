@@ -80,7 +80,7 @@ class HostileEntityManager(Manager):
     def __init__(self):
         pass
 
-    def update(self, handler):
+    def update(self, handler: Handler):
         pass
 
     def on_action(self, handler: Handler, action: Action):

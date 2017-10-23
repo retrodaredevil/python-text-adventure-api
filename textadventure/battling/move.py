@@ -1,8 +1,8 @@
 import typing
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union, Tuple
+from typing import List, Dict, Union, Optional
 
-from textadventure.battling.outcome import MoveOutcome, OutcomePart
+from textadventure.battling.outcome import MoveOutcome, OutcomePart  # needed
 from textadventure.battling.team import Team
 from textadventure.entity import Entity
 from textadventure.utils import CanDo, MessageConstant
@@ -97,6 +97,13 @@ class Turn:
         self.chosen_moves: Dict[Target, Move] = {}  # note that this has nothing to do with move options. Let \
         # MoveChooser handle that stuff
 
+    def get_target(self, entity: Entity) -> Optional[Target]:
+        for target in self.targets:
+            if target.entity == entity:
+                return target
+
+        return None
+
     def start(self, battle: 'Battle'):
         """
         Called when this Turn is being set to the Battle's current turn
@@ -118,7 +125,7 @@ class Turn:
             move = self.chosen_moves[target]
             if move is None:
                 do_turn = False
-                move = target.move_chooser.get_move(self, target)  # note that this is NOT a MoveOption
+                move = target.move_chooser.get_move(battle, target, self)  # note that this is NOT a MoveOption
                 # the move is what the move_chooser returned at we aren't going to question that.
                 if move is not None:  # also should probably check if it's None first (Maybe they haven't decided)
                     self.chosen_moves[target] = move
@@ -151,17 +158,15 @@ class Turn:
 
             if can_move[0]:
                 result = move.do_move(self)  # actually do the move
-                # ^ Note the weird tuple returned
-                outcome = MoveOutcome(can_move, result[1])
-                outcome.parts.extend(result[0])
+                outcome = MoveOutcome(can_move)
+                outcome.parts.extend(result)
             else:
-                outcome = MoveOutcome(can_move, (False, "The move wasn't even executed, so this shouldn't be printed."))
-
+                outcome = MoveOutcome(can_move)
             for effect in move.user.effects:
                 effect.after_move(self, move, outcome)  # call after move
             # calling this after the loop used to call Effect's after_move because after_move could have done something
             # if we needed to, here is where an Action would go related to the move
-
+            outcome.broadcast_messages(battle)  # TODO somewhere in here we need to create an action
         for move in moves:  # now we will call after_turn
             for effect in move.user.effects:
                 effect.after_turn(self, move)
@@ -180,32 +185,27 @@ class Turn:
 
 
 class Move(ABC):
-    def __init__(self, priority: int, user: Target, targets: List[Target]):
+    def __init__(self, name: str, priority: int, user: Target, targets: List[Target]):
         """
 
         @param priority: The priority of the move where it will move first if it is lower
         @param user: The user of the moveHello there how are you
         @param targets: The targets the user is targeting
         """
+        self.name = name
         self.priority = priority
         self.user = user
         self.targets = targets
 
     @abstractmethod
-    def do_move(self, turn: Turn) -> Tuple[List[OutcomePart], CanDo]:
+    def do_move(self, turn: Turn) -> List[OutcomePart]:
         """
         Called when the move should be executed
         Note the order that the returned List at [0] matters because of the order the outcomes will be displayed
         @param turn: The current turn that is ongoing and could possibly finish after this method is called (if this \
                       is the last move)
-        @return: A tuple where [0] represents a list of MoveOutcomes (things that this method did) and [1] represents \
-                    CanDo representing if this move's main goal was reached. If it wasn't, [0] ([1][0]) \
-                     is False and [1] represents a message that will be broadcasted.
+        @return: A list of OutcomeParts (things that this method did)
         """
-        pass
-
-    def get_outcome_messages(self, outcome: MoveOutcome) -> List[MessageConstant]:
-        # TODO
         pass
 
 

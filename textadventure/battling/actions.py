@@ -1,6 +1,9 @@
 import typing
 
 from textadventure.action import Action
+from textadventure.battling.managing import BattleManager
+from textadventure.battling.team import Team
+from textadventure.entity import EntityActionToEntity, Entity
 
 if typing.TYPE_CHECKING:
     from textadventure.battling.battle import Battle
@@ -21,4 +24,16 @@ class BattleEnd(Action):
 
     def _do_action(self, handler):
         self.battle.has_ended = True
+        return self.can_do
 
+
+class EntityChallengeAction(EntityActionToEntity):
+    def __init__(self, entity: Entity, asked_entity: Entity):
+        super().__init__(entity, asked_entity)
+
+    def _do_action(self, handler):
+        from textadventure.battling.battle import Battle
+        battle = Battle([Team([self.entity]), Team([self.asked_entity])])
+        manager: BattleManager = handler.get_managers(BattleManager, 1)[0]
+        manager.add_battle(battle)
+        return self.can_do

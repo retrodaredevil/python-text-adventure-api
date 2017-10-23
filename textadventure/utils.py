@@ -19,8 +19,12 @@ Note that the list does not include an empty string ("") because that may mess u
 """
 
 CanDo = Tuple[bool, MessageConstant]
-"""[0] is a boolean representing if a player can do the action. If [0] is True, then [1] tells why it is True. If\
-False, then [1] is an error message that should be sent to the player. If [0] is True, then [1] is basically debug"""
+"""
+[0] is a boolean representing if a player can do the action. If [0] is True, then [1] tells why it is True. If\
+    False, then [1] is an error message that should be sent to the player. If [0] is True, then [1] is basically debug
+If a CanDo from a method was returned, then it is likely that if a player or entity object was passed, no message was\
+    sent to them. 
+"""
 
 
 def debug(values):
@@ -42,6 +46,34 @@ def error(values):
 
 def is_string_true(string_input: str):
     return "y" in string_input.lower()
+
+
+def join_list(to_join: List[str], use_brackets: bool = False, use_indexes: bool = False):
+    """
+    Creates a string like: Value1, Value2 and Value3. (Lists a list like we do in english)
+    @param to_join: The list of strings to join
+    @param use_brackets: By default, False, if set to true, instead of using the values of to_join, it will use a '{}'
+    @param use_indexes: By default, False, if set to True, the index will be shown before each element in the returned\
+        string
+    @return: The string that was created
+    """
+    r = ""
+    length = len(to_join)
+    for index, s in enumerate(to_join):
+        if index > 0:
+            if index == length - 1:
+                r += " and "
+            else:
+                r += ", "
+
+        if use_indexes:
+            r += "[{}] ".format(index)
+        if use_brackets:
+            r += "{}"
+        else:
+            r += s
+
+    return r
 
 
 T = TypeVar('T')

@@ -204,7 +204,10 @@ class Message:
     def __init__(self, text: str, message_type: MessageType = MessageType.TYPED, ending=DEFAULT_ENDING, before=" ",
                  wait_in_seconds=0, named_variables: List = [], wait_after=False):
         """
-
+        Creates a Message object. All you need a string to do so.
+        Note that it is recommended to use named_variables instead of the format method so that it can be easy to \
+            change the color of those variables in the future. Obviously, if changing the color wouldn't help for \
+            a cool effect, you can use the format method on the passed string
         @param message_type: The MessageType
         @param text: The text
         @param ending: the ending defaults to \\n
@@ -221,7 +224,7 @@ class Message:
         self.wait_in_seconds = wait_in_seconds
         self.named_variables: List = named_variables
         if (before is self.__class__.DEFAULT_ENDING and ending is not self.__class__.DEFAULT_ENDING
-            and len(ending) == 0) or len(text) == 0:  # if you read this if statement, it might make sense
+                and len(ending) == 0) or len(text) == 0:  # if you read this if statement, it might make sense
             before = ""  # makes sure that if we are changing the def ending, we don't get a space we don't want unless\
             # we do want it
         elif ending is self.__class__.DEFAULT_ENDING and ending in text:  # adds the before string before a new line

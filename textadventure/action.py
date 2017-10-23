@@ -18,6 +18,7 @@ class Action(ABC):
         """
         When overriden, this method should do whatever is wanted to matter what the state of the object is
         (Don't use the can_do field to alter what happens in this method)
+        Usually, self.can_do should be returned.
         @param handler: The handler object
         @return whether or not the action was done (Return self.can_do or if you need to change it, change it)
         """

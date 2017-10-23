@@ -68,6 +68,8 @@ class Battle:
         return None
 
     def broadcast(self, message: MessageConstant):
+        if message is None:
+            return
         for team in self.teams:
             for target in team.members:
                 target.send_message(message)

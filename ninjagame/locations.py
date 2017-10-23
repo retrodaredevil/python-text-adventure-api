@@ -475,7 +475,6 @@ class CenterSpiderWebForest(Location):
         events_object = player[EventsObject]
         if not events_object.has_been_in_center_spider_web_forest:
             events_object.has_been_in_center_spider_web_forest = True
-            # TODO 
 
     def listen(self, handler: Handler, player: Player):
         player.send_message("You hear nothing except for the occasional drop of water out of the fountain.")

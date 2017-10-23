@@ -14,7 +14,7 @@ def has_only(the_list: List[T], only_list: List[T]):
     """
     Makes sure that all the items in a list are equal to one of the items in only_list
     @param the_list: The list to check
-    @param only_list: The list of acceptable objects to make sure that every item in the list is one of these objects
+    @param only_list: The list of acceptable objects to make sure that every weapon in the list is one of these objects
     @return: True if all the items in the list are equal to only, Also True if there are no items in list.
     """
     for ele in the_list:
@@ -57,6 +57,8 @@ class Handler:
 
             for manager in self.managers:
                 manager.update(self)
+                #  except TypeError: don't forget the () when creating the Manager (call the constructor)
+                #  ^ That comment is there because in the Manager list, I added the class instead of creating the obj
 
     def __do_input(self, player: Player, inp: str):
         from textadventure.input import InputObject, InputHandleType

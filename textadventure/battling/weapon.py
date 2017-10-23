@@ -9,7 +9,7 @@ from textadventure.player import Player
 class Weapon(Item):
     """
     All weapons should be items because they are going to be in your inventory and making them items makes it easier\
-        to change data for the item. Ex: A Weapon could be your right fist, but if you use the command use right fist,\
+        to change data for the weapon. Ex: A Weapon could be your right fist, but if you use the command use right fist,\
         it would do something. That's why all Weapons will be items. Thanks for listening.
 
     A weapon can also be something like a potion. Basically, a weapon is just something that you use in a battle
@@ -21,7 +21,7 @@ class Weapon(Item):
     def __init__(self, name: str, move_option: Optional[MoveOption]):
         """
 
-        @param name: The name of the item
+        @param name: The name of the weapon
         @param move_option: The MoveOption object or None. I'm not sure why you'd inherit Weapon and make this None.
         """
         super().__init__(name, True)

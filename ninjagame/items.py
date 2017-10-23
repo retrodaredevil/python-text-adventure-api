@@ -1,6 +1,7 @@
 from enum import Enum, unique
 from typing import Tuple
 
+from textadventure.battling.choosing import MoveOption
 from textadventure.battling.weapon import Weapon
 from textadventure.handler import Handler
 from textadventure.items import Item
@@ -34,7 +35,8 @@ class SwordType(Enum):
 
 class Sword(Weapon):
     def __init__(self, sword_type: SwordType):
-        super().__init__("{} sword".format(sword_type.value[0]), None)  # TODO create a sword move option
+        from ninjagame.utils import SwordMoveOption
+        super().__init__("{} sword".format(sword_type.value[0]), SwordMoveOption(self, 1))
         self.sword_type = sword_type
 
     def see(self, handler: Handler, player: Player):

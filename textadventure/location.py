@@ -67,24 +67,24 @@ class Location(Holder, InputHandler, FiveSensesHandler):
 
     def on_take(self, handler: Handler, item: Item) -> None:
         """
-        By default, doesn't do anything. Is called after the item's change_holder is called and should not be called\
-            inside the item's change_holder function
-        You can use the item's holder to see it's new holder and since it was taken, it's previous holder is this loc
+        By default, doesn't do anything. Is called after the weapon's change_holder is called and should not be called\
+            inside the weapon's change_holder function
+        You can use the weapon's holder to see it's new holder and since it was taken, it's previous holder is this loc
         @param handler: The handler object
-        @param item: The item that was taken
+        @param item: The weapon that was taken
         @return: None
         """
         pass
 
     def on_place(self, handler: Handler, item: Item, player: Player) -> None:
         """
-        Just like on_take , it's called after item's change_holder and is not called by that method
-        The item's holder is already this location. The player is what placed it
+        Just like on_take , it's called after weapon's change_holder and is not called by that method
+        The weapon's holder is already this location. The player is what placed it
 
         Note instead of overriding (or listening) for this method, you can override the @see can_hold method if needed
         @param handler: The handler object
-        @param item: The item placed
-        @param player: The player who placed/dropped the item
+        @param item: The weapon placed
+        @param player: The player who placed/dropped the weapon
         @return: None
         """
         pass
@@ -111,10 +111,10 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         If overridden, it's recommended that you call the super method (this method)
         @param handler: The handler object
         @param player: The player object
-        @param item: The item that is being 'used'
-        @return: None because the this Location should choose how it wants to handle the using of this item
+        @param item: The weapon that is being 'used'
+        @return: None because the this Location should choose how it wants to handle the using of this weapon
         """
-        player.send_message("You can't use that item here.")
+        player.send_message("You can't use that weapon here.")
         # ONEDAY here, we will eventually handle simple things that all locations should be able to handle
 
     def send_welcome(self, player: Player):
@@ -134,7 +134,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         Should be called when the player's location is changed (this method doesn't set the players location)
         If for whatever reason, this method may change the player's location back to the previous (update if becomes t)
         When overriding, make sure that even if the player doesn't leave and this method gets called twice for whatever\
-            reason, it doesn't do something like give them a second item or make them face an enemy they already faced
+            reason, it doesn't do something like give them a second weapon or make them face an enemy they already faced
         @param handler:
         @param player: The player
         @param previous_location: the previous location or None if there is none or it couldn't be found

@@ -9,6 +9,7 @@ from ninjagame.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
 
 from ninjagame.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
     EntranceSpiderWebForest, CenterSpiderWebForest
+from textadventure.actions import EntityActionToEntityManager
 from textadventure.battling.managing import HostileEntityManager
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
     UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
@@ -20,7 +21,7 @@ from textadventure.playersavable import PlayerSavable
 from textadventure.saving import SaveCommandHandler, LoadCommandHandler
 
 """
-This file is an example ninjagame for my text adventure api using the ninjagame package
+This file is an example game for my text adventure api using the ninjagame package
 """
 
 
@@ -58,7 +59,7 @@ def setup():
 
     handler.entities.append(player)
     handler.input_handlers.append(SettingsHandler(player))
-    handler.managers.append(HostileEntityManager())
+    handler.managers.extend([HostileEntityManager(), EntityActionToEntityManager()])
 
     default_load(player, handler)
 

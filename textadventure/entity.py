@@ -71,6 +71,21 @@ class Health:
         self.current_health = current_health
         self.max_health = max_health
 
+    def chance_by(self, hp_change: int):
+        """
+        The recommended way to change the current_health
+        @param hp_change:
+        @return:
+        """
+        self.current_health += hp_change
+        self.check_range()
+
+    def check_range(self):
+        if self.current_health < 0:
+            self.current_health = 0
+        if self.current_health > self.max_health:
+            self.current_health = self.max_health
+
     def is_fainted(self):
         return self.current_health <= 0
 
@@ -103,8 +118,20 @@ class Entity(Living, Holder):
     #     """
     #     return True, "You can pass, a hostile entity might say otherwise, though."
 
-    def damage(self, damage):
-        raise Exception("damage method not implemented")
+    def can_do_action(self, handler, entity_action: 'EntityActionToEntity') -> CanDo:
+        """
+        This method should not be called outside of entity.py but may be overridden by any subclass of entity to \
+            listen for Actions that are trying to be executed on this entity hence why only EntityActionAgainstEntitys \
+            are passed
+        Note this will be called when try_action is called meaning that it will have been called after all the \
+            calls to on_action in each Manager registered in the handler class
+        @param handler: The Handler object
+        @param entity_action: The action that entity is requesting. asked_entity should be equal to self when called.
+        @return: A CanDo where if [0] is False, the message at [1] will be sent to entity_action.entity
+        """
+        # TODO add more documentation and state in docs whether or not overriding subclasses should cancel the Action\
+        #      or do more stuff that may be unwanted or have side effects
+        return True, "You have received the default reply from an Entity."
 
 
 class HostileEntity(Entity):  # abstract
@@ -161,8 +188,29 @@ class EntityAction(Action):  # abstract
         super().__init__()
         self.entity = entity
 
-    def try_action(self, handler) -> CanDo:
+    def try_action(self, handler):  # overridden
         can_do = super().try_action(handler)
         if not can_do[0]:
             self.entity.send_message(can_do[1])
         return can_do
+
+
+class EntityActionToEntity(EntityAction):  # abstract
+
+    def __init__(self, entity: Entity, asked_entity: Entity):
+        """
+        @param entity: The main entity causing this action to occur. (The entity that is asking/action on asked_entity
+        @param asked_entity: The entity that entity is asked, challenged, requested of, depending on the action
+        """
+        super().__init__(entity)
+        self.asked_entity = asked_entity
+
+    # def try_action(self, handler):  # overridden
+    # commented out because it would be a lot easier and more maintainable to create a class and inherit Manager
+    #     if not self.can_do[0]:
+    #         return super().try_action(handler)  # this is to avoid sending multiple messages.
+    #     can_do = self.asked_entity.can_do_action(handler, self)
+    #     if not can_do[0]:
+    #         self.entity.send_message(can_do[1])
+    #         return can_do  # returns it because we don't actually want to do the action if the asked_entity stopped it
+    #     return super().try_action(handler)  # the asked_entity didn't stop it so we'll let the superclass handle it

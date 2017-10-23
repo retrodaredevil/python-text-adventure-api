@@ -43,7 +43,7 @@ class Item(Savable, FiveSensesHandler):
     CANNOT_SMELL: CanDo = (False, "You can't smell this")
     CANNOT_TASTE: CanDo = (False, "You can't taste this")
     # CANNOT_USE: CanDo = (False, "You can't use this")
-    CANNOT_USE_DONT_HAVE: CanDo = (False, "You don't have this item")
+    CANNOT_USE_DONT_HAVE: CanDo = (False, "You don't have this weapon")
     CANNOT_TAKE: CanDo = (False, "You can't take this")
     CANNOT_TAKE_ON_PERSON: CanDo = (False, "You already have this")
     CANNOT_PUT: CanDo = (False, "You can't place this")
@@ -55,13 +55,13 @@ class Item(Savable, FiveSensesHandler):
 
     For all the can methods, they return a CanDo which is a Tuple[bool, str]
     For any can method, you should make sure that the player can reference this Item using can_reference
-    For calling any of the five senses methods, you should make sure the player is able to do that on this item
+    For calling any of the five senses methods, you should make sure the player is able to do that on this weapon
     """
 
     def __new__(cls, *args, **kwargs):
         """Needed for saving and so the non_serialized attribute actually works"""
         instance = object.__new__(cls)
-        for item in cls.non_serialized:  # item is a string
+        for item in cls.non_serialized:  # weapon is a string
             setattr(instance, item, None)
         return instance
 
@@ -92,7 +92,7 @@ class Item(Savable, FiveSensesHandler):
         @param previous_holder test
         """
         assert new_holder is not None, "Why would you change the holder to None?"
-        # change in future if needs to delete item.
+        # change in future if needs to delete weapon.
 
         self.holder = new_holder
         if previous_holder is not None and self in previous_holder.items:
@@ -169,7 +169,7 @@ class Item(Savable, FiveSensesHandler):
         By default does nothing. can_use should only return true if this has been overridden
         This method should be called by the Location class and from no where else
         @param handler: The handler object
-        @param player: The player using the item
-        @return: True if it was successful in using the item. If false, should have sent an error message already
+        @param player: The player using the weapon
+        @return: True if it was successful in using the weapon. If false, should have sent an error message already
         """
         pass

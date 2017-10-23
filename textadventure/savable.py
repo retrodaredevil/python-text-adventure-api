@@ -27,7 +27,7 @@ class Savable(ABC):
     Data in each instance/implementation should be player specific TODO edit comment
 
     If you are getting a KeyError, remember to override __new__ and set any fields that are in the non_serialized list.\
-        You can look in the Item in item.py class for an example
+        You can look in the Item in weapon.py class for an example
     """
 
     def __init__(self):
@@ -35,13 +35,13 @@ class Savable(ABC):
         self.non_serialized: List[str] = []
         """Appending to this list allows you to stop pickler from saving a field"""
 
-    # def __getattribute__(self, item):  # this is funny. I tried getting it to work with pickle. Don't try this
-    #     # print("requested {} from type: {}".format(item, type(self)))
-    #     if is_saving and item != "non_serialized" \
-    #             and item in self.non_serialized:  # if this throws an error. init hasn't been called
-    #         print("ignored: " + item)
+    # def __getattribute__(self, weapon):  # this is funny. I tried getting it to work with pickle. Don't try this
+    #     # print("requested {} from type: {}".format(weapon, type(self)))
+    #     if is_saving and weapon != "non_serialized" \
+    #             and weapon in self.non_serialized:  # if this throws an error. init hasn't been called
+    #         print("ignored: " + weapon)
     #         return None
-    #     return super().__getattribute__(item)
+    #     return super().__getattribute__(weapon)
 
     def __getstate__(self):
         # thanks https://stackoverflow.com/questions/6313421/can-i-mark-variables-as-transient-so-they-wont-be-pickled

@@ -78,7 +78,7 @@ class Player(Entity):
 
     def get_wallet(self):
         """
-        This method returns the Wallet item. It is here so there aren't any import errors whenever you want to use it.
+        This method returns the Wallet weapon. It is here so there aren't any import errors whenever you want to use it.
         @rtype Wallet
         @return: The wallet that's in the player's items or None if there is no Wallet
         """

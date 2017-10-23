@@ -19,7 +19,7 @@ def get_reference(player: Player, string_args: str) -> Optional[Item]:
     Note: Remember, this can return None.
     @param player: the player
     @param string_args: The arguments that the player entered
-    @return: The item
+    @return: The weapon
     """
     for item in player.location.items:
         if item.is_reference(string_args):
@@ -121,7 +121,7 @@ class SensesCommandHandler(LocationCommandHandler):
 
 class LookCommandHandler(SensesCommandHandler):
     command_names = ["look", "see", "lok", "find", "se", "ook"]  # yeah I know, magic strings deal with it
-    description = """Allows you to see your surroundings. Aliases: look, see, find\nUsage: look [item] """
+    description = """Allows you to see your surroundings. Aliases: look, see, find\nUsage: look [weapon] """
 
     def __init__(self, location: Location):
         super(LookCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
@@ -135,7 +135,7 @@ class LookCommandHandler(SensesCommandHandler):
 
 class ListenCommandHandler(SensesCommandHandler):
     command_names = ["listen", "hear", "escucha", "liste", "isten", "hea"]
-    description = """Allows you to listen to your surroundings. Aliases: listen, hear\nUsage: feel [item]"""
+    description = """Allows you to listen to your surroundings. Aliases: listen, hear\nUsage: feel [weapon]"""
 
     def __init__(self, location: Location):
         super(ListenCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
@@ -149,7 +149,7 @@ class ListenCommandHandler(SensesCommandHandler):
 
 class FeelCommandHandler(SensesCommandHandler):
     command_names = ["feel", "touch", "eel", "fee", "tou", "tuch", "toch"]
-    description = """Allows you to feel your surroundings. Aliases: look, touch\nUsage: feel [item]"""
+    description = """Allows you to feel your surroundings. Aliases: look, touch\nUsage: feel [weapon]"""
 
     def __init__(self, location: Location):
         super(FeelCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
@@ -163,7 +163,7 @@ class FeelCommandHandler(SensesCommandHandler):
 
 class SmellCommandHandler(SensesCommandHandler):
     command_names = ["smell", "nose", "smel", "mell", "nos", "smeel", "smee", "mel"]
-    description = """Allows you to smell your surroundings. Aliases: smell, nose\nUsage: feel [item]"""
+    description = """Allows you to smell your surroundings. Aliases: smell, nose\nUsage: feel [weapon]"""
 
     def __init__(self, location: Location):
         super(SmellCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
@@ -177,7 +177,7 @@ class SmellCommandHandler(SensesCommandHandler):
 
 class TasteCommandHandler(SensesCommandHandler):
     command_names = ["taste", "tongue", "aste", "tast"]
-    description = """Allows you to taste. Aliases: taste, tongue\nUsage: feel [item]"""
+    description = """Allows you to taste. Aliases: taste, tongue\nUsage: feel [weapon]"""
 
     def __init__(self, location: Location):
         super(TasteCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
@@ -200,7 +200,7 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
         first_arg = player_input.get_arg(0)
-        if len(first_arg) == 0:
+        if not first_arg:
             self.send_help(player)
             return InputHandleType.HANDLED
         rest = " ".join(first_arg)
@@ -240,7 +240,7 @@ class DirectionInputHandler(InputHandler):
                 return InputHandleType.NOT_HANDLED
             return GoCommandHandler.player_go(handler, player, player_input.get_command())
 
-        if len(player_input.get_arg(0)) == 0:  # make sure the length is always 1 (there should be no args cuz command)
+        if not player_input.get_arg(0):  # make sure the length is always 1 (there should be no args cuz command)
             command_name = player_input.get_command()
 
             if get_point(handler, player, command_name) is not None:  # we'll let the GoCommandHandler do what it wants
@@ -251,14 +251,14 @@ class DirectionInputHandler(InputHandler):
 class TakeCommandHandler(SimpleCommandHandler):
     command_names = ["take", "grab", "tak", "steal", "pick", "pik", "pickup"]
     description = "Allows you to take something from a location or someone. Aliases: take, grab, pickup\n" \
-                  "Usage: take <item name>"
+                  "Usage: take <weapon name>"
 
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         first_arg = player_input.get_arg(0)
-        if len(first_arg) == 0:
+        if not first_arg:
             self.send_help(player)
             return InputHandleType.HANDLED
         item = get_reference(player, " ".join(first_arg))
@@ -284,14 +284,14 @@ class TakeCommandHandler(SimpleCommandHandler):
 class PlaceCommandHandler(SimpleCommandHandler):
     command_names = ["place", "put", "plac", "drop"]
     description = "Allows you to place something in your current location. Aliases: place, put, drop\n" \
-                  "Usage: place <item name>"
+                  "Usage: place <weapon name>"
 
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         first_arg = player_input.get_arg(0)
-        if len(first_arg) == 0:
+        if not first_arg:
             self.send_help(player)
             return InputHandleType.HANDLED
         item = get_reference(player, " ".join(first_arg))
@@ -327,7 +327,7 @@ class YellCommandHandler(SimpleCommandHandler):
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         first_arg = player_input.get_arg(0, False)
-        if len(first_arg) == 0:
+        if not first_arg:
             self.send_help(player)
             return InputHandleType.HANDLED
         if self.can_yell(player):
@@ -339,15 +339,15 @@ class YellCommandHandler(SimpleCommandHandler):
 
 class UseCommandHandler(SimpleCommandHandler):
     command_names = ["use"]
-    description = "Allows you to use an item. Aliases: Use\n" \
-                  "Usage: use <item name>"
+    description = "Allows you to use an weapon. Aliases: Use\n" \
+                  "Usage: use <weapon name>"
 
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
         first_arg = player_input.get_arg(0)
-        if len(first_arg) == 0:
+        if not first_arg:
             self.send_help(player)
             return InputHandleType.HANDLED
         item = get_reference(player, " ".join(first_arg))
@@ -390,11 +390,13 @@ class InventoryCommandHandler(SimpleCommandHandler):
             player.send_message("You don't have anything in your inventory")
         elif amount == 1:
             player.send_message(Message("You have {}.", named_variables=player.items))
-        names = []
-        for i in range(0, amount):
-            names.append("{}")
+        else:
+            names = []
+            for i in range(0, amount):
+                names.append("{}")
 
-        player.send_message(Message("You  have these items: {}".format(", ".join(names)), named_variables=player.items))
+            player.send_message(Message("You  have these items: {}".format(", ".join(names)),
+                                        named_variables=player.items))
 
         return InputHandleType.HANDLED
 
