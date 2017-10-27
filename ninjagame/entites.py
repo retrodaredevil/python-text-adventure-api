@@ -1,5 +1,5 @@
 from ninjagame.data import EventsObject
-from textadventure.entity import *
+from textadventure.entity import Living, CommunityHostileEntity
 from textadventure.player import Player
 from textadventure.savable import Savable
 
@@ -51,7 +51,7 @@ class NinjaDude(Living):
                                   "But really, this is an actual error.")
 
 
-class NinjaEntity(SimpleHostileEntity):
+class NinjaEntity(CommunityHostileEntity):
     def __init__(self, name, health, location):
         super().__init__(name, health, location, [Player])
 

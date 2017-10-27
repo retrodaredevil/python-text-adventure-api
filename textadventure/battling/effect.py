@@ -1,10 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, TYPE_CHECKING, Union
 
 from textadventure.battling.choosing import MoveOption
 from textadventure.battling.move import Move, Target, Turn
-from textadventure.battling.outcome import MoveOutcome
+from textadventure.battling.outcome import MoveOutcome, OutcomePart
 from textadventure.utils import CanDo
+
+
+if TYPE_CHECKING:
+    from textadventure.battling.actions import DamageAction
 
 
 """
@@ -52,37 +56,37 @@ class Effect(ABC):
         pass
 
     @abstractmethod
-    def before_turn(self, turn: Turn, move: Move):
+    def before_turn(self, turn: Turn, move: Move) -> List[OutcomePart]:
         """
         Called after can_move and can_choose_targets before the all of the moves have happened
         @param turn: the turn that is ongoing
         @param move: The move that is about to be performed
-        @return: None
+        @return: A List of OutcomeParts which are a list of things that this method has done
         """
         pass
 
     @abstractmethod
-    def after_move(self, turn: Turn, move: Move, outcome: MoveOutcome):
+    def after_move(self, turn: Turn, move: Move, outcome: MoveOutcome) -> List[OutcomePart]:
         """
         Called right after the move has happened.
         With the MoveOutcome object, if you would like to (and you probably should) you can add to the parts when\
             you act on something
         @param turn: The turn that will soon finish after every other Target performs their move
         @param move: The move that was just performed by the user
-        @param outcome: The outcome of the move represented by a MoveOutcome object. Feel free to do something and add \
-                        outcome parts
-        @return: None
+        @param outcome: The outcome of the move represented by a MoveOutcome object. You should not append to parts but\
+                            instead return the list of things that this method has done
+        @return: A list of OutcomeParts which are the things that this method has done
         """
         pass
 
     @abstractmethod
-    def after_turn(self, turn: Turn, move: Move):
+    def after_turn(self, turn: Turn, move: Move) -> List[OutcomePart]:
         """
         Called after all the moves have happened
         The main method that should be where the main code to do something/affect the user
         @param turn: The turn that is about to be over
         @param move: The move that the user performed
-        @return: None
+        @return: A List of OutcomeParts which are a list of things that this method has done
         """
         pass
 
@@ -93,5 +97,16 @@ class Effect(ABC):
         The next turn is about to be created, we just need to know if this effect should stay with the user
         @param previous_turn: The turn that has just finished.
         @return: True if the effect should stay on the user, False if the effect should be removed
+        """
+        pass
+
+    @abstractmethod
+    def on_damage(self, damage_action: 'DamageAction') -> List[OutcomePart]:
+        """
+        Is called when a DamageAction event happens only if damage_action.damage.damager or \
+            damage_action.damage.damager is the same as self.user.
+        Note: You should check to see if damage_action.damage.damager is equal to self.
+        @param damage_action: The DamageAction object which has all the needed data to determine what has happened
+        @return: A List of OutcomeParts which will then be appended to the outcome for you
         """
         pass

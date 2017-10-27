@@ -1,9 +1,10 @@
 from typing import List, Optional
 
 from ninjagame.data import EventsObject
-from ninjagame.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend
+from ninjagame.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend, NinjaEntity
 
 from ninjagame.items import Sword, SwordType
+from textadventure.entity import Health
 from textadventure.handler import Handler
 from textadventure.input import InputHandler
 from textadventure.input import InputObject, InputHandle, InputHandleType
@@ -106,7 +107,7 @@ class Entrance(Location):  # players should only be in this location when starti
                                        "An interesting area that has a large door that goes into the trail.",
                                        Point(0, 0))
 
-    def on_enter(self, player, previous_location: 'Location', handler: Handler):
+    def on_enter(self, player, previous_location: Optional[Location], handler: Handler):
         if previous_location is None:
             player.send_message("Welcome to the entrance to The Trail.")
             player.send_wait(0.3)
@@ -119,7 +120,7 @@ class Entrance(Location):  # players should only be in this location when starti
         def handle_function(already_handled: List[InputHandleType]):
             if not self._should_handle_input(already_handled):
                 return InputHandleType.NOT_HANDLED
-
+            # if ["hi", "ho", "he"] any/all/only 1 in "hello there how are you"
             if "n" in player_input.string_input:
                 player.send_message("What? Are you sure?")
             else:
@@ -169,7 +170,7 @@ class InsideEntrance(Location):
                                              "There are double doors and lots of trees",
                                              Point(0, 1))
 
-    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
+    def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
         player.send_message(
             "You now see a very long trail ahead of you. You see forests on both sides and double doors behind you.")
         player.send_line()
@@ -230,7 +231,7 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
                          "There just enough light peeking through the trees to see.",
                          Point(1, 1))
 
-    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
+    def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
         self.send_welcome(player)
         if not player[EventsObject].been_introduced_to_furry:
             player.send_message("You hear screaming.")
@@ -319,7 +320,7 @@ class WestInsideEntrance(Location):  # introduce Laura
                          "Lots of trees around with the only exit going back to the double doors.",
                          Point(-1, 1))
 
-    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
+    def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
         self.send_welcome(player)
 
     def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player):
@@ -395,7 +396,7 @@ class EntranceSpiderWebForest(Location):
                          "There are lots of spider webs around. No spiders though.",
                          Point(0, 2))
 
-    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
+    def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
         self.send_welcome(player)
         if not player[EventsObject].been_introduced_to_furry:
             player.send_message("You hear your friend off in the distance screaming. "
@@ -470,7 +471,7 @@ class CenterSpiderWebForest(Location):
         player.send_message(self.description)
         player.send_line()
 
-    def on_enter(self, player: Player, previous_location: 'Location', handler: Handler):
+    def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
         self.send_welcome(player)
         events_object = player[EventsObject]
         if not events_object.has_been_in_center_spider_web_forest:
@@ -494,7 +495,7 @@ class CenterSpiderWebForest(Location):
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         return None
 
-    def go_to_other_location(self, handler: Handler, new_location, direction: 'Point', player: Player):
+    def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player):
         if new_location is None:
             return CANT_MOVE_DIRECTION
 
@@ -524,14 +525,62 @@ class CenterSpiderWebForest(Location):
 
 class EastCenterSpiderWebForest(Location):
 
-    def __init__(self):
+    def __init__(self, handler: Handler):
         super().__init__("East of the Center of the Spider Web Forest",
-                         "A nice big field with trees all around. You can see the exit to the fountain.",
+                         "A nice big field with trees all around. You can see the path to the fountain to the west.",
                          Point(1, 3))
+        ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self)
+        sword = Sword(SwordType.WOODEN)
+        sword.change_holder(None, ninja)
+        handler.entities.append(ninja)
+
+        self.ninja = ninja
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):
         return None
 
     def listen(self, handler: Handler, player: Player):
-        pass  # TODO
+        player.send_message(DONT_HEAR)
 
+    def taste(self, handler: Handler, player: Player):
+        player.send_message(DONT_TASTE)
+
+    def feel(self, handler: Handler, player: Player):
+        if player not in self.ninja.entities_lost_to:
+            player.send_message(Message("You feel scared that you have to face {}.", named_variables=[self.ninja]))
+        else:
+            player.send_message(Message("You feel glad that you beat {}.", named_variables=[self.ninja]))
+
+    def smell(self, handler: Handler, player: Player):
+        player.send_message(DONT_SMELL)
+
+    def see(self, handler: Handler, player: Player):
+        if player not in self.ninja.entities_lost_to:
+            player.send_message("You see {} waiting to fight you. There's no escaping now.")
+        else:
+            player.send_message("You see the path to the fountain to the west.")
+
+    def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player):
+        if new_location is None:
+            return CANT_MOVE_DIRECTION
+
+        if direction == EAST:
+            assert False, "Shouldn't happen yet. Remove assert if ready."
+            pass  # to fo stuff here
+        elif direction == WEST:
+            pass
+        elif direction in DIRECTIONS:
+            return CANT_MOVE_DIRECTION
+        else:
+            return CANT_JUMP_LOCATION
+
+        action = GoAction(player, player.location, new_location, create_leave_message(self))
+        action.can_do = CAN_GO_TO_LOCATION
+        handler.do_action(action)
+        return action.try_action(handler)
+    
+    def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
+        self.send_welcome(player)
+        if player not in self.ninja.entities_lost_to:
+            player.send_message(Message("It looks like you are going to have to fight {}.",
+                                        named_variables=[self.ninja]))

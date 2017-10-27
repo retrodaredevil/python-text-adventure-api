@@ -5,11 +5,12 @@ from typing import List, Dict, Union, Optional
 from textadventure.battling.outcome import MoveOutcome, OutcomePart  # needed
 from textadventure.battling.team import Team
 from textadventure.entity import Entity
-from textadventure.utils import CanDo, MessageConstant
+from textadventure.utils import CanDo
 
 if typing.TYPE_CHECKING:  # if removed, will cause type errors
     from textadventure.battling.choosing import MoveOption, MoveChooser
     from textadventure.battling.battle import Battle
+    from textadventure.handler import Handler
 
 
 class Target:
@@ -62,12 +63,10 @@ class Target:
         @return: A list of MoveOptions that, by default, is based on the items that the Target currently has
         """
         from textadventure.battling.weapon import Weapon
-        r = []
+        r: List['MoveOption'] = []
         for item in self.entity.items:
             if isinstance(item, Weapon):
-                move_option = item.move_option
-                if move_option is not None:
-                    r.append(move_option)
+                r.extend(item.move_options)
 
         return r
 
@@ -111,18 +110,16 @@ class Turn:
         """
         self.is_started = True
 
-    def update(self, battle: 'Battle'):  # should be called by the Battle class
+    def update(self, battle: 'Battle', handler: 'Handler'):  # should be called by the Battle class
         """
         Called by the Battle class every time its update method is called.
         Calling update is how the turn actually works (There is no method to actually DO the turn) (This method will \
             call private methods _do_turn and _on_end
-        @param battle:
-        @return:
         """
 
         do_turn = True  # set to False if we can't do the turn because not everyone has already chosen their moves
         for target in self.targets:
-            move = self.chosen_moves[target]
+            move = self.chosen_moves.get(target, None)
             if move is None:
                 do_turn = False
                 move = target.move_chooser.get_move(battle, target, self)  # note that this is NOT a MoveOption
@@ -131,10 +128,10 @@ class Turn:
                     self.chosen_moves[target] = move
 
         if do_turn:
-            self._do_turn(battle)
+            self._do_turn(battle, handler)
             self._on_end(battle)
 
-    def _do_turn(self, battle: 'Battle'):
+    def _do_turn(self, battle: 'Battle', handler: 'Handler'):
         self.is_doing = True  # set to True because turn is actually going on now
 
         moves: List[Move] = []
@@ -148,6 +145,7 @@ class Turn:
             for effect in move.user.effects:
                 # effect.can_choose_targets let the MoveChooser handle this (We don't even have the MoveOption anyway)
                 effect.before_turn(self, move)  # call before turn (And before all moves)
+
         for move in moves:  # now we will call do_move
 
             can_move: CanDo = (True, "By default, you can move. An effect might say otherwise")
@@ -157,19 +155,20 @@ class Turn:
                     break  # another effect might say you can use it, so we want to make sure this one is 'heard'
 
             if can_move[0]:
-                result = move.do_move(self)  # actually do the move
+                result = move.do_move(battle, handler)  # actually do the move
                 outcome = MoveOutcome(can_move)
                 outcome.parts.extend(result)
             else:
                 outcome = MoveOutcome(can_move)
             for effect in move.user.effects:
-                effect.after_move(self, move, outcome)  # call after move
+                outcome.parts.extend(effect.after_move(self, move, outcome))  # call after move
             # calling this after the loop used to call Effect's after_move because after_move could have done something
             # if we needed to, here is where an Action would go related to the move
-            outcome.broadcast_messages(battle)  # TODO somewhere in here we need to create an action
+            outcome.broadcast(battle)  # TODO somewhere in here we need to create an action
+
         for move in moves:  # now we will call after_turn
             for effect in move.user.effects:
-                effect.after_turn(self, move)
+                MoveOutcome.broadcast_messages(effect.after_turn(self, move), battle)
 
         # now we are done with calling effects and all the moves have been invoked
         # lets let _on_end handle the ending of a turn. (We don't call it because the method calling this will)
@@ -180,6 +179,8 @@ class Turn:
                 stay = effect.should_stay(self)  # this turn is now pretty much the previous turn
                 if not stay:
                     target.effects.remove(effect)
+
+            target.move_chooser.reset_option()
 
         self.is_done = True
 
@@ -197,13 +198,16 @@ class Move(ABC):
         self.user = user
         self.targets = targets
 
+    def __str__(self):
+        return self.name
+
     @abstractmethod
-    def do_move(self, turn: Turn) -> List[OutcomePart]:
+    def do_move(self, battle: 'Battle', handler: 'Handler') -> List[OutcomePart]:
         """
         Called when the move should be executed
         Note the order that the returned List at [0] matters because of the order the outcomes will be displayed
-        @param turn: The current turn that is ongoing and could possibly finish after this method is called (if this \
-                      is the last move)
+        @param handler:
+        @param battle: The battle that this move is being used in where current_turn is the current turn that is ongoing
         @return: A list of OutcomeParts (things that this method did)
         """
         pass

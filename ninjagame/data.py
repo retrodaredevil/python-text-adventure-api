@@ -9,7 +9,11 @@ from textadventure.savable import Savable
 class EventsObject(Savable):
     """
     An class that holds most of the data for the player but not all data
-    Basically holds a bunch of one way flags
+    Basically holds a bunch of one way flags.
+    This class is used as per player data meaning that the values in this class may determine what a certain player\
+        can or can't do. Just because one player can do something doesn't mean another can.
+    Obviously, if you are making your own game, you wouldn't use this class, you would use a similar one to suit your \
+        needs
     """
 
     def __init__(self):

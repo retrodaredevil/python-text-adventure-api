@@ -1,7 +1,7 @@
 from typing import List
 
 from ninjagame.items import Sword
-from ninjagame.moves import SwordMove
+from ninjagame.moves import SwordMove, SwordMoveType
 from textadventure.battling.choosing import MoveOption, TargetingOption, Targetability
 from textadventure.battling.move import Target
 from textadventure.battling.weapon import Weapon
@@ -20,7 +20,7 @@ class SimpleMoveOption(MoveOption):
         self._targeting_option = targeting_option
 
     def can_use_move(self, user: Target):
-        return True
+        return True, "SimpleMoveOption won't stop you from using this move."
 
     def get_targeting_option(self, user: Target):
         return self._targeting_option
@@ -49,10 +49,14 @@ class WeaponMoveOption(SimpleMoveOption):  # abstract
 
 
 class SwordMoveOption(WeaponMoveOption):
-    def __init__(self, sword: Sword, number_of_targets: int):
+    def __init__(self, sword: Sword, move_type: SwordMoveType, number_of_targets: int):
         super().__init__(sword, TargetingOption(Targetability.NOT_ABLE, Targetability.NOT_RECOMMENDED,
                                                 Targetability.RECOMMENDED, number_of_targets))
         self.weapon = sword
+        self.move_type = move_type
+
+    def __str__(self):
+        return str(self.weapon) + "'s " + self.move_type.value
 
     def create_move(self, user: Target, targets: List[Target]):
-        return SwordMove(user, targets, self.weapon)
+        return SwordMove(user, targets, self.weapon, self.move_type)

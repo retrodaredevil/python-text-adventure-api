@@ -15,12 +15,24 @@ class Team:
         @param members: The list of entities on this team (Can have any number of members)
         @param name: The name of the team. If None, it will become: Name1, Name2, Name3 and Name4
         """
+        self.members = members
         length = len(self.members)
         assert length > 0, "The members of a team cannot be 0."
-        self.members = members
+        
         if name is None:  # basically a default name
             name = join_list(list(map(str, self.members)))
         self.name = name
+
+    def is_dead(self):
+        """
+        <insert meme about being dead here>
+        @return: Just a boolean representing if everyone on the team is dead. If one person is alive, returns True
+        """
+        for member in self.members:
+            if not member.health.is_fainted():
+                return False
+
+        return True
 
     def __str__(self):
         return self.name

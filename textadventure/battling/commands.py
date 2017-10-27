@@ -79,8 +79,8 @@ class AttackCommandHandler(SimpleCommandHandler):
     @staticmethod
     def send_options(player, user):
         options = user.get_move_options()
-        rep = join_list(list(map(str, options)), use_brackets=True, use_indexes=True)
-        player.send_message(Message("Options: {}".format(rep), named_variables=[options]))
+        rep = join_list([str(option) for option in options], use_brackets=True, use_indexes=True)
+        player.send_message(Message("Options: {}".format(rep), named_variables=options))
         chooser: SetMoveChooser = user.move_chooser
         if chooser.chosen_move is not None:
             player.send_message(Message("You have already chosen: {}", named_variables=[chooser.chosen_move]))
@@ -97,7 +97,8 @@ class AttackCommandHandler(SimpleCommandHandler):
         chooser: SetMoveChooser = user.move_chooser
 
         if chosen_targets is None:  # lets automatically create the list for the player.
-            chosen_targets = option.get_targeting_option().get_recommended_targets(user, battle.teams)
+            chosen_targets = option.get_targeting_option(user).get_recommended_targets(battle.current_turn, user,
+                                                                                       battle.teams)
 
         was_successful = chooser.set_option(user, option, chosen_targets)
         if not was_successful[0]:

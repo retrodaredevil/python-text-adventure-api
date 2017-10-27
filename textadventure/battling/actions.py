@@ -1,4 +1,5 @@
 import typing
+from typing import Union, List, Any
 
 from textadventure.action import Action
 from textadventure.battling.managing import BattleManager
@@ -7,6 +8,9 @@ from textadventure.entity import EntityActionToEntity, Entity
 
 if typing.TYPE_CHECKING:
     from textadventure.battling.battle import Battle
+    from textadventure.battling.damage import Damage
+    from textadventure.battling.move import Move, Target
+    from textadventure.battling.effect import Effect
 
 
 """
@@ -36,4 +40,31 @@ class EntityChallengeAction(EntityActionToEntity):
         battle = Battle([Team([self.entity]), Team([self.asked_entity])])
         manager: BattleManager = handler.get_managers(BattleManager, 1)[0]
         manager.add_battle(battle)
+        battle.start(handler)
         return self.can_do
+
+
+class DamageAction(Action):  # TODO create a manager where Effects can handle this Action without creating their own M
+    def __init__(self, cause_object: Union['Move', 'Effect', Any], damage: 'Damage', battle: 'Battle'):
+        """
+        @param cause_object: The object that contains the method that created this. (Almost always a Move or Effect)
+        @param damage:
+        """
+        from textadventure.battling.outcome import OutcomePart
+        from textadventure.battling.move import Move
+        from textadventure.battling.effect import Effect
+        super().__init__()
+        self.cause_object: Union['Move', 'Effect'] = cause_object
+        """The object that contains the method that created this. Depending on the implementation or the code you \
+        created, this could be None"""
+        self.damage = damage
+        assert damage is not None
+        self.battle = battle
+
+        self.outcome_parts: List[OutcomePart] = []
+        """The list of outcome parts that will be appended to when _do_action is called. If a Manager changes \
+        something in self.damage, they may want to append an OutcomePart so people know what happened."""
+
+    def _do_action(self, handler):
+        self.outcome_parts.append(self.damage.damage(self.battle))  # append a single OutcomePart
+

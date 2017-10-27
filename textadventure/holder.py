@@ -10,6 +10,7 @@ class Holder:  # kind of like an interface
         super().__init__()  # for multiple inheritance
         from textadventure.item import Item
         self.items: List[Item] = []
+        """Should almost never be appended to directly. You should use the item's change_holder method"""
 
     def can_hold(self, item):
         """

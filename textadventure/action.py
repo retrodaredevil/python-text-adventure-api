@@ -16,7 +16,7 @@ class Action(ABC):
     @abstractmethod
     def _do_action(self, handler) -> CanDo:
         """
-        When overriden, this method should do whatever is wanted to matter what the state of the object is
+        When overridden, this method should do whatever is wanted to matter what the state of the object is
         (Don't use the can_do field to alter what happens in this method)
         Usually, self.can_do should be returned.
         @param handler: The handler object
@@ -27,7 +27,7 @@ class Action(ABC):
     def try_action(self, handler) -> CanDo:
         """
         Should be called after calling handlers do_action. This will make sure that if this Action was cancelled, it\
-            won't be called
+            won't be called (So you don't have to check can_do manually
         @param handler: The handler object to be passed to _do_action
         @return: Whether or not the action was successful
         """

@@ -211,8 +211,12 @@ class Location(Holder, InputHandler, FiveSensesHandler):
 
 class GoAction(EntityAction):
     def __init__(self, entity: Entity, previous_location: Location, new_location: Location,
-                 leave_message: MessageConstant):
-        super().__init__(entity)
+                 leave_message: MessageConstant, send_on_can_not: bool = False):
+        """
+        @param send_on_can_not: The value that is passed to the EntityAction init and now, instead of True, by default\
+                            is False
+        """
+        super().__init__(entity, send_on_can_not=send_on_can_not)
         self.previous_location = previous_location
         self.new_location = new_location
         self.leave_message = leave_message

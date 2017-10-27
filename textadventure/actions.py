@@ -10,6 +10,9 @@ The defined classes, usually shouldn't be referenced in the code and if they are
 """
 
 
+# future self: I think this file was supposed to have subclasses of Action but I put EntityActionToEntity in entity.py
+
+
 class EntityActionToEntityManager(Manager):
     def __init__(self):
         pass  # calling super().__init__() raises TypeError

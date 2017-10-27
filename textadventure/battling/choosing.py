@@ -39,13 +39,15 @@ class TargetingOption:
         self.enemies = enemies
         self.total_number = total_number
 
-    def get_recommended_targets(self, user: Target, teams: List[Team]) -> List[Target]:
+    def get_recommended_targets(self, turn: Turn, user: Target, teams: List[Team]) -> List[Target]:
         # importing Team could cause import errors later. Maybe not though
-        r = []
+        r: List[Target] = []
         for team in teams:
-            for target in team.members:
+            for entity in team.members:
                 if len(r) >= self.total_number:
                     break  # we can't have more than the total number of allowed targets
+                target = turn.get_target(entity)
+                assert target is not None
                 recommended = Targetability.RECOMMENDED  # defining a constant value to make if readable
                 if (target == user and self.user == recommended) or \
                         (team == user.team and target != user and self.other_teammates == recommended) or \
@@ -129,6 +131,14 @@ class MoveChooser(ABC):
         """
         pass
 
+    @abstractmethod
+    def reset_option(self):
+        """
+        Called once the turn is over and it if this object has state that may affect the outcome of get_move, the \
+            implementation of this should probably reset that.
+        """
+        pass
+
 
 class RandomMoveChooser(MoveChooser):
     def __init__(self, entity: Entity):
@@ -136,9 +146,9 @@ class RandomMoveChooser(MoveChooser):
 
     @staticmethod
     def __try_choose(battle, user: Target, option: MoveOption) -> Optional[Move]:
-        if not option.can_use_move(user):
+        if not option.can_use_move(user)[0]:
             return None
-        targets = option.get_targeting_option(user).get_recommended_targets(user, battle.teams)
+        targets = option.get_targeting_option(user).get_recommended_targets(battle.current_turn, user, battle.teams)
         can_choose = option.can_choose_targets(user, targets)
         if not can_choose:
             return None
@@ -159,6 +169,9 @@ class RandomMoveChooser(MoveChooser):
             move = self.__try_choose(battle, user, random.choice(options))
 
         return move
+
+    def reset_option(self):
+        pass
 
 
 class SetMoveChooser(MoveChooser):
@@ -185,7 +198,8 @@ class SetMoveChooser(MoveChooser):
         can_use = option.can_use_move(user)
         if not can_use[0]:
             return can_use
-        can_target = option.can_choose_targets(targets)
+
+        can_target = option.can_choose_targets(user, targets)
         if not can_target[0]:
             return can_target
 
@@ -198,3 +212,6 @@ class SetMoveChooser(MoveChooser):
 
     def get_move(self, battle, user: Target, turn: Turn):
         return self.chosen_move
+
+    def reset_option(self):
+        self.chosen_move = None

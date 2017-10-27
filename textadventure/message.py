@@ -1,9 +1,12 @@
 import sys
 import time
+import warnings
 from abc import ABC, abstractmethod
 from enum import Enum
 from threading import Thread
 from typing import List
+
+from textadventure.utils import join_list
 
 
 class PlayerInput(ABC):
@@ -82,8 +85,22 @@ class StreamOutput(PlayerOutput, Thread):  # extending thread so we can let mess
 
                     names: List[str] = []
                     for named in message.named_variables:
-                        names.append(str(named))  # named could be a string or something that has an __str__ method
-                    to_print = to_print.format(*names)  # tuple is needed or it ends up ['Bob']
+                        if isinstance(named, List):
+                            names.append(join_list(list(map(str, named))))
+                            # if you're wonder what the heck the above thing does, don't worry about it. But since you\
+                            # asked, list(map(str, named)) transforms the list, named, into a list of strings, then\
+                            # it calls join_list which there is some excellent documentation on that elsewhere. Good day
+                        else:
+                            names.append(str(named))  # named could be a string or something that has an __str__ method
+
+                    try:
+                        to_print = to_print.format(*names)  # tuple is needed or it ends up ['Bob']
+                    except IndexError:
+                        warnings.warn("Couldn't format to_print: '{}' with names: len:{}, values:{}.".format(
+                            to_print, len(names), names))
+                        warnings.warn("named_variables: len: {}, values: {}".format(len(message.named_variables),
+                                                                                    message.named_variables))
+                        continue
                     is_immediate = False  # only used with MessageType.TYPED used for |text| blocks to print immediately
                     # ^ not affected by Message properties, read code in for loop to understand
                     for c in to_print:
@@ -202,12 +219,15 @@ class Message:
     DEFAULT_BEFORE = " "
 
     def __init__(self, text: str, message_type: MessageType = MessageType.TYPED, ending=DEFAULT_ENDING, before=" ",
-                 wait_in_seconds=0, named_variables: List = [], wait_after=False):
+                 wait_in_seconds=0, named_variables: List = None, wait_after=False):
         """
         Creates a Message object. All you need a string to do so.
         Note that it is recommended to use named_variables instead of the format method so that it can be easy to \
             change the color of those variables in the future. Obviously, if changing the color wouldn't help for \
             a cool effect, you can use the format method on the passed string
+        If an element in the list named_variables happens to be another list, it should transform each element into a \
+            string and call join_list to create a nice string. That list inside the list will only replace ONE {} using\
+            join_list
         @param message_type: The MessageType
         @param text: The text
         @param ending: the ending defaults to \\n
@@ -222,6 +242,8 @@ class Message:
         self.ending: str = ending
         self.wait_after = wait_after
         self.wait_in_seconds = wait_in_seconds
+        if named_variables is None:
+            named_variables = []
         self.named_variables: List = named_variables
         if (before is self.__class__.DEFAULT_ENDING and ending is not self.__class__.DEFAULT_ENDING
                 and len(ending) == 0) or len(text) == 0:  # if you read this if statement, it might make sense

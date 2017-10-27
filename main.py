@@ -8,9 +8,10 @@ from ninjagame.data import EventsObject
 from ninjagame.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
 
 from ninjagame.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
-    EntranceSpiderWebForest, CenterSpiderWebForest
+    EntranceSpiderWebForest, CenterSpiderWebForest, EastCenterSpiderWebForest
 from textadventure.actions import EntityActionToEntityManager
-from textadventure.battling.managing import HostileEntityManager
+from textadventure.battling.commands import AttackCommandHandler
+from textadventure.battling.managing import HostileEntityManager, BattleManager
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
     UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
     HelpCommandHandler
@@ -49,17 +50,17 @@ def setup():
     # player[PlayerFriend] = PlayerFriend("Friend")
 
     handler.locations.extend([Entrance(), InsideEntrance(), EastInsideEntrance(), WestInsideEntrance(),
-                              EntranceSpiderWebForest(), CenterSpiderWebForest()])
+                              EntranceSpiderWebForest(), CenterSpiderWebForest(), EastCenterSpiderWebForest(handler)])
     handler.input_handlers.extend([GoCommandHandler(), TakeCommandHandler(), PlaceCommandHandler(),
                                    YellCommandHandler(), UseCommandHandler(), SaveCommandHandler(),
                                    LoadCommandHandler(), NameCommandHandler(), InventoryCommandHandler(),
-                                   LocateCommandHandler(), HelpCommandHandler()])
+                                   LocateCommandHandler(), HelpCommandHandler(), AttackCommandHandler()])
     handler.input_handlers.extend([DirectionInputHandler()])
     handler.living_things.extend([OtherPerson(), LauraPerson(), NinjaDude()])
 
     handler.entities.append(player)
     handler.input_handlers.append(SettingsHandler(player))
-    handler.managers.extend([HostileEntityManager(), EntityActionToEntityManager()])
+    handler.managers.extend([HostileEntityManager(), EntityActionToEntityManager(), BattleManager()])
 
     default_load(player, handler)
 

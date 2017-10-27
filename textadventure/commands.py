@@ -46,7 +46,7 @@ def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Po
     add: Point = None
     if "nor" in string_args:
         add = NORTH
-    elif "eas" in string_args or "ast" in string_args:  # can't put est here because of west
+    elif "eas" in string_args:  # or "ast" in string_args can't cuz taste <:  # can't put est here because of west
         add = EAST
     elif "sou" in string_args:
         add = SOUTH

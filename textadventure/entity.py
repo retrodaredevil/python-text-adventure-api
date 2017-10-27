@@ -71,7 +71,10 @@ class Health:
         self.current_health = current_health
         self.max_health = max_health
 
-    def chance_by(self, hp_change: int):
+    def __str__(self):
+        return "{}/{}".format(self.current_health, self.max_health)
+
+    def change_by(self, hp_change: int):
         """
         The recommended way to change the current_health
         @param hp_change:
@@ -135,6 +138,9 @@ class Entity(Living, Holder):
 
 
 class HostileEntity(Entity):  # abstract
+
+    CANNOT_PASS_STRING: str = "You can't pass because {} wants to eat you."
+
     def __init__(self, name: str, health: Health, location):
         super().__init__(name, health, location)
 
@@ -156,41 +162,87 @@ class SimpleHostileEntity(HostileEntity):
         self.hostile_to_types = hostile_to_types
 
         self.hostile_now = True
-        self.can_not_pass: CanDo = (False, Message("You can't pass because {} wants to eat you.",
-                                                   named_variables=[self]))
+        self.can_not_pass: CanDo = (False, Message(self.__class__.CANNOT_PASS_STRING, named_variables=[self]))
+
+    def _can_pass(self, entity: Entity) -> CanDo:
+        """
+        Used to be overridden by subclasses where the main implementation is handled in the can_entity_pass method
+        By default, this returned self.health.is_fainted()
+        The message in the returned value at [1] will never be displayed, but take it seriously in case of needed
+            debugging in the future.
+        @param entity:
+        @return:
+        """
+        if self.health.is_fainted():
+            return True, "I can't fight you because I'm dead."
+        return False, "Message shouldn't be displayed. There is no reason to let this entity pass."
+
+    def _is_type_target(self, entity: Entity) -> bool:
+        """
+
+        @param entity: The entity to test its type for
+        @return: True if the entity's type is a target based upon self.hostile_to_types
+        """
+        for t in self.hostile_to_types:
+            if isinstance(entity, t):
+                return True
+
+        return False
 
     def can_entity_pass(self, entity: Entity):
         if not self.hostile_now:
             return True, "I'm not hostile right now"
 
-        if self.health.is_fainted():
-            return True, "I can't get you because I'm dead."
+        can_pass = self._can_pass(entity)
+        if not can_pass[0]:
+            return can_pass
 
-        for t in self.hostile_to_types:
-            if isinstance(entity, t):
-                return self.can_not_pass
+        if self._is_type_target(entity):
+            return self.can_not_pass
+
         return True, "I don't really want to eat you."
 
     def send_message(self, message):
         pass
 
 
+class CommunityHostileEntity(SimpleHostileEntity):
+
+    def __init__(self, name: str, health: Health, location, hostile_to_types: List[Type[Entity]]):
+        super().__init__(name, health, location, hostile_to_types)
+        self.entities_lost_to: List[Entity] = []
+        self.entities_won_against: List[Entity] = []
+
+    def _can_pass(self, entity: Entity):
+        # We aren't going to call super because even if this entity is dead, we want them to fight the entity if\
+        #   they haven't beat us yet.
+
+        if entity in self.entities_lost_to:
+            return True, "Sure, you can pass, you already beat me."
+
+        return False, "You can't pass since you haven't beaten me yet."
+
+
 class EntityAction(Action):  # abstract
     """
     Used when there's an entity involved in an action (or multiple entities where the entity stored in this class\
         is the one that caused it, usually being the Player (There is no PlayerAction this is it)
+    Note that the overridden try_action method sends the entity a message if the returned can_do[0] will be False
     """
-    def __init__(self, entity: Entity):
+    def __init__(self, entity: Entity, send_on_can_not: bool = True):
         """
-
         @param entity: The main entity involved and the one that is basically requesting to do this action
+        @param send_on_can_not: Used to determine if a message should be sent if the returned value at [0] in \
+                try_action is False. By default True. Set to False if you will be returning the CanDo returned in \
+                try_action. (You would do this so the message wouldn't get sent twice)
         """
         super().__init__()
         self.entity = entity
+        self.send_on_can_not = send_on_can_not
 
     def try_action(self, handler):  # overridden
         can_do = super().try_action(handler)
-        if not can_do[0]:
+        if not can_do[0] and self.send_on_can_not:
             self.entity.send_message(can_do[1])
         return can_do
 

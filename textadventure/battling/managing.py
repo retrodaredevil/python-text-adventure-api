@@ -2,6 +2,7 @@ from typing import List, Tuple
 
 from textadventure.action import Action
 from textadventure.battling.battle import Battle
+from textadventure.battling.move import Target, Move
 from textadventure.entity import HostileEntity, Entity
 from textadventure.handler import Handler
 from textadventure.manager import Manager
@@ -63,6 +64,8 @@ class BattleManager(Manager):
     def on_action(self, handler: Handler, action: Action):
         from textadventure.location import GoAction
         if isinstance(action, GoAction):
+            if not action.can_do[0]:
+                return  # already cancelled so don't mess with it
             if not self.stop_entities_from_leaving_location[0]:
                 return  # stopping entities is not wanted here
             # now we know stopping entities from changing locations while in battle is wanted
@@ -87,9 +90,31 @@ class HostileEntityManager(Manager):
         from textadventure.location import GoAction
         # print("we got and action: {}".format(action)) works
         if isinstance(action, GoAction):
+            if not action.can_do[0]:
+                return  # already cancelled, so don't mess with it
             for entity in action.previous_location.get_entities(handler):  # go through all entities at current location
                 if isinstance(entity, HostileEntity):  # if it's a HostileEntity
                     can_pass = entity.can_entity_pass(action.entity)  # check if the hostile entity wants to stop them
                     if not can_pass[0]:  # if the hostile entity wants to stop them, V
                         action.can_do = can_pass  # set the action's can_do to a CanDo with a [0] value of False
                         return  # we don't need to do anything else
+
+
+class DamageActionManager(Manager):
+    def __init__(self):
+        pass
+
+    def update(self, handler: Handler):
+        pass
+
+    def on_action(self, handler: Handler, action: Action):
+        from textadventure.battling.actions import DamageAction
+        if isinstance(action, DamageAction):
+            damage = action.damage
+            to_alert: List[Target] = [damage.target]
+            if isinstance(damage.damager, Target):
+                to_alert.append(damage.damager)
+
+            for target in to_alert:
+                for effect in target.effects:
+                    action.outcome_parts.extend(effect.on_damage(action))

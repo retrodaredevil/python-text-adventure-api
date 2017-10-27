@@ -27,6 +27,7 @@ class OutcomePart(ABC):
 class MoveOutcome:
     """
     Represents a list of messages (OutcomeParts) which will be broadcasted to everyone
+
     """
 
     def __init__(self, can_move: CanDo):
@@ -39,15 +40,24 @@ class MoveOutcome:
 
         self.parts: List[OutcomePart] = []
 
-    def broadcast_messages(self, battle: 'Battle'):
+    def broadcast(self, battle: 'Battle'):
         if not self.can_move[0]:
             battle.broadcast(self.can_move[1])
             return
-        for part in self.parts:
+        self.__class__.broadcast_messages(self.parts, battle)
+
+    @staticmethod
+    def broadcast_messages(messages: List[OutcomePart], battle: 'Battle'):
+        for part in messages:
             battle.broadcast(part.get_message())
 
 
 class UseMoveOutcome(OutcomePart):
+    """
+    This is more of a special OutcomePart because it should appear pretty much every time a move has been made.
+        Usually, for the most part, there shouldn't really be special ones that appear every time because the \
+        information displayed may be something that should be displayed with a command.
+    """
     def __init__(self, move: 'Move'):
         self.move = move
 
@@ -59,7 +69,8 @@ class UseMoveOutcome(OutcomePart):
         return self.move.targets
 
     def get_message(self):
-        return Message("{} used {} on {}.", named_variables=[self.move.user, self.move, self.get_targets_object()])
+        return Message("{} used {} on {}.", named_variables=[self.move.user.entity, self.move,
+                                                             list(map(lambda x: x.entity, self.get_targets_object()))])
 
 
 class HealthChangeOutcome(OutcomePart):
@@ -75,10 +86,10 @@ class HealthChangeOutcome(OutcomePart):
         current_health = self.affected_target.entity.health.current_health
         changed = current_health - self.before_health  # negative means that the affected_target was damaged
         if changed == 0:
-            return Message("{} was unaffected.", named_variables=[self.affected_target])
+            return Message("{} was unaffected.", named_variables=[self.affected_target.entity])
         elif changed > 0:
-            return Message("{} was healed by {}hp.", named_variables=[self.affected_target, changed])
-        return Message("{} was damaged by {}hp.", named_variables=[self.affected_target, -changed])
+            return Message("{} was healed by {} hp.", named_variables=[self.affected_target.entity, changed])
+        return Message("{} was damaged by {} hp.", named_variables=[self.affected_target.entity, -changed])
 
 
 class EffectAddedOutcome(OutcomePart):
@@ -87,4 +98,13 @@ class EffectAddedOutcome(OutcomePart):
         self.added_effect = added_effect
 
     def get_message(self):
-        return Message("{} was added to {}.", named_variables=[self.added_effect, self.affected_target])
+        return Message("{} was added to {}.", named_variables=[self.added_effect, self.affected_target.entity])
+
+
+class EffectRemoveOutcome(OutcomePart):
+    def __init__(self, affected_target: 'Target', removed_effect: 'Effect'):
+        self.affected_target = affected_target
+        self.removed_effect = removed_effect
+
+    def get_message(self):
+        return Message("{} was removed from {}.", named_variables=[self.removed_effect, self.affected_target.entity])
