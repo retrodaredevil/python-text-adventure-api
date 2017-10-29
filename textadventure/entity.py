@@ -194,13 +194,13 @@ class SimpleHostileEntity(HostileEntity):
             return True, "I'm not hostile right now"
 
         can_pass = self._can_pass(entity)
-        if not can_pass[0]:
+        if can_pass[0]:  # most of the time, this should be false
             return can_pass
 
         if self._is_type_target(entity):
             return self.can_not_pass
 
-        return True, "I don't really want to eat you."
+        return True, "I don't really want to eat you because you aren't of the type of entity I like."
 
     def send_message(self, message):
         pass
@@ -220,7 +220,7 @@ class CommunityHostileEntity(SimpleHostileEntity):
         if entity in self.entities_lost_to:
             return True, "Sure, you can pass, you already beat me."
 
-        return False, "You can't pass since you haven't beaten me yet."
+        return False, "You can't pass since you haven't beaten me yet. - Should not be displayed"
 
 
 class EntityAction(Action):  # abstract

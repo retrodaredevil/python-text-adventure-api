@@ -49,7 +49,11 @@ class Battle:
         if self.current_turn.is_done:
             if self.__is_done():
                 self.has_ended = True
-                self.broadcast("The battle has ended.")
+                from textadventure.battling.actions import BattleEnd
+                end_action = BattleEnd(self, self.get_alive_teams()[0])  # TODO make a safer way to get winning team
+                handler.do_action(end_action)
+                assert end_action.can_do[0], "We aren't prepared for this. Why would you cancel it?"
+                end_action.try_action(handler)  # calling this will display results
                 return
             self.current_turn = self.__next_turn(self.current_turn)
 
@@ -94,7 +98,6 @@ class Battle:
         """
         self.has_started = True
         self.current_turn = self.__next_turn(None)
-        self.broadcast_healths()
 
     def get_team(self, entity: Entity) -> Optional[Team]:
         """
@@ -108,6 +111,15 @@ class Battle:
                 return team
 
         return None
+
+    def get_alive_teams(self) -> List[Team]:
+        r = []
+
+        for team in self.teams:
+            if not team.is_dead():
+                r.append(team)
+
+        return r
 
     def broadcast(self, message: MessageConstant):
         if message is None:

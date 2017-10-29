@@ -5,6 +5,7 @@ from textadventure.action import Action
 from textadventure.battling.managing import BattleManager
 from textadventure.battling.team import Team
 from textadventure.entity import EntityActionToEntity, Entity
+from textadventure.message import Message
 
 if typing.TYPE_CHECKING:
     from textadventure.battling.battle import Battle
@@ -22,12 +23,14 @@ class BattleEnd(Action):
     """
     An Action that may have unexpected results when cancelling. Basically an event that tells you when the Battle ends.
     """
-    def __init__(self, battle: 'Battle'):
+    def __init__(self, battle: 'Battle', winning_team: Team):
         super().__init__()
         self.battle: 'Battle' = battle
+        self.winning_team = winning_team
 
     def _do_action(self, handler):
         self.battle.has_ended = True
+        self.battle.broadcast(Message("{} has won the battle!", named_variables=[self.winning_team]))
         return self.can_do
 
 
@@ -54,7 +57,7 @@ class DamageAction(Action):  # TODO create a manager where Effects can handle th
         from textadventure.battling.move import Move
         from textadventure.battling.effect import Effect
         super().__init__()
-        self.cause_object: Union['Move', 'Effect'] = cause_object
+        self.cause_object: Union[Move, Effect] = cause_object
         """The object that contains the method that created this. Depending on the implementation or the code you \
         created, this could be None"""
         self.damage = damage

@@ -27,6 +27,9 @@ class Effect(ABC):
     CAN_MOVE: CanDo = (True, "This effect does not affect the outcome of at attack")
 
     def __init__(self, user: Target):
+        """
+        @param user: The target being affected by this effect
+        """
         self.user = user
 
     @abstractmethod

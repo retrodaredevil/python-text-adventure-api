@@ -1,13 +1,12 @@
-import typing
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, TYPE_CHECKING
 
 from textadventure.battling.outcome import MoveOutcome, OutcomePart  # needed
 from textadventure.battling.team import Team
 from textadventure.entity import Entity
 from textadventure.utils import CanDo
 
-if typing.TYPE_CHECKING:  # if removed, will cause type errors
+if TYPE_CHECKING:  # if removed, will cause type errors
     from textadventure.battling.choosing import MoveOption, MoveChooser
     from textadventure.battling.battle import Battle
     from textadventure.handler import Handler
@@ -36,13 +35,13 @@ class Target:
 
         self.effects: List[Effect] = []
 
-        self.moves_left = 1  # one move per turn (Duh!)
-        self.used_moves: List[Move] = []
-        self.outcomes: Dict[Move, bool] = {}
-        """Tells whether or not a certain move hit this Target object."""
-
-    def set_outcome(self, move: 'Move', did_hit: bool):  # maybe change the did_hit to something other than bool later
-        self.outcomes[move] = did_hit
+        # self.moves_left = 1  # one move per turn (Duh!)  not used
+        # self.used_moves: List[Move] = []
+    #     self.outcomes: Dict[Move, bool] = {}
+    #     """Tells whether or not a certain move hit this Target object."""
+    #
+    # def set_outcome(self, move: 'Move', did_hit: bool):  # maybe change the did_hit to something other than bool later
+    #     self.outcomes[move] = did_hit
 
     def did_hit(self, key: Union['Move', Entity, 'Target']):
         if isinstance(key, Move):
@@ -109,6 +108,8 @@ class Turn:
         @param battle: The battle handling this Turn object
         """
         self.is_started = True
+        battle.broadcast("")  # a new line makes it easier to read
+        battle.broadcast_healths()
 
     def update(self, battle: 'Battle', handler: 'Handler'):  # should be called by the Battle class
         """

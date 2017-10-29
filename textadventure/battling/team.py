@@ -4,6 +4,11 @@ from textadventure.entity import Entity
 from textadventure.utils import join_list
 
 
+"""
+If in the future, this file needs to import more modules, there will probably be type errors.
+"""
+
+
 class Team:
     """
     A Team object has a list of entities that are on the team and a name to go along with the team.

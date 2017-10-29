@@ -1,11 +1,15 @@
-from typing import List, Tuple
+from typing import List, Tuple, TYPE_CHECKING
 
 from textadventure.action import Action
 from textadventure.battling.battle import Battle
 from textadventure.battling.move import Target, Move
-from textadventure.entity import HostileEntity, Entity
+from textadventure.entity import HostileEntity, Entity, CommunityHostileEntity
 from textadventure.handler import Handler
 from textadventure.manager import Manager
+
+
+if TYPE_CHECKING:
+    from textadventure.battling.team import Team
 
 
 """
@@ -88,7 +92,8 @@ class HostileEntityManager(Manager):
 
     def on_action(self, handler: Handler, action: Action):
         from textadventure.location import GoAction
-        # print("we got and action: {}".format(action)) works
+        from textadventure.battling.actions import BattleEnd
+
         if isinstance(action, GoAction):
             if not action.can_do[0]:
                 return  # already cancelled, so don't mess with it
@@ -98,6 +103,34 @@ class HostileEntityManager(Manager):
                     if not can_pass[0]:  # if the hostile entity wants to stop them, V
                         action.can_do = can_pass  # set the action's can_do to a CanDo with a [0] value of False
                         return  # we don't need to do anything else
+
+        elif isinstance(action, BattleEnd):  # this part handles CommunityHostileEntities
+            # future maintainers, this is gonna be a lot of for loops so get used to it
+            # print("BattleEnd called")
+            battle = action.battle
+            winning_team = action.winning_team
+            community_hostiles: List[Tuple[CommunityHostileEntity, 'Team']] = []
+            for team in battle.teams:
+                for entity in team.members:
+                    if isinstance(entity, CommunityHostileEntity):
+                        community_hostiles.append((entity, team))
+
+            # now community_hostiles has a list of tuples with each CommunityHostileEntity
+            for hostile_tuple in community_hostiles:
+                hostile = hostile_tuple[0]
+                hostile_team = hostile_tuple[1]
+                for team in battle.teams:
+                    if team == hostile_team:  # now the members can't be on the same team
+                        continue
+                    for entity in team.members:
+                        if winning_team == team:  # entity has beaten hostile
+                            hostile.entities_lost_to.append(entity)
+                            # print("Appended to lost_to: {}".format(entity))
+                        elif winning_team == hostile_team:  # extra elif that will only be false if more than 3 teams
+                            hostile.entities_won_against.append(entity)
+                            # print("Appended to won_to: {}".format(entity))
+                        else:
+                            print("This shouldn't be called unless there are more than 2 teams")
 
 
 class DamageActionManager(Manager):
@@ -118,3 +151,6 @@ class DamageActionManager(Manager):
             for target in to_alert:
                 for effect in target.effects:
                     action.outcome_parts.extend(effect.on_damage(action))
+
+
+
