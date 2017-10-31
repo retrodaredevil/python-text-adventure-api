@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, TYPE_CHECKING, Union
+from typing import List, TYPE_CHECKING, Union, Optional
 
 from textadventure.battling.choosing import MoveOption
 from textadventure.battling.move import Move, Target, Turn
@@ -26,11 +26,12 @@ class Effect(ABC):
     CAN_CHOOSE: CanDo = (True, "This effect does not affect the options you are allowed to choose")
     CAN_MOVE: CanDo = (True, "This effect does not affect the outcome of at attack")
 
-    def __init__(self, user: Target):
+    def __init__(self, user: Target, name: str):
         """
         @param user: The target being affected by this effect
         """
         self.user = user
+        self.name = name
 
     @abstractmethod
     def can_choose(self, targets: List[Target], option: MoveOption) -> CanDo:
@@ -98,6 +99,10 @@ class Effect(ABC):
         """
         Is used to tell whether or not the effect should move on to the next turn
         The next turn is about to be created, we just need to know if this effect should stay with the user
+
+        Note, this will only be called once per turn so feel free to increment or decrement a value of something.
+        The reason a CanDo is NOT returned is because there will be an OutcomePart that will announce it being removed \
+            along with that, anything that affected how long it stayed should broadcast/return an OutcomePart
         @param previous_turn: The turn that has just finished.
         @return: True if the effect should stay on the user, False if the effect should be removed
         """
@@ -113,3 +118,45 @@ class Effect(ABC):
         @return: A List of OutcomeParts which will then be appended to the outcome for you
         """
         pass
+
+
+class DefaultEffect(Effect):
+    def __init__(self, user: Target, name: str, turns_to_stay: Optional[int]):
+        """
+        @param turns_to_stay: The number of turns for the effect to stay on. If None, will stay infinitely
+        """
+        super().__init__(user, name)
+        self.turns_to_stay = turns_to_stay
+
+    def can_choose(self, targets: List[Target], option: MoveOption):
+        return True, "By default, this effect doesn't affect what you can and can't choose"
+
+    def can_move(self, move: Move):
+        return True, "By default this effect doesn't affect the outcome of your move."
+
+    def before_turn(self, turn: Turn, move: Move):
+        return []
+
+    def after_move(self, turn: Turn, move: Move, outcome: MoveOutcome):
+        return []
+
+    def after_turn(self, turn: Turn, move: Move):
+        return []
+
+    def should_stay(self, previous_turn: Turn):
+        if self.turns_to_stay is not None:
+            if self.turns_to_stay <= 0:
+                return False
+            self.turns_to_stay -= 1
+        return True
+
+    def on_damage(self, damage_action: 'DamageAction'):
+        return []
+
+
+class PropertyEffect(DefaultEffect):
+    """
+    Should be implemented when referring to an effect that is not mentioned
+    """
+    def __init__(self, user: Target, name: str):
+        super().__init__(user, name, None)

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union, Optional, TYPE_CHECKING
+from typing import List, Dict, Optional, TYPE_CHECKING, Type, TypeVar
 
 from textadventure.battling.outcome import MoveOutcome, OutcomePart  # needed
 from textadventure.battling.team import Team
@@ -10,6 +10,9 @@ if TYPE_CHECKING:  # if removed, will cause type errors
     from textadventure.battling.choosing import MoveOption, MoveChooser
     from textadventure.battling.battle import Battle
     from textadventure.handler import Handler
+
+
+T = TypeVar('T')
 
 
 class Target:
@@ -35,26 +38,16 @@ class Target:
 
         self.effects: List[Effect] = []
 
-        # self.moves_left = 1  # one move per turn (Duh!)  not used
-        # self.used_moves: List[Move] = []
-    #     self.outcomes: Dict[Move, bool] = {}
-    #     """Tells whether or not a certain move hit this Target object."""
-    #
-    # def set_outcome(self, move: 'Move', did_hit: bool):  # maybe change the did_hit to something other than bool later
-    #     self.outcomes[move] = did_hit
-
-    def did_hit(self, key: Union['Move', Entity, 'Target']):
-        if isinstance(key, Move):
-            return self.outcomes[key]
-        elif isinstance(key, Entity) or isinstance(key, Target):
-            is_entity = isinstance(key, Entity)  # if False, then key is a Target
-            for k, value in self.outcomes.items():
-                if (is_entity and k.user.entity == key) or (not is_entity and k.user == key):
-                    return value
-
-            return None
-        else:
-            raise ValueError("key must be an instance of a Move or an Entity object. You must have type checks off.")
+    def __getitem__(self, item: Type[T]) -> Optional[T]:
+        """
+        T is recommended to be PropertyEffect and using this to get an effect is not recommended
+        @param item: The type of effect to get in the effects list
+        @return: The first effect of the exact type 'item' in the self.effects list. Or None if there is none in list
+        """
+        for effect in self.effects:
+            if type(effect) == item:
+                return effect
+        return None
 
     def get_move_options(self) -> List['MoveOption']:
         """

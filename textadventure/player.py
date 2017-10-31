@@ -8,15 +8,17 @@ T = TypeVar("T")
 
 class Player(Entity):
     def __init__(self, player_input: PlayerInput, player_output: PlayerOutput, name: Optional[str]):
+        """
+        @param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
+                    that players' names are one word while other entities are multiple so no one can name themselves\
+                    the name of an important entity
+        """
         super().__init__(name, Health(30, 30), None)  # TODO max_health, current_health, location
         self.player_input = player_input
         self.player_output = player_output
         # self.__getitem__(PlayerFriend): Living = None
         self.handled_objects = []
         # self.__getitem__(EventsObject): 'EventsObject' = data_object
-
-    def damage(self, damage):
-        super().damage(damage)
 
     def __getitem__(self, item: Type[T]) -> Optional[T]:
         if not isinstance(item, Type):
