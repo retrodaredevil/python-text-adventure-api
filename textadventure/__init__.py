@@ -14,4 +14,7 @@ Also a java thing I guess, I use static typing a lot and if you see an if typing
     because removing that (importing it normally) would cause type errors.
 
 String convention for this project: use "" for almost everything but use '' for static typing and other smaller strings
+
+When I reference one-way-flags, that will mean something that is set to the opposite value once. Usually, starts at \
+    False then goes to True. Usually, it won't change back
 """

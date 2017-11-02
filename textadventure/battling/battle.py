@@ -96,7 +96,11 @@ class Battle:
         Calling this will add this instance to the handler's input_handlers
         @param handler: The Handler object
         """
-        self.has_started = True
+        from textadventure.battling.actions import BattleStart
+        battle_start = BattleStart(self)
+        handler.do_action(battle_start)
+        battle_start.try_action(handler)
+        # battle_start will set self.has_started to True
         self.current_turn = self.__next_turn(None)
 
     def get_team(self, entity: Entity) -> Optional[Team]:

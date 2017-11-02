@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, List
 
 from textadventure.battling.battle import Battle
 from textadventure.battling.effect import Effect
@@ -71,11 +71,20 @@ class HPDamage(Damage):
         """
         Damage.__init__(self, damager, target)
         self.hp_change = hp_change
+        self.multiplier_list: List[float] = []
+        """Should be appended to when wanting to multiply the damage of hp_change"""
+
+    def _calculate_hp_change(self):
+        r = self.hp_change
+        for multiplier in self.multiplier_list:
+            r *= multiplier
+        return r
 
     def damage(self, battle: Battle):
-        health = self.target.entity.health
+        from textadventure.entity import Health
+        health: Health = self.target.entity.health
         before_health = health.current_health
-        health.change_by(self.hp_change)
+        health.change_by(self._calculate_hp_change())
         return HealthChangeOutcome(self.target, before_health)
 
 

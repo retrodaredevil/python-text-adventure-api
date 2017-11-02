@@ -58,9 +58,17 @@ class InputObject:
         # if you're wondering, this class used to be a lot different.
 
     def get_split(self) -> List[str]:
-        return self.string_input.split(" ")
+        r = self.string_input.split(" ")
+        for element in list(r):
+            if not element:
+                r.remove(element)
+        return r
 
     def get_command_index(self) -> int:
+        """
+        A simple method that for now, returns 0 but should always be used because having another simple layer of \
+            abstraction is never a bad idea
+        """
         return 0
 
     def get_command(self) -> str:

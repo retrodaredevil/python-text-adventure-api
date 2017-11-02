@@ -25,7 +25,11 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     be called randomly unless it's something like get_players or is_lit_up.
     
     Also note one of the primary features of this class is that it is also an input handler but you have to call \
-        _should_take_input to make sure that the player is in this location.  
+        _should_take_input to make sure that the player is in this location.
+        
+    Note that with the inherited methods from FiveSensesHandler, usually, player.location will be self, but you\
+        should program each method carefully and prepare if the player smelling, looking from another location. \
+        Note that you shouldn't throw assert errors because that would defeat the whole point.  
     Attributes:
         command_handlers: Keeps a list of command_handlers. After __init__ is called, Handler should call these \
                           when location is getting its on_input called
@@ -96,7 +100,8 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         @param handler: The handler object
         @param player: The player
         @param player_input: The player input object
-        @param is_there_response: By default,False. If set to true.The default implementation won't say no one responded
+        @param is_there_response: By default,False. If set to true, the default implementation won't
+                                        say no one responded
         @return: None
         """
         first_arg = player_input.get_arg(0, False)

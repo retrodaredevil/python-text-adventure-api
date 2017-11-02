@@ -10,13 +10,26 @@ from textadventure.message import Message
 if typing.TYPE_CHECKING:
     from textadventure.battling.battle import Battle
     from textadventure.battling.damage import Damage
-    from textadventure.battling.move import Move, Target
+    from textadventure.battling.move import Move
     from textadventure.battling.effect import Effect
 
 
 """
 A file dedicated to define implementations of the Action class related to the battling api
 """
+
+
+class BattleStart(Action):
+    """
+    An action that happens when a battle starts. Should not be cancelled
+    """
+    def __init__(self, battle: 'Battle'):
+        super().__init__()
+        self.battle: 'Battle' = battle
+
+    def _do_action(self, handler):
+        self.battle.has_started = True
+        return self.can_do
 
 
 class BattleEnd(Action):

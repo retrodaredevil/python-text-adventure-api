@@ -1,3 +1,5 @@
+import warnings
+from abc import abstractmethod
 from typing import List, Tuple, TYPE_CHECKING
 
 from textadventure.action import Action
@@ -10,6 +12,7 @@ from textadventure.manager import Manager
 
 if TYPE_CHECKING:
     from textadventure.battling.team import Team
+    from textadventure.battling.effect import Effect
 
 
 """
@@ -77,7 +80,7 @@ class BattleManager(Manager):
             for battle in battles:
                 if battle.is_going_on() or (not battle.has_started and self.stop_entities_from_leaving_location[1]):
                     action.can_do = (False, "You can't leave! You've got to stay and fight!")
-                    return  # we cancelled the action so we good
+                    return  # we cancelled the action so we good - possibly change to "break" later on
 
 
 class HostileEntityManager(Manager):
@@ -150,7 +153,25 @@ class DamageActionManager(Manager):
 
             for target in to_alert:
                 for effect in target.effects:
-                    action.outcome_parts.extend(effect.on_damage(action))
+                    outcomes = effect.on_damage(action)
+                    if outcomes is None:
+                        warnings.warn("List of outcomes from class {} are None.".format(type(effect)))
+                    action.outcome_parts.extend(outcomes)
 
 
+class PropertyEffectManager(Manager):
+    """
+    An abstract class that should be inherited by a custom class where its create_effects method adds different\
+        PropertyEffects to customize the gameplay
+    """
+    def update(self, handler: 'Handler'):
+        pass
 
+    def on_action(self, handler: 'Handler', action: Action):
+        from textadventure.battling.actions import BattleStart
+        if isinstance(action, BattleStart):
+            pass
+
+    @abstractmethod
+    def create_effects(self, entity: Entity) -> List['Effect']:
+        pass
