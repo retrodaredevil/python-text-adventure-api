@@ -3,10 +3,11 @@ from typing import Tuple
 from textadventure.battling.actions import DamageAction
 from textadventure.battling.damage import WeaponHPDamage
 from textadventure.battling.effect import PropertyEffect
+from textadventure.battling.move import Target
 
 
 class SwordDamageAlter(PropertyEffect):
-    def __init__(self, user: 'Target', sword_move_type_effectiveness: Tuple[float, float, float]):
+    def __init__(self, user: Target, sword_move_type_effectiveness: Tuple[float, float, float]):
         """
         @param sword_move_type_effectiveness: [Slash multiplier, slam multiplier, stab multiplier]
         """

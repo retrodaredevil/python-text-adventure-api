@@ -53,7 +53,7 @@ class Sword(Weapon):
     def __init__(self, sword_type: SwordType):
         from ninjagame.utils import SwordMoveOption  # to avoid import errors
         super().__init__("{} sword".format(sword_type.value[0]),
-                         move_options=[SwordMoveOption(self, move_type[0], 1) for move_type in SwordMoveType])
+                         move_options=[SwordMoveOption(self, move_type.value[0], 1) for move_type in SwordMoveType])
         self.sword_type = sword_type
 
     def see(self, handler: Handler, player: Player):
