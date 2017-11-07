@@ -71,8 +71,8 @@ def load(handler, player: Player, path: 'Path'=DEFAULT_PATH) -> CanDo:
         return False, "The file was either empty or something is wrong with it."
     except UnpicklingError:
         return False, "Unpickling Error: {}".format(sys.exc_info()[0])
-    except:
-        return False, "Unexpected error: {}".format(sys.exc_info()[0])
+    # except:  # we want to see this error fully. And this error is a bad one.
+    #     return False, "Unexpected error: {}".format(sys.exc_info()[0])
 
     if content is None:
         return False, "The file's contents were null. (Or None)"

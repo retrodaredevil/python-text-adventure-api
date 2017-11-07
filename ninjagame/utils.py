@@ -27,7 +27,7 @@ class SimpleMoveOption(MoveOption):
 
     def can_choose_targets(self, user: Target, targets: List[Target]):
         rec = self.get_targeting_option(user)
-        unable = Targetability.NOT_ABLE
+        unable = Targetability.NOT_ABLE  # create a local variable to make series of if statements more readable
         for target in targets:
             if target == user and rec.user == unable:
                 return self.__class__.CANT_TARGET_SELF
@@ -56,7 +56,7 @@ class SwordMoveOption(WeaponMoveOption):
         self.move_type = move_type
 
     def __str__(self):
-        return str(self.weapon) + "'s " + self.move_type.value
+        return str(self.weapon) + "'s " + self.move_type.value[0]
 
     def create_move(self, user: Target, targets: List[Target]):
         return SwordMove(user, targets, self.weapon, self.move_type)

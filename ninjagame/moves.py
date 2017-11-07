@@ -23,7 +23,7 @@ class SwordMove(WeaponMove):
         self.item = item
         self.move_type = move_type
 
-        self.name += "'s " + self.move_type.value
+        self.name += "'s " + self.move_type.value[0]
 
     def do_move(self, battle: Battle, handler: 'Handler'):
         from textadventure.battling.damage import WeaponHPDamage
