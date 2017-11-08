@@ -170,8 +170,13 @@ class PropertyEffectManager(Manager):
     def on_action(self, handler: 'Handler', action: Action):
         from textadventure.battling.actions import BattleStart
         if isinstance(action, BattleStart):
-            pass
+            battle = action.battle
+            turn = battle.current_turn
+            assert turn is not None, "When invoking a BattleStart action, you need to initialize current_turn"
+            for target in turn.targets:
+                effects = self.create_effects(target)
+                target.effects.extend(effects)
 
     @abstractmethod
-    def create_effects(self, entity: Entity) -> List['Effect']:
+    def create_effects(self, target: Target) -> List['Effect']:
         pass

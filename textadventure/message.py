@@ -225,6 +225,8 @@ class Message:
         Note that it is recommended to use named_variables instead of the format method so that it can be easy to \
             change the color of those variables in the future. Obviously, if changing the color wouldn't help for \
             a cool effect, you can use the format method on the passed string
+            -> Basically, named_variables in the future will be used to communicate extra data than just making \
+            something a string and concatenating it
         If an element in the list named_variables happens to be another list, it should transform each element into a \
             string and call join_list to create a nice string. That list inside the list will only replace ONE {} using\
             join_list

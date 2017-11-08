@@ -74,8 +74,8 @@ class HPDamage(Damage):
         self.multiplier_list: List[float] = []
         """Should be appended to when wanting to multiply the damage of hp_change"""
 
-    def _calculate_hp_change(self):
-        r = self.hp_change
+    def calculate_multiplier(self):
+        r = 1
         for multiplier in self.multiplier_list:
             r *= multiplier
         return r
@@ -84,8 +84,12 @@ class HPDamage(Damage):
         from textadventure.entity import Health
         health: Health = self.target.entity.health
         before_health = health.current_health
-        health.change_by(self._calculate_hp_change())
-        return HealthChangeOutcome(self.target, before_health)
+
+        multiplier = self.calculate_multiplier()
+
+        calculated = int(round(multiplier * self.hp_change))
+        health.change_by(calculated)
+        return HealthChangeOutcome(self.target, before_health, multiplier)
 
 
 class EffectDamage(Damage):

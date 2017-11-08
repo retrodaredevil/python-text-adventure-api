@@ -67,8 +67,6 @@ class DamageAction(Action):  # TODO create a manager where Effects can handle th
         @param damage:
         """
         from textadventure.battling.outcome import OutcomePart
-        from textadventure.battling.move import Move
-        from textadventure.battling.effect import Effect
         super().__init__()
         self.cause_object: Union[Move, Effect] = cause_object
         """The object that contains the method that created this. Depending on the implementation or the code you \

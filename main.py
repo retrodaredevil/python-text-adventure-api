@@ -9,6 +9,7 @@ from ninjagame.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
 
 from ninjagame.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
     EntranceSpiderWebForest, CenterSpiderWebForest, EastCenterSpiderWebForest
+from ninjagame.managing import NinjaGamePropertyManager
 from textadventure.actions import EntityActionToEntityManager
 from textadventure.battling.commands import AttackCommandHandler
 from textadventure.battling.managing import HostileEntityManager, BattleManager, DamageActionManager
@@ -61,7 +62,7 @@ def setup():
     handler.entities.append(player)
     handler.input_handlers.append(SettingsHandler(player))
     handler.managers.extend([HostileEntityManager(), EntityActionToEntityManager(), BattleManager(),
-                             DamageActionManager()])
+                             DamageActionManager(), NinjaGamePropertyManager()])
 
     default_load(player, handler)
 

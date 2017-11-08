@@ -4,6 +4,7 @@ from typing import List, TYPE_CHECKING, Union, Optional
 from textadventure.battling.choosing import MoveOption
 from textadventure.battling.move import Move, Target, Turn
 from textadventure.battling.outcome import MoveOutcome, OutcomePart
+from textadventure.entity import Entity
 from textadventure.utils import CanDo
 
 
@@ -26,8 +27,9 @@ class Effect(ABC):
     CAN_CHOOSE: CanDo = (True, "This effect does not affect the options you are allowed to choose")
     CAN_MOVE: CanDo = (True, "This effect does not affect the outcome of at attack")
 
-    def __init__(self, user: Target, name: str):
+    def __init__(self, user: Entity, name: str):
         """
+        Note that user is the Entity and not the Target. It used to be the Target but changing it each turn was a hassle
         @param user: The target being affected by this effect
         """
         self.user = user
@@ -121,7 +123,7 @@ class Effect(ABC):
 
 
 class DefaultEffect(Effect):
-    def __init__(self, user: Target, name: str, turns_to_stay: Optional[int]):
+    def __init__(self, user: Entity, name: str, turns_to_stay: Optional[int]):
         """
         @param turns_to_stay: The number of turns for the effect to stay on. If None, will stay infinitely
         """
@@ -144,11 +146,12 @@ class DefaultEffect(Effect):
         return []
 
     def should_stay(self, previous_turn: Turn):
+        # print(f"Calling should_stay with turns_to_stay: {self.turns_to_stay}")
         if self.turns_to_stay is not None:
             if self.turns_to_stay <= 0:
                 return False
             self.turns_to_stay -= 1
-        return True
+        return True  # will return True if self.turns_to_stay is None
 
     def on_damage(self, damage_action: 'DamageAction'):
         return []
@@ -158,5 +161,5 @@ class PropertyEffect(DefaultEffect):
     """
     Should be implemented when referring to an effect that is not mentioned
     """
-    def __init__(self, user: Target, name: str):
+    def __init__(self, user: Entity, name: str):
         super().__init__(user, name, None)

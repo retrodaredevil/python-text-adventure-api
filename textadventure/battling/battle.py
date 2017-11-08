@@ -13,7 +13,7 @@ class Battle:
     def __init__(self, teams: List[Team]):
         self.teams = teams
 
-        self.turns: List[Turn] = []
+        # self.turns: List[Turn] = []  # commented because nowhere in the code is this list appended to
         self.has_started = False
         self.has_ended = False
 
@@ -64,8 +64,8 @@ class Battle:
             number = last_turn.number + 1
 
             for target in last_turn.targets:
-                targets.append(target.create_target_next_turn(number))
-        else:  # lets create some default values
+                targets.append(target.create_target_next_turn(last_turn, number))
+        else:  # lets create some default values (mostly for targets)
             from textadventure.battling.choosing import RandomMoveChooser, SetMoveChooser
             for team in self.teams:
                 for entity in team.members:
@@ -97,11 +97,11 @@ class Battle:
         @param handler: The Handler object
         """
         from textadventure.battling.actions import BattleStart
-        battle_start = BattleStart(self)
+        self.current_turn = self.__next_turn(None)  # set current_turn so not None when a manager handles the action
+        battle_start = BattleStart(self)  # probably uses current_turn to add effects to the entities/targets
         handler.do_action(battle_start)
         battle_start.try_action(handler)
         # battle_start will set self.has_started to True
-        self.current_turn = self.__next_turn(None)
 
     def get_team(self, entity: Entity) -> Optional[Team]:
         """

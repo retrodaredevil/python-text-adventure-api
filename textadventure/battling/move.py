@@ -37,6 +37,7 @@ class Target:
         #  of self somehow to the Turn object
 
         self.effects: List[Effect] = []
+        """Right now, you should just append to this list since we don't have a special method to add effects."""
 
     def __getitem__(self, item: Type[T]) -> Optional[T]:
         """
@@ -62,12 +63,16 @@ class Target:
 
         return r
 
-    def create_target_next_turn(self, turn_number: int) -> 'Target':
+    def create_target_next_turn(self, previous_turn: 'Turn', turn_number: int) -> 'Target':
         """
         Creates a new Target that should be used on the next turn
         @return: The Target to use for the next turn
         """
         target = Target(self.entity, self.team, self.move_chooser, turn_number)
+        for effect in self.effects:
+            if effect.should_stay(previous_turn):
+                target.effects.append(effect)
+
         return target
 
 
@@ -110,7 +115,6 @@ class Turn:
         Calling update is how the turn actually works (There is no method to actually DO the turn) (This method will \
             call private methods _do_turn and _on_end
         """
-
         do_turn = True  # set to False if we can't do the turn because not everyone has already chosen their moves
         for target in self.targets:
             move = self.chosen_moves.get(target, None)

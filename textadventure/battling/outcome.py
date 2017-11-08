@@ -74,13 +74,15 @@ class UseMoveOutcome(OutcomePart):
 
 
 class HealthChangeOutcome(OutcomePart):
-    def __init__(self, affected_target: 'Target', before_health: int):
+    def __init__(self, affected_target: 'Target', before_health: int, multiplier: int=1):
         """
         @param affected_target: The Target that has had its health changed
         @param before_health: The health that the affected_target had before it was affected.
+        @param multiplier: The multiplier for the amount the health was changed.
         """
         self.affected_target = affected_target
         self.before_health = before_health
+        self.multiplier = multiplier
 
     def get_message(self):
         current_health = self.affected_target.entity.health.current_health
@@ -89,7 +91,21 @@ class HealthChangeOutcome(OutcomePart):
             return Message("{} was unaffected.", named_variables=[self.affected_target.entity])
         elif changed > 0:
             return Message("{} was healed by {} hp.", named_variables=[self.affected_target.entity, changed])
-        return Message("{} was damaged by {} hp.", named_variables=[self.affected_target.entity, -changed])
+        extra = ""
+        mult = self.multiplier
+        if mult != 1:
+            extra += "\n"
+            if mult > 1.75:
+                extra += "It's super effective!"
+            elif mult > 1:
+                extra += "It's pretty effective."
+            elif mult >= .4:
+                extra += "It's not very effective"
+            elif mult < 0:
+                extra += "The attack decided to do damage instead!"
+            else:
+                extra += "It didn't do very much at all."
+        return Message("{} was damaged by {} hp." + extra, named_variables=[self.affected_target.entity, -changed])
 
 
 class EffectAddedOutcome(OutcomePart):
