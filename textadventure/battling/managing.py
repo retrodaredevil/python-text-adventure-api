@@ -49,7 +49,7 @@ class BattleManager(Manager):
     def add_battle(self, battle: Battle):
         """
         Adds a battle to the list of active_battles. If the battle has not started, it will not start the battle
-        @param battle: The battle you want to add
+        :param battle: The battle you want to add
         """
         self.active_battles.append(battle)
 
@@ -58,8 +58,8 @@ class BattleManager(Manager):
         This gets a list of current battles the entity is currently in. It returns a list because it is possible for\
             someone to be in multiple battles at once. (Usually only one should be started)
             This is kept like this just in case people for whatever reason add an entity to multiple battles.
-        @param entity: The entity that you are trying to find the battles that it's in
-        @return: A list of the current battles the entity is in
+        :param entity: The entity that you are trying to find the battles that it's in
+        :return: A list of the current battles the entity is in
         """
         r = []
         for battle in self.active_battles:

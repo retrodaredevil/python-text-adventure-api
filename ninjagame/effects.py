@@ -10,7 +10,7 @@ from textadventure.entity import Entity
 class SwordDamageAlter(PropertyEffect):
     def __init__(self, user: Entity, sword_move_type_effectiveness: Tuple[float, float, float]):
         """
-        @param sword_move_type_effectiveness: [Slash multiplier, slam multiplier, stab multiplier]
+        :param sword_move_type_effectiveness: [Slash multiplier, slam multiplier, stab multiplier]
         """
         super().__init__(user, "SwordDamageAlter")
         self.sword_move_type_effectiveness = sword_move_type_effectiveness

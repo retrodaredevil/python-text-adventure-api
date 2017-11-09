@@ -21,8 +21,8 @@ class Weapon(Item):
     def __init__(self, name: str, move_options: Optional[List[MoveOption]] = None):
         """
 
-        @param name: The name of the weapon
-        @param move_options: A list of MoveOptions or None which will set self.move_options to an empty list
+        :param name: The name of the weapon
+        :param move_options: A list of MoveOptions or None which will set self.move_options to an empty list
         """
         super().__init__(name, True)
         if move_options is None:

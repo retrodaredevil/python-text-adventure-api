@@ -29,10 +29,10 @@ class TargetingOption:
                  total_number: Optional[int]):
         """
         Creates a TargetingOption representing what you can, should and can't select as targets
-        @param user: Can you target yourself?
-        @param other_teammate: Can you target other people on your team
-        @param enemies: Can you target your enemies?
-        @param total_number: What are the total number of targets you can target. Use None to represent infinite
+        :param user: Can you target yourself?
+        :param other_teammate: Can you target other people on your team
+        :param enemies: Can you target your enemies?
+        :param total_number: What are the total number of targets you can target. Use None to represent infinite
         """
         self.user = user
         self.other_teammates = other_teammate
@@ -68,8 +68,8 @@ class MoveOption(ABC):  # like an interface
     def can_use_move(self, user: Target) -> CanDo:
         """
 
-        @param user: The user that will end up using this Move
-        @return: A CanDo tuple where [0] is a boolean value that determines whether or not you can use this move
+        :param user: The user that will end up using this Move
+        :return: A CanDo tuple where [0] is a boolean value that determines whether or not you can use this move
         """
         pass
 
@@ -78,8 +78,8 @@ class MoveOption(ABC):  # like an interface
         """
         Returns a TargetingOption that usually isn't user specific and is type specific (what type of class this is) \
             But it could be user specific if you wanted it to be.
-        @param user: The user that will use this move along with choosing a set of targets based on
-        @return: The TargetingOption that is used for this move and can be changed for a specific user
+        :param user: The user that will use this move along with choosing a set of targets based on
+        :return: The TargetingOption that is used for this move and can be changed for a specific user
         """
         pass
 
@@ -92,9 +92,9 @@ class MoveOption(ABC):  # like an interface
         Note that if you are handling a player's input and the player's input wants to select targets that don't\
             follow the TargetingOption returned, you SHOULD call this method so you can send \
             them the error message at [1]
-        @param user: The user that will end up using this Move
-        @param targets: The list of targets that the player is trying to target
-        @return: A CanDo tuple where [0] is a boolean value that determines whether or not the user can target targets
+        :param user: The user that will end up using this Move
+        :param targets: The list of targets that the player is trying to target
+        :return: A CanDo tuple where [0] is a boolean value that determines whether or not the user can target targets
         """
         pass
 
@@ -102,9 +102,9 @@ class MoveOption(ABC):  # like an interface
     def create_move(self, user: Target, targets: List[Target]) -> Move:
         """
         A method that creates a move the the user as the user and targets as the targets
-        @param user: The person using the move and what should be in the returned Move's user field
-        @param targets: The targets that will be targeted and should be in the returned Move's targets field
-        @return: A move that is different for each MoveOption
+        :param user: The person using the move and what should be in the returned Move's user field
+        :param targets: The targets that will be targeted and should be in the returned Move's targets field
+        :return: A move that is different for each MoveOption
         """
         pass
 
@@ -124,10 +124,10 @@ class MoveChooser(ABC):
         The reason we pass user (A Target) in this method is because we only store the entity in this calss and  \
             user changes every turn
         Remember to check the user's effects to see if the user can_choose_targets that move
-        @param battle:
-        @param turn: The current turn
-        @param user: The target that will be using the returned move. user.entity is always equal to this class's entity
-        @return: The chosen move or None if no Move has been chosen yet
+        :param battle:
+        :param turn: The current turn
+        :param user: The target that will be using the returned move. user.entity is always equal to this class's entity
+        :return: The chosen move or None if no Move has been chosen yet
         """
         pass
 
@@ -189,10 +189,10 @@ class SetMoveChooser(MoveChooser):
         A method that takes a MoveOption and a list of Targets which if successful, would have created a Move which \
             will then be returned the next time get_move is called.
         This method handles the create of the Move object
-        @param user: The user of the move where user.entity == self.entity
-        @param option: The MoveOption that will help create the Move
-        @param targets: The targets that will be targeted
-        @return: A CanDo representing if the Move was successfully created. If it wasn't [0] will be False and [0] \
+        :param user: The user of the move where user.entity == self.entity
+        :param option: The MoveOption that will help create the Move
+        :param targets: The targets that will be targeted
+        :return: A CanDo representing if the Move was successfully created. If it wasn't [0] will be False and [0] \
             is an error which should be sent to the entity
         """
         can_use = option.can_use_move(user)

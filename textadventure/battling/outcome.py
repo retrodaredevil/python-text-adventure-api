@@ -18,7 +18,7 @@ class OutcomePart(ABC):
     def get_message(self) -> Optional[MessageConstant]:
         """
         Uses the state of this instance to create a message that should be broadcasted to everyone
-        @return: The message that should be broadcasted or None if this OutcomePart doesn't have anything to say. \
+        :return: The message that should be broadcasted or None if this OutcomePart doesn't have anything to say. \
                         (Usually it should have something so say)
         """
         pass
@@ -33,7 +33,7 @@ class MoveOutcome:
     def __init__(self, can_move: CanDo):
         """
 
-        @param can_move: A CanDo tuple representing if the player was able to try to perform the move. This can be \
+        :param can_move: A CanDo tuple representing if the player was able to try to perform the move. This can be \
                          cancelled by effects.
         """
         self.can_move: CanDo = can_move
@@ -64,7 +64,7 @@ class UseMoveOutcome(OutcomePart):
     def get_targets_object(self):
         """
         Can be overridden to choose what gets said in get_message
-        @return: The object to be put in named_variables from the returned get_message
+        :return: The object to be put in named_variables from the returned get_message
         """
         return self.move.targets
 
@@ -76,9 +76,9 @@ class UseMoveOutcome(OutcomePart):
 class HealthChangeOutcome(OutcomePart):
     def __init__(self, affected_target: 'Target', before_health: int, multiplier: int=1):
         """
-        @param affected_target: The Target that has had its health changed
-        @param before_health: The health that the affected_target had before it was affected.
-        @param multiplier: The multiplier for the amount the health was changed.
+        :param affected_target: The Target that has had its health changed
+        :param before_health: The health that the affected_target had before it was affected.
+        :param multiplier: The multiplier for the amount the health was changed.
         """
         self.affected_target = affected_target
         self.before_health = before_health

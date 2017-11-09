@@ -55,13 +55,13 @@ class Savable(ABC):
     def before_save(self, player, handler):
         """
         Called before the data will be saved. Override to do whatever you want with it.
-        @param player: The player whose data will be saved
-        @type player: Player
-        @param handler: The handler object
-        @type handler: Handler
+        :param player: The player whose data will be saved
+        :type player: Player
+        :param handler: The handler object
+        :type handler: Handler
 
-        # @return: [0] is True if you can save, [0] is False if you can't and [1] will be the reason why
-        @return: None
+        # :return: [0] is True if you can save, [0] is False if you can't and [1] will be the reason why
+        :return: None
         """
         pass
 
@@ -71,11 +71,11 @@ class Savable(ABC):
         Called when the object is loaded into the player's handled_object
         this should not be called from __init__ and should and will only be called when unserializing/unpickling data\
             (that's handled for you)
-        @param player: The player whose data has been loaded
-        @type player: Player
-        @param handler: The handler object
-        @type handler: Handler
-        @return: None
+        :param player: The player whose data has been loaded
+        :type player: Player
+        :param handler: The handler object
+        :type handler: Handler
+        :return: None
         """
         pass
 

@@ -30,7 +30,7 @@ class Effect(ABC):
     def __init__(self, user: Entity, name: str):
         """
         Note that user is the Entity and not the Target. It used to be the Target but changing it each turn was a hassle
-        @param user: The target being affected by this effect
+        :param user: The target being affected by this effect
         """
         self.user = user
         self.name = name
@@ -41,9 +41,9 @@ class Effect(ABC):
         Called first because it's called before the Move object is created
         Should be used to test for things like if you can choose a certain type of move, if you can target so many\
             people. Should not call any of option's can_use methods because that will already be handled for you
-        @param targets: The targets the user is trying to target
-        @param option: The move option requested by the user
-        @return: Whether or not the user can use the selected move
+        :param targets: The targets the user is trying to target
+        :param option: The move option requested by the user
+        :return: Whether or not the user can use the selected move
         """
         pass
 
@@ -55,8 +55,8 @@ class Effect(ABC):
         If it returns false, the player will not be able to choose a different move because this one failed. And\
             move.do_move will NOT be called
         Could be renamed to will_move_be_success if you want to think about it like that
-        @param move: The move that is about to be used. It contains the user and the targets
-        @return: whether or not the move should be performed. If [0] is false, the move will fail and [1] will be \
+        :param move: The move that is about to be used. It contains the user and the targets
+        :return: whether or not the move should be performed. If [0] is false, the move will fail and [1] will be \
                     broadcasted
         """
         pass
@@ -65,9 +65,9 @@ class Effect(ABC):
     def before_turn(self, turn: Turn, move: Move) -> List[OutcomePart]:
         """
         Called after can_move and can_choose_targets before the all of the moves have happened
-        @param turn: the turn that is ongoing
-        @param move: The move that is about to be performed
-        @return: A List of OutcomeParts which are a list of things that this method has done
+        :param turn: the turn that is ongoing
+        :param move: The move that is about to be performed
+        :return: A List of OutcomeParts which are a list of things that this method has done
         """
         pass
 
@@ -77,11 +77,11 @@ class Effect(ABC):
         Called right after the move has happened.
         With the MoveOutcome object, if you would like to (and you probably should) you can add to the parts when\
             you act on something
-        @param turn: The turn that will soon finish after every other Target performs their move
-        @param move: The move that was just performed by the user
-        @param outcome: The outcome of the move represented by a MoveOutcome object. You should not append to parts but\
+        :param turn: The turn that will soon finish after every other Target performs their move
+        :param move: The move that was just performed by the user
+        :param outcome: The outcome of the move represented by a MoveOutcome object. You should not append to parts but\
                             instead return the list of things that this method has done
-        @return: A list of OutcomeParts which are the things that this method has done
+        :return: A list of OutcomeParts which are the things that this method has done
         """
         pass
 
@@ -90,9 +90,9 @@ class Effect(ABC):
         """
         Called after all the moves have happened
         The main method that should be where the main code to do something/affect the user
-        @param turn: The turn that is about to be over
-        @param move: The move that the user performed
-        @return: A List of OutcomeParts which are a list of things that this method has done
+        :param turn: The turn that is about to be over
+        :param move: The move that the user performed
+        :return: A List of OutcomeParts which are a list of things that this method has done
         """
         pass
 
@@ -105,8 +105,8 @@ class Effect(ABC):
         Note, this will only be called once per turn so feel free to increment or decrement a value of something.
         The reason a CanDo is NOT returned is because there will be an OutcomePart that will announce it being removed \
             along with that, anything that affected how long it stayed should broadcast/return an OutcomePart
-        @param previous_turn: The turn that has just finished.
-        @return: True if the effect should stay on the user, False if the effect should be removed
+        :param previous_turn: The turn that has just finished.
+        :return: True if the effect should stay on the user, False if the effect should be removed
         """
         pass
 
@@ -116,8 +116,8 @@ class Effect(ABC):
         Is called when a DamageAction event happens only if damage_action.damage.damager or \
             damage_action.damage.damager is the same as self.user.
         Note: You should check to see if damage_action.damage.damager is equal to self.
-        @param damage_action: The DamageAction object which has all the needed data to determine what has happened
-        @return: A List of OutcomeParts which will then be appended to the outcome for you
+        :param damage_action: The DamageAction object which has all the needed data to determine what has happened
+        :return: A List of OutcomeParts which will then be appended to the outcome for you
         """
         pass
 
@@ -125,7 +125,7 @@ class Effect(ABC):
 class DefaultEffect(Effect):
     def __init__(self, user: Entity, name: str, turns_to_stay: Optional[int]):
         """
-        @param turns_to_stay: The number of turns for the effect to stay on. If None, will stay infinitely
+        :param turns_to_stay: The number of turns for the effect to stay on. If None, will stay infinitely
         """
         super().__init__(user, name)
         self.turns_to_stay = turns_to_stay

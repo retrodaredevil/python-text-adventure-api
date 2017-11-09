@@ -17,8 +17,8 @@ class Team:
     def __init__(self, members: List[Entity], name: str = None):
         """
         A team can have one or more entities on it.
-        @param members: The list of entities on this team (Can have any number of members)
-        @param name: The name of the team. If None, it will become: Name1, Name2, Name3 and Name4
+        :param members: The list of entities on this team (Can have any number of members)
+        :param name: The name of the team. If None, it will become: Name1, Name2, Name3 and Name4
         """
         self.members = members
         length = len(self.members)
@@ -31,7 +31,7 @@ class Team:
     def is_dead(self):
         """
         <insert meme about being dead here>
-        @return: Just a boolean representing if everyone on the team is dead. If one person is alive, returns True
+        :return: Just a boolean representing if everyone on the team is dead. If one person is alive, returns True
         """
         for member in self.members:
             if not member.health.is_fainted():

@@ -23,11 +23,11 @@ def is_path_valid(path: Path):
 def save(handler, player: Player, path: Path=DEFAULT_PATH, override_file: bool=False) -> CanDo:
     """
     Saves the data to the file. Will overwrite data if there is any
-    @param handler: The Handler object
-    @param player: The player whose data will be saved
-    @param path: The path to the file to save the data in
-    @param override_file: True if you want to automatically override the passed file path, False otherwise
-    @return: [0] is True if saved successfully, [0] is False if override_file was False and there is already a \
+    :param handler: The Handler object
+    :param player: The player whose data will be saved
+    :param path: The path to the file to save the data in
+    :param override_file: True if you want to automatically override the passed file path, False otherwise
+    :return: [0] is True if saved successfully, [0] is False if override_file was False and there is already a \
                     file with the path.
     """
     if not override_file and path.is_file():
@@ -58,10 +58,10 @@ def save(handler, player: Player, path: Path=DEFAULT_PATH, override_file: bool=F
 def load(handler, player: Player, path: 'Path'=DEFAULT_PATH) -> CanDo:
     """
     Loads the player's save data from a file
-    @param handler: The Handler object
-    @param path: The file path to the save data
-    @param player: The player to load the data into
-    @return: True if there was data to load, False otherwise
+    :param handler: The Handler object
+    :param path: The file path to the save data
+    :param player: The player to load the data into
+    :return: True if there was data to load, False otherwise
     """
     if not path.is_file():
         return False, "File was not found."

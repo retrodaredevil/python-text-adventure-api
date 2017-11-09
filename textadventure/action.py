@@ -19,8 +19,8 @@ class Action(ABC):
         When overridden, this method should do whatever is wanted to matter what the state of the object is
         (Don't use the can_do field to alter what happens in this method)
         Usually, self.can_do should be returned.
-        @param handler: The handler object
-        @return whether or not the action was done (Return self.can_do or if you need to change it, change it)
+        :param handler: The handler object
+        :return whether or not the action was done (Return self.can_do or if you need to change it, change it)
         """
         pass
 
@@ -28,8 +28,8 @@ class Action(ABC):
         """
         Should be called after calling handlers do_action. This will make sure that if this Action was cancelled, it\
             won't be called (So you don't have to check can_do manually
-        @param handler: The handler object to be passed to _do_action
-        @return: Whether or not the action was successful
+        :param handler: The handler object to be passed to _do_action
+        :return: Whether or not the action was successful
         """
         if self.can_do[0]:
             return self._do_action(handler)

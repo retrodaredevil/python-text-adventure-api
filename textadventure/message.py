@@ -13,7 +13,7 @@ class PlayerInput(ABC):
     @abstractmethod
     def take_input(self):
         """
-        @return: a string representing the input or None
+        :return: a string representing the input or None
         Calling this method should not make the current thread sleep
         """
         pass
@@ -22,8 +22,8 @@ class PlayerInput(ABC):
     def set_input_prompt(self, message: str):
         """
         Sets the input prompt
-        @param message: The string to set the input prompt to
-        @return: None
+        :param message: The string to set the input prompt to
+        :return: None
         """
         pass
 
@@ -32,7 +32,7 @@ class PlayerOutput(ABC):
     @abstractmethod
     def send_message(self, message):
         """
-        @param message: the message to send
+        :param message: the message to send
         """
         pass
 
@@ -148,7 +148,7 @@ class KeyboardInput(PlayerInput, Thread):
     def __init__(self, stream_output: StreamOutput):
         """
 
-        @param stream_output: The stream output or None if the PlayerOutput object isn't a StreamOutput
+        :param stream_output: The stream output or None if the PlayerOutput object isn't a StreamOutput
         """
         super().__init__()
         self.inputs: List[str] = []
@@ -230,12 +230,12 @@ class Message:
         If an element in the list named_variables happens to be another list, it should transform each element into a \
             string and call join_list to create a nice string. That list inside the list will only replace ONE {} using\
             join_list
-        @param message_type: The MessageType
-        @param text: The text
-        @param ending: the ending defaults to \\n
-        @param wait_after: defaults to False. Set to true if you want to wait after a character is printing instead bef
-        @param wait_in_seconds: The amount of time in seconds before this prints. Not affected by wait_after
-        @param named_variables: A list of variables each overriding __str__ which replaces {} {1} etc\
+        :param message_type: The MessageType
+        :param text: The text
+        :param ending: the ending defaults to \\n
+        :param wait_after: defaults to False. Set to true if you want to wait after a character is printing instead bef
+        :param wait_in_seconds: The amount of time in seconds before this prints. Not affected by wait_after
+        :param named_variables: A list of variables each overriding __str__ which replaces {} {1} etc\
                                 This is recommended because we might want to change the color later.\
                                 Note that you shouldn't put a number in {} (don't do {1}) it could be handled weirdly
         """

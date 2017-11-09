@@ -26,8 +26,8 @@ class Living(ABC):
     def get_used_name(self, viewer: 'Living') -> str:
         """
         By default, returns self.name but can be overridden to create the effect that someone doesn't know this person
-        @param viewer: The person that the returned name will be showed to
-        @return: The string that represents the name the passed 'living' will be shown
+        :param viewer: The person that the returned name will be showed to
+        :return: The string that represents the name the passed 'living' will be shown
         """
         return self.name
 
@@ -55,8 +55,8 @@ class Living(ABC):
         """
         Converts a MessageConstant to a Message
         Makes sure that the passed message value is returned as a Message object
-        @param message: The message or string to make sure or change to a Message
-        @return: A message object
+        :param message: The message or string to make sure or change to a Message
+        :return: A message object
         """
 
         if type(message) is str:
@@ -77,8 +77,8 @@ class Health:
     def change_by(self, hp_change: int):
         """
         The recommended way to change the current_health
-        @param hp_change:
-        @return:
+        :param hp_change:
+        :return:
         """
         self.current_health += hp_change
         self.check_range()
@@ -115,8 +115,8 @@ class Entity(Living, Holder):
     #     """ Not going to use this - define in HostileEntity
     #     Called when a entity, usually a player, is trying to go to another location.
     #     This will be called if this entity is in the same location as the entity trying to move to another location
-    #     @param entity: The entity trying to move to another location
-    #     @return: A CanDo tuple where [0] is a boolean value representing the the entity can pass and if False,\
+    #     :param entity: The entity trying to move to another location
+    #     :return: A CanDo tuple where [0] is a boolean value representing the the entity can pass and if False,\
     #                 [1] is the reason why the entity can't pass. (It will be displayed)
     #     """
     #     return True, "You can pass, a hostile entity might say otherwise, though."
@@ -128,9 +128,9 @@ class Entity(Living, Holder):
             are passed
         Note this will be called when try_action is called meaning that it will have been called after all the \
             calls to on_action in each Manager registered in the handler class
-        @param handler: The Handler object
-        @param entity_action: The action that entity is requesting. asked_entity should be equal to self when called.
-        @return: A CanDo where if [0] is False, the message at [1] will be sent to entity_action.entity
+        :param handler: The Handler object
+        :param entity_action: The action that entity is requesting. asked_entity should be equal to self when called.
+        :return: A CanDo where if [0] is False, the message at [1] will be sent to entity_action.entity
         """
         # TODO add more documentation and state in docs whether or not overriding subclasses should cancel the Action\
         #      or do more stuff that may be unwanted or have side effects
@@ -148,8 +148,8 @@ class HostileEntity(Entity):  # abstract
     def can_entity_pass(self, entity: Entity) -> CanDo:
         """
         Will be used by the HostileEntityManager
-        @param entity: The entity that is trying to go to another location
-        @return: A CanDo
+        :param entity: The entity that is trying to go to another location
+        :return: A CanDo
         """
         # return super().can_entity_pass(entity)
         pass
@@ -170,8 +170,8 @@ class SimpleHostileEntity(HostileEntity):
         By default, this returned self.health.is_fainted()
         The message in the returned value at [1] will never be displayed, but take it seriously in case of needed
             debugging in the future.
-        @param entity:
-        @return:
+        :param entity:
+        :return:
         """
         if self.health.is_fainted():
             return True, "I can't fight you because I'm dead."
@@ -180,8 +180,8 @@ class SimpleHostileEntity(HostileEntity):
     def _is_type_target(self, entity: Entity) -> bool:
         """
 
-        @param entity: The entity to test its type for
-        @return: True if the entity's type is a target based upon self.hostile_to_types
+        :param entity: The entity to test its type for
+        :return: True if the entity's type is a target based upon self.hostile_to_types
         """
         for t in self.hostile_to_types:
             if isinstance(entity, t):
@@ -231,8 +231,8 @@ class EntityAction(Action):  # abstract
     """
     def __init__(self, entity: Entity, send_on_can_not: bool = True):
         """
-        @param entity: The main entity involved and the one that is basically requesting to do this action
-        @param send_on_can_not: Used to determine if a message should be sent if the returned value at [0] in \
+        :param entity: The main entity involved and the one that is basically requesting to do this action
+        :param send_on_can_not: Used to determine if a message should be sent if the returned value at [0] in \
                 try_action is False. By default True. Set to False if you will be returning the CanDo returned in \
                 try_action. (You would do this so the message wouldn't get sent twice)
         """
@@ -251,8 +251,8 @@ class EntityActionToEntity(EntityAction):  # abstract
 
     def __init__(self, entity: Entity, asked_entity: Entity):
         """
-        @param entity: The main entity causing this action to occur. (The entity that is asking/action on asked_entity
-        @param asked_entity: The entity that entity is asked, challenged, requested of, depending on the action
+        :param entity: The main entity causing this action to occur. (The entity that is asking/action on asked_entity
+        :param asked_entity: The entity that entity is asked, challenged, requested of, depending on the action
         """
         super().__init__(entity)
         self.asked_entity = asked_entity

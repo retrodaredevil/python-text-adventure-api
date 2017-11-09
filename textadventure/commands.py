@@ -17,9 +17,9 @@ def get_reference(player: Player, string_args: str) -> Optional[Item]:
     """
     Senses command handler has a good code snippet that shows how you should use this method
     Note: Remember, this can return None.
-    @param player: the player
-    @param string_args: The arguments that the player entered
-    @return: The weapon
+    :param player: the player
+    :param string_args: The arguments that the player entered
+    :return: The weapon
     """
     for item in player.location.items:
         if item.is_reference(string_args):
@@ -33,10 +33,10 @@ def get_reference(player: Player, string_args: str) -> Optional[Item]:
 def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Point]:
     """
     Gets the location using the player, and it's string_args
-    @param handler: The Handler object
-    @param player: The player. Needed for location reference to get location N,E,S,W
-    @param string_args: The string arguments
-    @return: The point object that represents the point of the new location
+    :param handler: The Handler object
+    :param player: The player. Needed for location reference to get location N,E,S,W
+    :param string_args: The string arguments
+    :return: The point object that represents the point of the new location
     """
     for location in handler.locations:  # we do this first in case there's a location called North <something>
         if location.is_reference(string_args):
@@ -409,6 +409,6 @@ class LocateCommandHandler(SimpleCommandHandler):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):
-        player.send_message(
-            Message("You are at {}, which is '{}'", named_variables=[player.location.point, player.location]))
+
+        player.location.send_locate_message(player)
         return InputHandleType.HANDLED

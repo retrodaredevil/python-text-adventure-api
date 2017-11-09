@@ -45,10 +45,10 @@ class CommandHandler(InputHandler):
         """
         The _ means that this method is meant to be "protected" and should only be called within classes and subclasses
         Should not be called outside of CommandHandler
-        @param handler: The handler object
-        @param player:  The player object
-        @param player_input: The player's input
-        @return: An InputHandleType that will be returned by the handle Callable in InputHandle
+        :param handler: The handler object
+        :param player:  The player object
+        :param player_input: The player's input
+        :return: An InputHandleType that will be returned by the handle Callable in InputHandle
         """
         pass
 
@@ -58,8 +58,8 @@ class CommandHandler(InputHandler):
         Overridden by subclasses of CommandHandler and returns whether or not a command should be handled
         Called in on_input
         Should not be called in places other than the CommandHandler class
-        @param player_input:
-        @return: returns True if a command should be handled (even if argsuments are incorrect)
+        :param player_input:
+        :return: returns True if a command should be handled (even if argsuments are incorrect)
         """
         pass
 
@@ -68,8 +68,8 @@ class CommandHandler(InputHandler):
         Tells whether or not a certain command will have an effect for a player(Normally returns true unless overridden)
         called in on_input
         Called by the CommandHandler class and doesn't ever need to be called on your own. Feel free to override
-        @param player: The player to check
-        @return: A boolean, True if this command should handle a player False otherwise
+        :param player: The player to check
+        :return: A boolean, True if this command should handle a player False otherwise
         """
         return True
 
@@ -78,8 +78,8 @@ class SimpleCommandHandler(CommandHandler):
     def __init__(self, command_names: List[str], description):
         """
         A subclass of CommandHandler that makes using/extending CommandHandler simpler
-        @param command_names: A list of strings that will trigger this command
-        @param description: The help/description string
+        :param command_names: A list of strings that will trigger this command
+        :param description: The help/description string
         """
         super(SimpleCommandHandler, self).__init__()
         self.command_names = command_names
@@ -95,13 +95,13 @@ class SimpleCommandHandler(CommandHandler):
 class LocationCommandHandler(SimpleCommandHandler):
     def __init__(self, command_names: List[str], description, location: Location):
         """
-        @param location: The specific location to handle or None to handle all locations
+        :param location: The specific location to handle or None to handle all locations
         """
         super(LocationCommandHandler, self).__init__(command_names, description)
         self.location = location
 
     def _should_handle_player(self, player: Player) -> bool:
         """
-        @return: return self.location is None or player.location == self.location
+        :return: return self.location is None or player.location == self.location
         """
         return self.location is None or player.location == self.location

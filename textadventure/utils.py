@@ -30,7 +30,7 @@ If a CanDo from a method was returned, then it is likely that if a player or ent
 def debug(values):
     """
     Used to debug things
-    @param values: The values to print
+    :param values: The values to print
     """
     print(values, file=sys.stderr)
     sys.stdout.flush()
@@ -39,7 +39,7 @@ def debug(values):
 def error(values):
     """
     Should be used to print errors when raising an exception won't do what you want.
-    @param values: The values to print
+    :param values: The values to print
     """
     debug(values)
 
@@ -51,11 +51,11 @@ def is_string_true(string_input: str):
 def join_list(to_join: List[str], use_brackets: bool = False, use_indexes: bool = False):
     """
     Creates a string like: Value1, Value2 and Value3. (Lists a list like we do in english)
-    @param to_join: The list of strings to join
-    @param use_brackets: By default, False, if set to true, instead of using the values of to_join, it will use a '{}'
-    @param use_indexes: By default, False, if set to True, the index will be shown before each element in the returned\
+    :param to_join: The list of strings to join
+    :param use_brackets: By default, False, if set to true, instead of using the values of to_join, it will use a '{}'
+    :param use_indexes: By default, False, if set to True, the index will be shown before each element in the returned\
         string
-    @return: The string that was created
+    :return: The string that was created
     """
     r = ""
     length = len(to_join)
@@ -84,13 +84,13 @@ def get_type_from_list(the_list, allowed_types: Union[Type[T], List[T]], expecte
     """
     Helps you get object(s) from a list that are of a certain type along with providing an expected return length of \
         the list to be returned
-    @param the_list: The list that you want to grab object(s) from
-    @param allowed_types: The type(s) allowed to be returned
-    @param expected_amount: The expected amount of items in the list that will be returned or None if any length will \
+    :param the_list: The list that you want to grab object(s) from
+    :param allowed_types: The type(s) allowed to be returned
+    :param expected_amount: The expected amount of items in the list that will be returned or None if any length will \
                             be tolerated
-    @param is_exact_type: By default False, if True, types will be compared using type(object) == an_allowed_type, \
+    :param is_exact_type: By default False, if True, types will be compared using type(object) == an_allowed_type, \
                             otherwise, types will be compared using using isinstance
-    @return: A list of objects from the list that are of a certain type
+    :return: A list of objects from the list that are of a certain type
     """
     def is_type_tolerated(ob) -> bool:
         object_type = type(ob)  # not used unless is_exact_type is True
@@ -116,9 +116,9 @@ def get_unimportant(to_change: List[str], unimportant_list=NOT_IMPORTANT) -> Lis
     """
     Should be used for comparing input to a string. If the input will eventually be outputted, don't print this, \
         you should print the input so the player knows what they actually inputted.
-    @param to_change: The list of separated words
-    @param unimportant_list: The list of words that are unimportant
-    @return: A list of ints where each int corresponds to an index in the to_change list that is unimportant
+    :param to_change: The list of separated words
+    :param unimportant_list: The list of words that are unimportant
+    :return: A list of ints where each int corresponds to an index in the to_change list that is unimportant
     """
 
     r: List[int] = []
@@ -137,9 +137,9 @@ def are_mostly_equal(a: str, b: str) -> bool:
     """
     Checks to see if the provided strings are mostly equal.
     Converts both to lowercase and removes words from the unimportant list so a: "my the bike" b: "bike" will be True
-    @param a: First string
-    @param b: Second string
-    @return: True if the strings are mostly equal
+    :param a: First string
+    :param b: Second string
+    :return: True if the strings are mostly equal
     """
     def remove_for(change: str):
         split = change.split(" ")
@@ -162,9 +162,9 @@ class Point:
     def __init__(self, x: int, y: int, z: int = 0):
         """
         Used on locations by having an x, y and z position (z is normally 0)
-        @param x: The x position on the map
-        @param y: The y position on the map
-        @param z: Used for the height/priority (usually 0)
+        :param x: The x position on the map
+        :param y: The y position on the map
+        :param z: Used for the height/priority (usually 0)
         """
         self.x = x
         self.y = y
@@ -201,3 +201,5 @@ DOWN = UP * -1
 ZERO = Point(0, 0, 0)
 
 DIRECTIONS = [NORTH, EAST, SOUTH, WEST, UP, DOWN]
+"""Note that the directions should never be compared with 'is' even though they are declared here, you shouldn't\
+be doing that"""

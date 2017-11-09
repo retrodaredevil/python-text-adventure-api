@@ -69,8 +69,8 @@ class Item(Savable, FiveSensesHandler):
         """
         An object that is in a location with properties that define how it should react when players type commands
         Once created, to change/add the holder call the change_holder method
-        @param name: The name of the object
-        @param needs_light_to_see: Should almost always be true
+        :param name: The name of the object
+        :param needs_light_to_see: Should almost always be true
         """
         super().__init__()  # for multiple inheritance
         self.name = name
@@ -85,11 +85,11 @@ class Item(Savable, FiveSensesHandler):
         """
         The method that should be called when you want to change the holder (Don't change holder directly)
         When overridden, to change the holder, you should always call the superclass instead of doing it yourself
-        @param previous_holder: The previous holder (should be the same as self.holder but pass it anyway)
-        @param new_holder: The new holder
-        @return: Returns True if the holder was successfully changed. False if it was not (overriding subclasses may or\
+        :param previous_holder: The previous holder (should be the same as self.holder but pass it anyway)
+        :param new_holder: The new holder
+        :return: Returns True if the holder was successfully changed. False if it was not (overriding subclasses may or\
                         may not react to the changing or trying to change of the holder (You shouldn't react)
-        @param previous_holder test
+        :param previous_holder test
         """
         assert new_holder is not None, "Why would you change the holder to None?"
         # change in future if needs to delete weapon.
@@ -112,8 +112,8 @@ class Item(Savable, FiveSensesHandler):
     def is_reference(self, reference: str) -> bool:
         """
         Should be called before can_reference
-        @param reference: The string used to reference this Item
-        @return: A boolean telling whether or not the string is close enough to reference this Item
+        :param reference: The string used to reference this Item
+        :return: A boolean telling whether or not the string is close enough to reference this Item
         """
         return are_mostly_equal(self.name, reference)
 
@@ -168,8 +168,8 @@ class Item(Savable, FiveSensesHandler):
         """
         By default does nothing. can_use should only return true if this has been overridden
         This method should be called by the Location class and from no where else
-        @param handler: The handler object
-        @param player: The player using the weapon
-        @return: True if it was successful in using the weapon. If false, should have sent an error message already
+        :param handler: The handler object
+        :param player: The player using the weapon
+        :return: True if it was successful in using the weapon. If false, should have sent an error message already
         """
         pass

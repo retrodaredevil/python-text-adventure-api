@@ -6,4 +6,5 @@ it would be quite hard to get started.
 
 I will hopefully be adding more documentation in the future.
 
-To run the game that I am working on right now, make sure you have python 3.6 and then use 'main.py'
+To run the game that I am working on right now, make sure you have python 3.6 and then use 'main.py' note that you \
+    must also have the dependency "colorama" which can be installed with pip install colorama or pip3.6 or pip3

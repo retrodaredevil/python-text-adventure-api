@@ -35,7 +35,7 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
     def should_give_response(self):
         """
         Indicates whether there should be more responses allowed
-        @return: True if there are more responses allowed. False if it is advised against that
+        :return: True if there are more responses allowed. False if it is advised against that
         """
         # return self is self.__class__.NOT_HANDLED or self is self.__class__.REMOVE_HANDLER_ALLOW_RESPONSE or \
         #     self is self.__class__.UNNOTICEABLE
@@ -73,7 +73,7 @@ class InputObject:
 
     def get_command(self) -> str:
         """
-        @return: The name of the command keeping the same case as the input
+        :return: The name of the command keeping the same case as the input
         """
         return self.get_split()[self.get_command_index()]
 
@@ -88,10 +88,10 @@ class InputObject:
         Note this should be used to get each arg. (Don't do args = #get_arg(0) and then use that. \
             Use this method multiple times)
         Note that this does not change anything to lower case. Beware when comparing
-        @param index: The index for the arg. Starts at 0. Using a number less than 0 will produce an unexpected result
-        @param ignore_unimportant_before Set to True if you want filter out unimportant words before the argument \
+        :param index: The index for the arg. Starts at 0. Using a number less than 0 will produce an unexpected result
+        :param ignore_unimportant_before Set to True if you want filter out unimportant words before the argument \
                 note that it will never ignore unimportant AFTER the requested index.
-        @return: A list of the requested argument and all arguments after it. (Requested arg is in [0])
+        :return: A list of the requested argument and all arguments after it. (Requested arg is in [0])
         """
         split = self.get_split()
         unimportant: List[int] = []
@@ -129,12 +129,13 @@ class InputHandler(ABC):
         The reason this doesn't handle the input is because we want all the input handlers to be able to give\
         us their priority and depending on that, we'll call the lower priority number first\
         (lower number higher priority. Explained in InputHandle)
-        @param handler: The handler object
-        @type handler: Handler
-        @param player: the player object that gave the input
-        @param player_input: The InputObject that contains the string input and other useful data
-        @rtype: Optional[InputHandle]
-        @return: An InputHandle that handles the inputs or None if it won't handle the input
+
+        :param handler: The handler object
+        :type handler: Handler
+        :param player: the player object that gave the input
+        :param player_input: The InputObject that contains the string input and other useful data
+        :rtype: Optional[InputHandle]
+        :return: An InputHandle that handles the inputs or None if it won't handle the input
         """
         pass
 
@@ -142,8 +143,9 @@ class InputHandler(ABC):
         """
         Should not be called outside of InputHandler or its subclasses
         (should not and is not called in Handler (you must call this on your own in a handle function or not at all))
-        @param already_handled: The InputHandleTypes that are already handled
-        @return: True if input should be handled in a handle function
+
+        :param already_handled: The InputHandleTypes that are already handled
+        :return: True if input should be handled in a handle function
         """
         for handle_type in already_handled:
             if not handle_type.should_give_response():
@@ -155,8 +157,8 @@ class InputHandle:  # returned and used to indicate when the handle function sho
     def __init__(self, priority: int, handle: Callable[[List[InputHandleType]], InputHandleType],
                  input_handler: InputHandler):
         """
-        @param priority: determines the order to call things in. Lower called first. Ex: 0 then 2 then 10
-        @param handle: A function that should return a InputHandleType and should expect a list of InputHandleType
+        :param priority: determines the order to call things in. Lower called first. Ex: 0 then 2 then 10
+        :param handle: A function that should return a InputHandleType and should expect a list of InputHandleType
         """
         self.priority = priority
         self.handle = handle

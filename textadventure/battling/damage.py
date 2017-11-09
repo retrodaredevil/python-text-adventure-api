@@ -27,8 +27,8 @@ class Damage(ABC):  # like an interface
 
     def __init__(self, damager: Union[Target, Effect], target: Target):
         """
-        @param damager: The Target that's performing the Damage
-        @param target: The Target that's receiving the Damage
+        :param damager: The Target that's performing the Damage
+        :param target: The Target that's receiving the Damage
         """
         self.damager = damager
         self.target = target
@@ -37,8 +37,8 @@ class Damage(ABC):  # like an interface
     def damage(self, battle: Battle) -> OutcomePart:
         """
         The method that should be called to actually DO the damage (or whatever this class does)
-        @param battle: The Battle object which the damager and target are currently in
-        @return: An OutcomePart that will be broadcasted
+        :param battle: The Battle object which the damager and target are currently in
+        :return: An OutcomePart that will be broadcasted
         """
         pass
 
@@ -66,7 +66,7 @@ class HPDamage(Damage):
         """
         If you are using this, you should probably be using WeaponHPDamage or EffectHPDamage unless you know what\
             you're doing
-        @param hp_change: The integer amount to change the hp by. A positive number will heal while a negative number\
+        :param hp_change: The integer amount to change the hp by. A positive number will heal while a negative number\
                             will damage
         """
         Damage.__init__(self, damager, target)

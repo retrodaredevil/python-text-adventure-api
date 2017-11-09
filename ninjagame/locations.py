@@ -232,7 +232,7 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
                          Point(1, 1))
 
     def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
-        self.send_welcome(player)
+        self._send_welcome(player)
         if not player[EventsObject].been_introduced_to_furry:
             player.send_message("You hear screaming.")
             player.send_wait(0.3)
@@ -321,7 +321,7 @@ class WestInsideEntrance(Location):  # introduce Laura
                          Point(-1, 1))
 
     def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
-        self.send_welcome(player)
+        self._send_welcome(player)
 
     def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player):
         if new_location is None:
@@ -397,7 +397,7 @@ class EntranceSpiderWebForest(Location):
                          Point(0, 2))
 
     def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
-        self.send_welcome(player)
+        self._send_welcome(player)
         if not player[EventsObject].been_introduced_to_furry:
             player.send_message("You hear your friend off in the distance screaming. "
                                 "It's coming from the east of the double doors")
@@ -465,14 +465,14 @@ class CenterSpiderWebForest(Location):
                          "There's an old fountain in the middle that doesn't work and lots of spider webs",
                          Point(0, 3))
 
-    def send_welcome(self, player: Player):
+    def _send_welcome(self, player: Player):
         player.send_line()
         player.send_message(Message("The {}.", named_variables=[self]))
         player.send_message(self.description)
         player.send_line()
 
     def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
-        self.send_welcome(player)
+        self._send_welcome(player)
         events_object = player[EventsObject]
         if not events_object.has_been_in_center_spider_web_forest:
             events_object.has_been_in_center_spider_web_forest = True
@@ -580,7 +580,7 @@ class EastCenterSpiderWebForest(Location):
         return action.try_action(handler)
     
     def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
-        self.send_welcome(player)
+        self._send_welcome(player)
         if player not in self.ninja.entities_lost_to:
             player.send_message(Message("It looks like you are going to have to fight {}.",
                                         named_variables=[self.ninja]))

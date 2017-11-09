@@ -26,8 +26,8 @@ class Target:
     def __init__(self, entity: Entity, team: Team, move_chooser: 'MoveChooser', turn_number: int):
         """
 
-        @param entity: The entity
-        @param team: The team that the entity is on
+        :param entity: The entity
+        :param team: The team that the entity is on
         """
         from textadventure.battling.effect import Effect  # to avoid import errors
         self.entity = entity
@@ -42,8 +42,8 @@ class Target:
     def __getitem__(self, item: Type[T]) -> Optional[T]:
         """
         T is recommended to be PropertyEffect and using this to get an effect is not recommended
-        @param item: The type of effect to get in the effects list
-        @return: The first effect of the exact type 'item' in the self.effects list. Or None if there is none in list
+        :param item: The type of effect to get in the effects list
+        :return: The first effect of the exact type 'item' in the self.effects list. Or None if there is none in list
         """
         for effect in self.effects:
             if type(effect) == item:
@@ -53,7 +53,7 @@ class Target:
     def get_move_options(self) -> List['MoveOption']:
         """
         Should only be used by MoveChooser to tell what options there are for moves
-        @return: A list of MoveOptions that, by default, is based on the items that the Target currently has
+        :return: A list of MoveOptions that, by default, is based on the items that the Target currently has
         """
         from textadventure.battling.weapon import Weapon
         r: List['MoveOption'] = []
@@ -66,7 +66,7 @@ class Target:
     def create_target_next_turn(self, previous_turn: 'Turn', turn_number: int) -> 'Target':
         """
         Creates a new Target that should be used on the next turn
-        @return: The Target to use for the next turn
+        :return: The Target to use for the next turn
         """
         target = Target(self.entity, self.team, self.move_chooser, turn_number)
         for effect in self.effects:
@@ -103,7 +103,7 @@ class Turn:
     def start(self, battle: 'Battle'):
         """
         Called when this Turn is being set to the Battle's current turn
-        @param battle: The battle handling this Turn object
+        :param battle: The battle handling this Turn object
         """
         self.is_started = True
         battle.broadcast("")  # a new line makes it easier to read
@@ -187,9 +187,9 @@ class Move(ABC):
     def __init__(self, name: str, priority: int, user: Target, targets: List[Target]):
         """
 
-        @param priority: The priority of the move where it will move first if it is lower
-        @param user: The user of the moveHello there how are you
-        @param targets: The targets the user is targeting
+        :param priority: The priority of the move where it will move first if it is lower
+        :param user: The user of the moveHello there how are you
+        :param targets: The targets the user is targeting
         """
         self.name = name
         self.priority = priority
@@ -204,9 +204,9 @@ class Move(ABC):
         """
         Called when the move should be executed
         Note the order that the returned List at [0] matters because of the order the outcomes will be displayed
-        @param handler:
-        @param battle: The battle that this move is being used in where current_turn is the current turn that is ongoing
-        @return: A list of OutcomeParts (things that this method did)
+        :param handler:
+        :param battle: The battle that this move is being used in where current_turn is the current turn that is ongoing
+        :return: A list of OutcomeParts (things that this method did)
         """
         pass
 

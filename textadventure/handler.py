@@ -13,9 +13,9 @@ T = TypeVar("T")
 def has_only(the_list: List[T], only_list: List[T]):
     """
     Makes sure that all the items in a list are equal to one of the items in only_list
-    @param the_list: The list to check
-    @param only_list: The list of acceptable objects to make sure that every weapon in the list is one of these objects
-    @return: True if all the items in the list are equal to only, Also True if there are no items in list.
+    :param the_list: The list to check
+    :param only_list: The list of acceptable objects to make sure that every weapon in the list is one of these objects
+    :return: True if all the items in the list are equal to only, Also True if there are no items in list.
     """
     for ele in the_list:
         if ele not in only_list:
@@ -93,8 +93,8 @@ class Handler:
         for each manager in managers call on_action with action
         This method just makes sure all of self.managers's on_action methods are called and does NOTHING ELSE\
             (You must call try_action on your own)
-        @param action: The action to be called
-        @return: None, but you the action's state should change if one of the managers acted on it
+        :param action: The action to be called
+        :return: None, but you the action's state should change if one of the managers acted on it
         """
         for manager in self.managers:
             manager.on_action(self, action)
@@ -145,7 +145,7 @@ from textadventure.input import InputHandler, InputObject, InputHandleType, Inpu
 class SettingsHandler(InputHandler):
     def __init__(self, allowed_player: Player):
         """
-        @param allowed_player: The only player that this will react to
+        :param allowed_player: The only player that this will react to
         """
         self.allowed_player = allowed_player
 

@@ -15,8 +15,8 @@ class Holder:  # kind of like an interface
     def can_hold(self, item):
         """
         Returns whether or not this holder can hold this weapon. Usually True and usually only reacts to the weapon type
-        @param item: The weapon
-        @type item: Item
-        @return: True if it can hold the weapon False otherwise
+        :param item: The weapon
+        :type item: Item
+        :return: True if it can hold the weapon False otherwise
         """
         return True

@@ -9,7 +9,7 @@ T = TypeVar("T")
 class Player(Entity):
     def __init__(self, player_input: PlayerInput, player_output: PlayerOutput, name: Optional[str]):
         """
-        @param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
+        :param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
                     that players' names are one word while other entities are multiple so no one can name themselves\
                     the name of an important entity
         """
@@ -65,15 +65,15 @@ class Player(Entity):
         """
         A method called in the while True loop inside Handler
         This method will be used mostly to update the handled_objects (as of right now not needed tho)
-        @param handler: The handler object
-        @type handler: Handler
-        @return:
+        :param handler: The handler object
+        :type handler: Handler
+        :return:
         """
         pass
 
     def take_input(self) -> str:
         """
-        @return: a string or None if there is no input to take
+        :return: a string or None if there is no input to take
         Once this method is called, the returned value will not be returned again (unless typed again)
         """
         return self.player_input.take_input()
@@ -81,8 +81,8 @@ class Player(Entity):
     def get_wallet(self):
         """
         This method returns the Wallet weapon. It is here so there aren't any import errors whenever you want to use it.
-        @rtype Wallet
-        @return: The wallet that's in the player's items or None if there is no Wallet
+        :rtype Wallet
+        :return: The wallet that's in the player's items or None if there is no Wallet
         """
         from textadventure.items import Wallet
         for item in self.items:
