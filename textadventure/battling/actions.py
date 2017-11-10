@@ -60,7 +60,7 @@ class EntityChallengeAction(EntityActionToEntity):
         return self.can_do
 
 
-class DamageAction(Action):  # TODO create a manager where Effects can handle this Action without creating their own M
+class DamageAction(Action):  # DONE create a manager where Effects can handle this Action without creating their own M
     def __init__(self, cause_object: Union['Move', 'Effect', Any], damage: 'Damage', battle: 'Battle'):
         """
         :param cause_object: The object that contains the method that created this. (Almost always a Move or Effect)
