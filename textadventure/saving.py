@@ -34,6 +34,7 @@ def save(handler, player: Player, path: Path=DEFAULT_PATH, override_file: bool=F
         return False, "Would you like to override the file in the path {}?".format(path.absolute().name)
 
     to_save = []
+    # noinspection PyBroadException
     try:
         textadventure.savable.is_saving = True
         data = player.handled_objects  # one of the only places it can do this
@@ -46,7 +47,7 @@ def save(handler, player: Player, path: Path=DEFAULT_PATH, override_file: bool=F
         with path.open("wb") as file:
             print("Going to save: {}".format(to_save))
             pickle.dump(to_save, file)
-    except:
+    except Exception:
         info = sys.exc_info()
         return False, "Got error: {}, {}".format(info[0], info[1])
     finally:

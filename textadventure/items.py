@@ -20,7 +20,7 @@ class CoinType(Enum):
 class Coin(Item):
     def __init__(self, coin_type: CoinType):
         super().__init__(coin_type.value[1], True)
-        self.coin_type: CoinType = coin_type
+        self.coin_type: CoinType = coin_type  # noinspection PyTypeChecker
 
     def change_holder(self, previous_holder: Optional[Holder], new_holder: Holder) -> bool:
         if isinstance(new_holder, Player):
@@ -34,7 +34,7 @@ class Coin(Item):
         return True, "You can feel this"
 
     def feel(self, handler: Handler, player: Player):
-        name: str = self.coin_type.value[1]
+        name: str = self.coin_type.value[1]  # noinspection PyTypeChecker
         if self.coin_type is CoinType.DOLLAR:
             player.send_message("You feel a nice GOLDEN coin. It's worth a lot! It's a {}!".format(name))
         else:

@@ -40,7 +40,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         super().__init__()
         self.name = name
         self.description = description
-        self.point: Point = point
+        self.point: Point = point  # noinspection PyTypeChecker
 
         self.command_handlers: List[CommandHandler] = []
         self.__add_command_handlers()
@@ -160,13 +160,15 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     @abstractmethod
     def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player) -> CanDo:
         """
-        Called when a player tried to go to another location using the go command. Different implementation for each loc
-        Note that when overriding this method, try not use use the type reference to other locations as the compiler\
-        won't like you
+        Called when a player tried to go to another location using the go command. Different implementation for each \
+        loc Note that when overriding this method, try not use use the type reference to other locations as the \
+        compiler won't like you
         This method will call on_enter, change the player's location etc if it is a success
+
         :param handler:
         :param player: The player that is trying to go to the new_location
-        :param new_location: The new location that the player is trying to go to. If passed is None, respond to a direction
+        :param new_location: The new location that the player is trying to go to. If passed is None, respond to \
+                a direction
         :param direction: The direction the player will move/ add to this location to get new_location's point
         :return: A CanDo tuple. If [0] is False, there was no output given to the player and the [1] \
                  represents the error message that still needs to be sent to the player. If [0] is True, then [1] \

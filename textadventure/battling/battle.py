@@ -3,7 +3,6 @@ from typing import List, Optional
 from textadventure.battling.move import Turn, Target
 from textadventure.battling.team import Team
 from textadventure.handler import Handler
-from textadventure.input import InputHandler, InputHandleType, InputObject, InputHandle
 from textadventure.message import Message
 from textadventure.player import Player, Entity
 from textadventure.utils import MessageConstant
@@ -17,7 +16,7 @@ class Battle:
         self.has_started = False
         self.has_ended = False
 
-        self.current_turn: Turn = None
+        self.current_turn: Turn = None  # noinspection PyTypeChecker
 
     def is_going_on(self):
         """

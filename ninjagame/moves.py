@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from textadventure.handler import Handler
 
 
+# noinspection PyAbstractClass
 class WeaponMove(Move):  # abstract
     def __init__(self, priority: int, user: Target, targets: List[Target], item: Item):
         super().__init__(str(item), priority, user, targets)

@@ -10,6 +10,7 @@ if TYPE_CHECKING:  # if removed, will cause type errors
     from textadventure.battling.choosing import MoveOption, MoveChooser
     from textadventure.battling.battle import Battle
     from textadventure.handler import Handler
+    from textadventure.battling.effect import Effect  # to avoid import errors
 
 
 T = TypeVar('T')
@@ -29,14 +30,13 @@ class Target:
         :param entity: The entity
         :param team: The team that the entity is on
         """
-        from textadventure.battling.effect import Effect  # to avoid import errors
         self.entity = entity
         self.team = team
         self.move_chooser = move_chooser
         self.turn_number = turn_number  # turn object not passed to avoid import errors and avoid passing a reference\
         #  of self somehow to the Turn object
 
-        self.effects: List[Effect] = []
+        self.effects: List['Effect'] = []
         """Right now, you should just append to this list since we don't have a special method to add effects."""
 
     def __getitem__(self, item: Type[T]) -> Optional[T]:
@@ -46,7 +46,7 @@ class Target:
         :return: The first effect of the exact type 'item' in the self.effects list. Or None if there is none in list
         """
         for effect in self.effects:
-            if type(effect) == item:
+            if isinstance(effect, item):
                 return effect
         return None
 
@@ -90,8 +90,8 @@ class Turn:
         self.is_doing = False
         self.is_done = False
 
-        self.chosen_moves: Dict[Target, Move] = {}  # note that this has nothing to do with move options. Let \
-        # MoveChooser handle that stuff
+        self.chosen_moves: Dict[Target, Move] = {}  # noinspection PyTypeChecker# note that this has nothing to do \
+        # with move options. Let MoveChooser handle that stuff
 
     def get_target(self, entity: Entity) -> Optional[Target]:
         for target in self.targets:

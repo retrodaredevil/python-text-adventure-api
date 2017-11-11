@@ -36,9 +36,9 @@ class MoveOutcome:
         :param can_move: A CanDo tuple representing if the player was able to try to perform the move. This can be \
                          cancelled by effects.
         """
-        self.can_move: CanDo = can_move
+        self.can_move = can_move
 
-        self.parts: List[OutcomePart] = []
+        self.parts: List[OutcomePart] = []  # noinspection PyTypeChecker
 
     def broadcast(self, battle: 'Battle'):
         if not self.can_move[0]:

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from enum import unique, Enum
 from typing import Type, List
 
 from textadventure.action import Action
@@ -98,6 +97,7 @@ class Health:
         return self.current_health == self.max_health
 
 
+# noinspection PyAbstractClass
 class Entity(Living, Holder):
     def __init__(self, name: str, health: Health, location):
         super().__init__(name)
@@ -162,7 +162,8 @@ class SimpleHostileEntity(HostileEntity):
         self.hostile_to_types = hostile_to_types
 
         self.hostile_now = True
-        self.can_not_pass: CanDo = (False, Message(self.__class__.CANNOT_PASS_STRING, named_variables=[self]))
+        self.can_not_pass: CanDo = (False, Message(self.__class__.CANNOT_PASS_STRING, named_variables=[self])
+                                    )  # noinspection PyTypeCheckeri
 
     def _can_pass(self, entity: Entity) -> CanDo:
         """
@@ -210,8 +211,8 @@ class CommunityHostileEntity(SimpleHostileEntity):
 
     def __init__(self, name: str, health: Health, location, hostile_to_types: List[Type[Entity]]):
         super().__init__(name, health, location, hostile_to_types)
-        self.entities_lost_to: List[Entity] = []
-        self.entities_won_against: List[Entity] = []
+        self.entities_lost_to: List[Entity] = []  # noinspection PyTypeChecker
+        self.entities_won_against: List[Entity] = []  # noinspection PyTypeChecker
 
     def _can_pass(self, entity: Entity):
         # We aren't going to call super because even if this entity is dead, we want them to fight the entity if\
@@ -223,6 +224,7 @@ class CommunityHostileEntity(SimpleHostileEntity):
         return False, "You can't pass since you haven't beaten me yet. - Should not be displayed"
 
 
+# noinspection PyAbstractClass
 class EntityAction(Action):  # abstract
     """
     Used when there's an entity involved in an action (or multiple entities where the entity stored in this class\
@@ -247,6 +249,7 @@ class EntityAction(Action):  # abstract
         return can_do
 
 
+# noinspection PyAbstractClass
 class EntityActionToEntity(EntityAction):  # abstract
 
     def __init__(self, entity: Entity, asked_entity: Entity):

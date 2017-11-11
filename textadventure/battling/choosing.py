@@ -182,7 +182,7 @@ class SetMoveChooser(MoveChooser):
     def __init__(self, entity: Entity):
         super().__init__(entity)
 
-        self.chosen_move: Optional[Move] = None
+        self.chosen_move: Optional[Move] = None  # noinspection PyTypeChecker
 
     def set_option(self, user: Target, option: MoveOption, targets: List[Target]) -> CanDo:
         """

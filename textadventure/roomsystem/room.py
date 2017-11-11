@@ -20,7 +20,7 @@ class Room:
                             If you want the player to go from here to
         """
         self.house = house
-        self.doorways: List[Point] = doorways
+        self.doorways: List[Point] = doorways  # noinspection PyTypeChecker
 
         self.entrances: List[Point] = []
         """The list of directions that the player can go to exit the location. If a player is in a room and EAST \

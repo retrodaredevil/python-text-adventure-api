@@ -1,7 +1,8 @@
 from typing import List, Optional
 
 from textadventure.battling.actions import EntityChallengeAction
-from textadventure.battling.choosing import SetMoveChooser, MoveOption, Targetability
+from textadventure.battling.choosing import SetMoveChooser, MoveOption
+from textadventure.battling.managing import BattleManager
 from textadventure.battling.move import Target
 from textadventure.command import SimpleCommandHandler
 from textadventure.handler import Handler
@@ -24,7 +25,7 @@ class AttackCommandHandler(SimpleCommandHandler):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
-        from textadventure.battling.managing import BattleManager
+        # from textadventure.battling.managing import BattleManager importing non-locally now
         manager: BattleManager = handler.get_managers(BattleManager, 1)[0]  # get the BattleManager, there should be 1
         battles = manager.get_battles(player)
         assert len(battles) <= 1, "The player can only by in one battle"
@@ -93,8 +94,8 @@ class AttackCommandHandler(SimpleCommandHandler):
         if number < 0 or number >= length:
             player.send_message(Message("The number {} is not valid", named_variables=[number]))
             return InputHandleType.HANDLED
-        option: MoveOption = options[number]
-        chooser: SetMoveChooser = user.move_chooser
+        option: MoveOption = options[number]  # noinspection PyTypeChecker
+        chooser: SetMoveChooser = user.move_chooser  # noinspection PyTypeChecker
 
         if chosen_targets is None:  # lets automatically create the list for the player.
             chosen_targets = option.get_targeting_option(user).get_recommended_targets(battle.current_turn, user,

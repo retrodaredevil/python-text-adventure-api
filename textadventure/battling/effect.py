@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List, TYPE_CHECKING, Union, Optional
+from typing import List, TYPE_CHECKING, Optional
 
 from textadventure.battling.choosing import MoveOption
 from textadventure.battling.move import Move, Target, Turn
 from textadventure.battling.outcome import MoveOutcome, OutcomePart
 from textadventure.entity import Entity
 from textadventure.utils import CanDo
-
 
 if TYPE_CHECKING:
     from textadventure.battling.actions import DamageAction

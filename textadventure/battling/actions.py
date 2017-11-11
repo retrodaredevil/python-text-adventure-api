@@ -25,7 +25,7 @@ class BattleStart(Action):
     """
     def __init__(self, battle: 'Battle'):
         super().__init__()
-        self.battle: 'Battle' = battle
+        self.battle = battle  # noinspection PyTypeChecker
 
     def _do_action(self, handler):
         self.battle.has_started = True
@@ -38,7 +38,7 @@ class BattleEnd(Action):
     """
     def __init__(self, battle: 'Battle', winning_team: Team):
         super().__init__()
-        self.battle: 'Battle' = battle
+        self.battle = battle  # noinspection PyTypeChecker
         self.winning_team = winning_team
 
     def _do_action(self, handler):
@@ -68,14 +68,14 @@ class DamageAction(Action):  # DONE create a manager where Effects can handle th
         """
         from textadventure.battling.outcome import OutcomePart
         super().__init__()
-        self.cause_object: Union[Move, Effect] = cause_object
+        self.cause_object = cause_object
         """The object that contains the method that created this. Depending on the implementation or the code you \
         created, this could be None"""
         self.damage = damage
         assert damage is not None
         self.battle = battle
 
-        self.outcome_parts: List[OutcomePart] = []
+        self.outcome_parts: List[OutcomePart] = []  # noinspection PyTypeChecker
         """The list of outcome parts that will be appended to when _do_action is called. If a Manager changes \
         something in self.damage, they may want to append an OutcomePart so people know what happened."""
 

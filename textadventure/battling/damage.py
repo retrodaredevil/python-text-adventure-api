@@ -43,6 +43,7 @@ class Damage(ABC):  # like an interface
         pass
 
 
+# noinspection PyAbstractClass
 class WeaponDamage(Damage):  # like an interface
     """
     A funky class that is meant to be an interface like class and should be used in a subclass of Damage when the \
@@ -71,7 +72,7 @@ class HPDamage(Damage):
         """
         Damage.__init__(self, damager, target)
         self.hp_change = hp_change
-        self.multiplier_list: List[float] = []
+        self.multiplier_list: List[float] = []  # noinspection PyTypeChecker
         """Should be appended to when wanting to multiply the damage of hp_change"""
 
     def calculate_multiplier(self):
@@ -92,6 +93,7 @@ class HPDamage(Damage):
         return HealthChangeOutcome(self.target, before_health, multiplier)
 
 
+# noinspection PyAbstractClass
 class EffectDamage(Damage):
     """
     The The equivalent of WeaponDamage but for Effects

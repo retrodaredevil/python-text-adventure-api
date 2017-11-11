@@ -6,6 +6,7 @@ from textadventure.item import Item
 from textadventure.player import Player
 
 
+# noinspection PyAbstractClass
 class Weapon(Item):
     """
     All weapons should be items because they are going to be in your inventory and making them items makes it easier\
@@ -27,7 +28,7 @@ class Weapon(Item):
         super().__init__(name, True)
         if move_options is None:
             move_options = []
-        self.move_options: List[MoveOption] = move_options
+        self.move_options: List[MoveOption] = move_options  # noinspection PyTypeChecker
 
     def can_take(self, player: Player):
         return True, "You can take this"

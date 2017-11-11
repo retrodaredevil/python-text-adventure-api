@@ -170,7 +170,7 @@ class Point:
         self.y = y
         self.z = z
 
-    def __mul__(self, other):
+    def __mul__(self, other: Union['Point', int]):
         if type(other) is int:
             return Point(self.x * other, self.y * other, self.z * other)
         return Point(self.x * other.x, self.y * other.y, self.z * other.z)

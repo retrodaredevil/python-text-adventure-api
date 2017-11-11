@@ -1,9 +1,6 @@
 from enum import Enum, unique
-from typing import Tuple, TYPE_CHECKING
+from typing import Tuple
 
-from textadventure.battling.actions import DamageAction
-from textadventure.battling.damage import WeaponHPDamage
-from textadventure.battling.effect import PropertyEffect
 from textadventure.battling.weapon import Weapon
 from textadventure.handler import Handler
 from textadventure.items import Item

@@ -26,7 +26,7 @@ class SwordDamageAlter(PropertyEffect):
             # section using damage_action.cause_object
             sword_move = damage_action.cause_object
             index = sword_move.move_type.value[1]  # SwordMoveType's value is a tuple with [1] being the index
-            multiplier: float = self.sword_move_type_effectiveness[index]
+            multiplier: float = self.sword_move_type_effectiveness[index]  # noinspection PyTypeChecker
             # section using damage_action.damage
             damage: WeaponHPDamage = damage_action.damage
 

@@ -45,7 +45,7 @@ class NameTaker(InputHandler):
     def __init__(self, player: Player):
         self.current_name = None
         self.current_friend_name = None
-        self.player: Player = player
+        self.player = player
 
         message = "Oh hey! You've just accepted to start your journey too! I just did too. Wait, what's you name again?"
         player[PlayerFriend].tell(player, message)
@@ -262,7 +262,7 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
     def on_take(self, handler: Handler, item: Item):
         if not isinstance(item.holder, Player):
             return
-        player: Player = item.holder
+        player = item.holder
         if isinstance(item, Wallet):
             if player[EventsObject].been_introduced_to_furry:
                 handler.get_livings(OtherPerson, 1)[0].tell(player, "Hey that's not yours!")

@@ -5,10 +5,10 @@ from ninjagame.moves import SwordMove, SwordMoveType
 from textadventure.battling.choosing import MoveOption, TargetingOption, Targetability
 from textadventure.battling.move import Target
 from textadventure.battling.weapon import Weapon
-from textadventure.item import Item
 from textadventure.utils import CanDo
 
 
+# noinspection PyAbstractClass
 class SimpleMoveOption(MoveOption):
     CAN_CHOOSE_TARGETS: CanDo = (True, "You are able to choose all of these targets.")
     CANT_TARGET_SELF: CanDo = (False, "You can't target yourself!")
@@ -39,6 +39,7 @@ class SimpleMoveOption(MoveOption):
         return self.__class__.CAN_CHOOSE_TARGETS
 
 
+# noinspection PyAbstractClass
 class WeaponMoveOption(SimpleMoveOption):  # abstract
     def __init__(self, weapon: Weapon, targeting_option: TargetingOption):
         super().__init__(targeting_option)

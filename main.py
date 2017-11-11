@@ -16,7 +16,8 @@ from textadventure.battling.managing import HostileEntityManager, BattleManager,
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
     UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
     HelpCommandHandler
-from textadventure.handler import SettingsHandler, Handler
+from textadventure.handler import Handler
+from textadventure.inputhandlers import SettingsHandler
 from textadventure.message import KeyboardInput, StreamOutput
 from textadventure.player import Player
 from textadventure.playersavable import PlayerSavable
@@ -41,7 +42,7 @@ def default_load(player: Player, handler: Handler):
 
 
 def setup():
-    handler: Handler = Handler()  # if getting error. Use 3.6
+    handler = Handler()
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 
     stream_output = StreamOutput()

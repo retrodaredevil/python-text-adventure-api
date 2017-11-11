@@ -74,6 +74,7 @@ class CommandHandler(InputHandler):
         return True
 
 
+# noinspection PyAbstractClass
 class SimpleCommandHandler(CommandHandler):
     def __init__(self, command_names: List[str], description):
         """
@@ -92,6 +93,7 @@ class SimpleCommandHandler(CommandHandler):
         player.send_message(self.description)
 
 
+# noinspection PyAbstractClass
 class LocationCommandHandler(SimpleCommandHandler):
     def __init__(self, command_names: List[str], description, location: Location):
         """

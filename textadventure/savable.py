@@ -5,7 +5,7 @@ from typing import List
 To avoid namespace and type error, this file shouldn't import anything from the textadventure package
 """
 
-is_saving = False
+is_saving = False  # as of right now, I don't think this is checked anywhere in the code, just set
 
 
 class Savable(ABC):
@@ -32,7 +32,7 @@ class Savable(ABC):
 
     def __init__(self):
         super().__init__()  # for multiple inheritance
-        self.non_serialized: List[str] = []
+        self.non_serialized: List[str] = []  # noinspection PyTypeChecker
         """Appending to this list allows you to stop pickler from saving a field"""
 
     # def __getattribute__(self, weapon):  # this is funny. I tried getting it to work with pickle. Don't try this

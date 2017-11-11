@@ -4,7 +4,7 @@ from typing import Optional
 from textadventure.handler import Handler
 from textadventure.holder import Holder
 from textadventure.player import Player
-from textadventure.savable import Savable, is_saving
+from textadventure.savable import Savable
 from textadventure.utils import are_mostly_equal, CanDo
 
 
@@ -43,7 +43,7 @@ class Item(Savable, FiveSensesHandler):
     CANNOT_SMELL: CanDo = (False, "You can't smell this")
     CANNOT_TASTE: CanDo = (False, "You can't taste this")
     # CANNOT_USE: CanDo = (False, "You can't use this")
-    CANNOT_USE_DONT_HAVE: CanDo = (False, "You don't have this weapon")
+    CANNOT_USE_DO_NOT_HAVE: CanDo = (False, "You don't have this weapon")
     CANNOT_TAKE: CanDo = (False, "You can't take this")
     CANNOT_TAKE_ON_PERSON: CanDo = (False, "You already have this")
     CANNOT_PUT: CanDo = (False, "You can't place this")
@@ -74,7 +74,7 @@ class Item(Savable, FiveSensesHandler):
         """
         super().__init__()  # for multiple inheritance
         self.name = name
-        self.holder: Optional[Holder] = None  # can be player, location etc
+        self.holder: Optional[Holder] = None  # noinspection PyTypeChecker # can be player, location etc
         self.non_serialized = self.__class__.non_serialized
         self.__needs_light = needs_light_to_see
 
@@ -161,7 +161,7 @@ class Item(Savable, FiveSensesHandler):
         if self in player.items:
             return True, "You can use this because you have it"
         else:
-            return self.__class__.CANNOT_USE_DONT_HAVE
+            return self.__class__.CANNOT_USE_DO_NOT_HAVE
 
     @abstractmethod
     def use_item(self, handler: Handler, player: Player) -> bool:

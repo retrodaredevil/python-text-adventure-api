@@ -1,4 +1,6 @@
-from typing import Optional
+from typing import Optional, List
+
+from textprint.line import Line
 
 
 class Section:

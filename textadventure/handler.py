@@ -1,11 +1,15 @@
-from typing import List, Optional, TypeVar, Type, Union
+from typing import List, Optional, TypeVar, Type, Union, TYPE_CHECKING
 
 from textadventure.action import Action
 from textadventure.entity import Entity
 from textadventure.manager import Manager
-from textadventure.message import Message, MessageType, StreamOutput
 from textadventure.player import Player, Living
 from textadventure.utils import Point, get_type_from_list
+
+
+if TYPE_CHECKING:
+    from textadventure.input import InputHandler
+
 
 T = TypeVar("T")
 
@@ -61,7 +65,7 @@ class Handler:
                 #  ^ That comment is there because in the Manager list, I added the class instead of creating the obj
 
     def __do_input(self, player: Player, inp: str):
-        from textadventure.input import InputObject, InputHandleType
+        from textadventure.input import InputObject, InputHandleType, InputHandle
         input_object = InputObject(inp)
         input_handles: List[InputHandle] = []
         for input_handler in self.get_input_handlers():
@@ -138,42 +142,3 @@ class Handler:
                 return location
         return None
 
-
-from textadventure.input import InputHandler, InputObject, InputHandleType, InputHandle
-
-
-class SettingsHandler(InputHandler):
-    def __init__(self, allowed_player: Player):
-        """
-        :param allowed_player: The only player that this will react to
-        """
-        self.allowed_player = allowed_player
-
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-
-        if player != self.allowed_player or player_input.get_command().lower() != "setting" \
-                or type(player.player_output) is not StreamOutput:
-            return None
-
-        output: StreamOutput = player.player_output
-
-        def handle_function(already_handled: List[InputHandleType]) -> InputHandleType:
-            if len(player_input.get_arg(1)) != 0:
-                if player_input.get_arg(0)[0].lower() == "speed":
-                    speed = player_input.get_arg(1)[0].lower()
-                    if speed == "fast":
-                        output.wait_multiplier = 0.4
-                        player.send_message("Set speed to fast.")
-                        return InputHandleType.HANDLED_AND_DONE
-                    elif speed == "normal":
-                        output.wait_multiplier = 1
-                        player.send_message("Set speed to normal")
-                        return InputHandleType.HANDLED_AND_DONE
-                    else:
-                        pass  # flow down to send help message
-
-            player.send_message(Message("Help for setting command: \n"
-                                        "\tspeed: setting speed <fast:normal>", MessageType.IMMEDIATE))
-            return InputHandleType.HANDLED_AND_DONE
-
-        return InputHandle(0, handle_function, self)

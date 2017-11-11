@@ -83,7 +83,7 @@ class StreamOutput(PlayerOutput, Thread):  # extending thread so we can let mess
                     time.sleep(message.wait_in_seconds * before_multiplier)
                     to_print = message.before + message.text + message.ending
 
-                    names: List[str] = []
+                    names: List[str] = []  # noinspection PyTypeChecker
                     for named in message.named_variables:
                         if isinstance(named, List):
                             names.append(join_list(list(map(str, named))))
@@ -151,7 +151,7 @@ class KeyboardInput(PlayerInput, Thread):
         :param stream_output: The stream output or None if the PlayerOutput object isn't a StreamOutput
         """
         super().__init__()
-        self.inputs: List[str] = []
+        self.inputs: List[str] = []  # noinspection PyTypeChecker
         self.stream_output = stream_output
         self.__input_prompt: str = self.__class__.DEFAULT_INPUT_PROMPT
         self.start()
@@ -240,8 +240,8 @@ class Message:
                                 Note that you shouldn't put a number in {} (don't do {1}) it could be handled weirdly
         """
         self.message_type = message_type
-        self.text: str = text
-        self.ending: str = ending
+        self.text = text
+        self.ending = ending
         self.wait_after = wait_after
         self.wait_in_seconds = wait_in_seconds
         if named_variables is None:

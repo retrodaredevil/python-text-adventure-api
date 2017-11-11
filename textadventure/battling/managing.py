@@ -4,11 +4,10 @@ from typing import List, Tuple, TYPE_CHECKING
 
 from textadventure.action import Action
 from textadventure.battling.battle import Battle
-from textadventure.battling.move import Target, Move
+from textadventure.battling.move import Target
 from textadventure.entity import HostileEntity, Entity, CommunityHostileEntity
 from textadventure.handler import Handler
 from textadventure.manager import Manager
-
 
 if TYPE_CHECKING:
     from textadventure.battling.team import Team
@@ -32,9 +31,9 @@ class BattleManager(Manager):
     """
     def __init__(self):
         super().__init__()
-        self.active_battles: List[Battle] = []
+        self.active_battles: List[Battle] = []  # noinspection PyTypeChecker
 
-        self.stop_entities_from_leaving_location: Tuple[bool, bool] = (True, True)
+        self.stop_entities_from_leaving_location: Tuple[bool, bool] = (True, True)  # PyCharm isn't mad at this
         """A tuple where [0] represents whether or not entities changing locations should be stopped and [1] \
         is only used if [0] is True. [1] is True when the entity should be stopped even if the battle hasn't started.
         By default, both are True."""
@@ -112,7 +111,7 @@ class HostileEntityManager(Manager):
             # print("BattleEnd called")
             battle = action.battle
             winning_team = action.winning_team
-            community_hostiles: List[Tuple[CommunityHostileEntity, 'Team']] = []
+            community_hostiles: List[Tuple[CommunityHostileEntity, 'Team']] = []  # noinspection PyTypeChecker
             for team in battle.teams:
                 for entity in team.members:
                     if isinstance(entity, CommunityHostileEntity):
@@ -147,7 +146,7 @@ class DamageActionManager(Manager):
         from textadventure.battling.actions import DamageAction
         if isinstance(action, DamageAction):
             damage = action.damage
-            to_alert: List[Target] = [damage.target]
+            to_alert: List[Target] = [damage.target]  # noinspection PyTypeChecker
             if isinstance(damage.damager, Target):
                 to_alert.append(damage.damager)
 
