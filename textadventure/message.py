@@ -174,7 +174,7 @@ class KeyboardInput(PlayerInput, Thread):
                     '''
                     Can we just take a moment to appreciate whatever the heck I created does?
                     All ya gotta do it press enter and this little if statement makes it happen.
-                    Fuck this doesn't work on windows. I've been using gitbash. Fuck DOS operating system wtf
+                    Duck this doesn't work on windows. I've been using gitbash. Duck DOS operating system wtf
                     '''
 
                     self.stream_output.print_immediate = True

@@ -1,18 +1,10 @@
 .metadata
 build
 
-# if you wonder why this is crazy, it's because I had no idea what I was doing when I created it.
-.idea/*
-*.pyc
-*.pyo
-*/__pycache__/*
-*/*/__pycache__/*
-*cpython*
 
-#  https://stackoverflow.com/questions/3719243/recommended-gitignore-file-for-python-projects
+#  https://stackoverflow.com/questions/3719243/recommended-gitignore-file-for-python-projects  << thanks
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
 
 # C extensions
 *.so
@@ -60,3 +52,4 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+.idea/
