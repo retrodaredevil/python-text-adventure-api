@@ -61,7 +61,8 @@ def run_program(win):
         if input_updater.should_exit:
             break
     while True:
-        pass  # keep it open
+        if input_updater.should_exit:
+            break
 
 
 if __name__ == '__main__':

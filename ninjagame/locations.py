@@ -6,8 +6,8 @@ from ninjagame.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend,
 from ninjagame.items import Sword, SwordType
 from textadventure.entity import Health
 from textadventure.handler import Handler
-from textadventure.input import InputHandler
-from textadventure.input import InputObject, InputHandle, InputHandleType
+from textadventure.inputhandling import InputHandler
+from textadventure.inputhandling import InputObject, InputHandle, InputHandleType
 from textadventure.item import Item
 from textadventure.items import Wallet, Coin, CoinType
 from textadventure.location import Location, GoAction

@@ -8,29 +8,31 @@ from textadventure.utils import get_unimportant
 
 
 @unique
-class InputHandleType(Enum):  # returned when the InputHandle's handle method/variableproperty is called
+class InputHandleType(Enum):  # returned when the InputHandle's handle method/variable property is called
     """
     Most of the time, unless you know the side effects, always use NOT_HANDLED and HANDLED
-    Attributes:
-        NOT_HANDLED        Used to represent when there was no action taken
-        HANDLED            Used to represent when there was a noticeable action taken (don't act unless needed after)
-        PARTIALLY_HANDLED  Used to represent when there was an action taken, but not something too important
-        UNNOTICEABLE       Used to represent when there was action taken but barely noticeable (should respond to)\
-                                if returned, and no other responses, it should say Command not recognized.
-        REMOVE_HANDLER     Used to tell the caller of the event to remove the handler(indicates a noticeable action too)
-        REMOVE_HANDLER_ALLOW_RESPONSE same as REMOVE_HANDLER but you can respond if you would like (no notic action)
-        INCORRECT_RESPONSE Represents when a response was incorrect and the handler doesn't want you to try to use input
         HANDLE_AND_DONE    Represents when a response has been handled and should never be responded to again \
                                (Normally use HANDLED) (It won't allow anything to respond at all after this is returned)
     """
     NOT_HANDLED = auto()
+    """Used to represent when there was no action taken"""
     HANDLED = auto()
+    """Used to represent when there was a noticeable action taken (don't act unless needed after)"""
     PARTIALLY_HANDLED = auto()
+    """Used to represent when there was an action taken, but not something too important"""
     UNNOTICEABLE = auto()
+    """Used to represent when there was action taken but barely noticeable (should respond to) if returned, \
+            and no other responses, it should say Command not recognized."""
     REMOVE_HANDLER = auto()
+    """Used to tell the caller of the event to remove the handler(indicates a noticeable action too)"""
     REMOVE_HANDLER_ALLOW_RESPONSE = auto()
+    """same as REMOVE_HANDLER but you can respond if you would like (no notic action)"""
+
     INCORRECT_RESPONSE = auto()
+    """Represents when a response was incorrect and the handler doesn't want you to try to use input"""
     HANDLED_AND_DONE = auto()
+    """Represents when a response has been handled and should never be responded to again (Normally use HANDLED) \
+            (It won't allow anything to respond at all after this is returned)"""
 
     def should_give_response(self):
         """

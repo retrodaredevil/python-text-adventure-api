@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from textadventure.command import LocationCommandHandler, SimpleCommandHandler
 from textadventure.handler import Handler
-from textadventure.input import InputObject, InputHandleType, InputHandler, InputHandle
+from textadventure.inputhandling import InputObject, InputHandleType, InputHandler, InputHandle
 from textadventure.item import FiveSensesHandler, Item
 from textadventure.location import Location
 from textadventure.message import Message, MessageType
@@ -70,8 +70,7 @@ class HelpCommandHandler(SimpleCommandHandler):
         super().__init__(["help"], "The help for this command isn't very helpful now it it?")
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
-        message_type = MessageType.WAIT
-        player.send_message(Message("Get help for commands: '<command> help'", message_type=message_type))
+        player.send_message(Message("Get help for commands: '<command> help'", message_type=MessageType.IMMEDIATE))
         player.send_message(
             Message("Useful commands: 'go', 'look', 'listen', 'feel', 'taste', 'smell', 'locate', 'items'"))
         return InputHandleType.HANDLED

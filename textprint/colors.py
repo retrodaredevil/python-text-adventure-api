@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from colorama import Fore, Back, Style
 
@@ -35,7 +36,7 @@ class Color(Enum):
     """If you want to reset the background, it is recommended to use BACK_RESET"""
     BACK_RESET = str(Back.RESET)
 
-    RESET = str(Fore.RESET) + str(Style.NORMAL) + str(Back.RESET)
+    RESET = str(Style.RESET_ALL)  # str(Fore.RESET) + str(Style.NORMAL) + str(Back.RESET)
     """Used to reset everything back to normal"""
 
     # def value(self):
@@ -50,8 +51,21 @@ class Color(Enum):
     def __radd__(self, other):
         return str(other) + str(self)
 
-    def __rshift__(self, other):
+    def __rshift__(self, other):  # color >> text
         return self + other + self.__class__.RESET
 
-    def __rlshift__(self, other):
+    def __rlshift__(self, other):  # text << color
         return self.__rshift__(other)
+
+    @classmethod
+    def get_color(cls, string_color: str) -> Optional['Color']:
+        """
+        :param string_color: The string code of the color. Note if this contains any text other than the color, \
+                this method will return None
+        :return: The color object or None if the string_color was not a valid color code
+        """
+        for color in cls:
+            if str(color) == string_color:
+                return color
+
+        return None

@@ -8,7 +8,7 @@ import sys
 
 import textadventure.savable
 from textadventure.command import SimpleCommandHandler
-from textadventure.input import InputObject, InputHandleType
+from textadventure.inputhandling import InputObject, InputHandleType
 from textadventure.player import Player
 from textadventure.savable import Savable
 from textadventure.utils import CanDo

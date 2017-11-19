@@ -18,7 +18,8 @@ from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCo
     HelpCommandHandler
 from textadventure.handler import Handler
 from textadventure.inputhandlers import SettingsHandler
-from textadventure.message import KeyboardInput, StreamOutput
+from textadventure.clientside.outputs import StreamOutput
+from textadventure.clientside.inputs import KeyboardInput
 from textadventure.player import Player
 from textadventure.playersavable import PlayerSavable
 from textadventure.saving import SaveCommandHandler, LoadCommandHandler

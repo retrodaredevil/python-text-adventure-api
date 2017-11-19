@@ -8,7 +8,7 @@ from textadventure.utils import Point, get_type_from_list
 
 
 if TYPE_CHECKING:
-    from textadventure.input import InputHandler
+    from textadventure.inputhandling import InputHandler
 
 
 T = TypeVar("T")
@@ -38,7 +38,7 @@ class Handler:
 
     def __init__(self):
         from textadventure.location import Location
-        from textadventure.input import InputHandler
+        from textadventure.inputhandling import InputHandler
         self.entities: List[Entity] = []
         self.locations: List[Location] = []
         self.input_handlers: List[InputHandler] = []
@@ -65,7 +65,7 @@ class Handler:
                 #  ^ That comment is there because in the Manager list, I added the class instead of creating the obj
 
     def __do_input(self, player: Player, inp: str):
-        from textadventure.input import InputObject, InputHandleType, InputHandle
+        from textadventure.inputhandling import InputObject, InputHandleType, InputHandle
         input_object = InputObject(inp)
         input_handles: List[InputHandle] = []
         for input_handler in self.get_input_handlers():

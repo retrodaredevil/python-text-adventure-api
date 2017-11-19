@@ -12,8 +12,9 @@ if TYPE_CHECKING:
 
 class EditableLine:
     def __init__(self, contents: str):
-        self._original = contents
-        """The original string that should not be changed after the creation of the object."""
+        self.original = contents
+        """The original string that should not be changed after the creation of the object. Should be used if you \
+                want an accurate representation of what was there when the player pressed enter."""
         self.before = contents
         """The text before the cursor"""
         self.after = ""
@@ -23,7 +24,7 @@ class EditableLine:
         self.before += to_type
 
     def reset(self):
-        self.before = self._original
+        self.before = self.original
         self.after = ""
 
     def delete(self, amount_delete_forward: int):
@@ -33,6 +34,21 @@ class EditableLine:
             self.before = self.before[:amount_delete_forward]  # delete from back of string
         else:  # delete key
             self.after = self.after[amount_delete_forward:]
+
+    def home(self):
+        """
+        Moves the cursor to the beginning of the line
+        """
+        self.after = self.before + self.after
+        self.before = ""
+
+    def end(self):
+        """
+        Moves the cursor to the end fo the line.
+        If all you need to do is reset the cursor position to the end of the line, this should do it.
+        """
+        self.before += self.after
+        self.after = ""
 
     def move(self, amount_forward: int):
         if amount_forward == 0:
@@ -58,6 +74,7 @@ class InputLineUpdater(Thread):
     """
     def __init__(self, text_printer: 'TextPrinter', line: Line, win):
         """
+        Creates an InputLineUpdater but does not start the thread. Note that it is recommended to set daemon to True
         :param text_printer: The text TextPrinter object that this instance will be updating
         :param line: The line to display the user's input on
         :param win: the object created by curses.initscr()
@@ -72,7 +89,10 @@ class InputLineUpdater(Thread):
 
         # noinspection PyTypeChecker
         self._editable_lines: List[EditableLine] = []
-        self._current_line = EditableLine("")
+        self._current_line = EditableLine("")  # remember most of the time you should call current_line()
+        """An EditableLine object that is used to keep track of what the player typed an the cursor position. When\
+                the player presses enter, this resets and the object that was here before the enter pressed has \
+                not been added to self._editable_lines but instead probably been destroyed by the GC"""
         self._line_index = 0  # The line that should be gotten. 0 represents the most recent line
 
         self.should_exit = False  # is set to True when we receive a key combination that says to stop the program
@@ -82,7 +102,13 @@ class InputLineUpdater(Thread):
     def current_line(self):
         if self._line_index == 0:
             return self._current_line
+        assert 0 <= self._line_index <= len(self._editable_lines), "_line_index isn't in range: {}".format(
+            self._line_index)  # both <= because  we already checked if it is zero
+
         return self._editable_lines[len(self._editable_lines) - self._line_index]  # if 1 get most recent printed line
+
+    def string_lines(self):
+        return [line.original for line in self._editable_lines]
 
     def _reset_editable_lines(self):
         for line in self._editable_lines:
@@ -108,22 +134,34 @@ class InputLineUpdater(Thread):
         :param data: The data to go along with the keypress like how much to go. May be useful in the future \
                 if you are able to call this function with something in place of data that makes sense, do so, \
                 otherwise, data is not used in the default implementation
-        :return:
         """
+        current = self.current_line()  # current line that may not actually be self._current_line
         if key == 10 or key == curses.KEY_ENTER:
-            self._editable_lines.append(self._current_line)
-            self._current_line = EditableLine("")
-            self._reset_editable_lines()
+            current.end()  # move the cursor to end
+            self._editable_lines.append(EditableLine(current.before))  # create a new line and add it
+            self._current_line = EditableLine("")  # even though current may not be this, we want to reset this
+            self._line_index = 0  # set the line back to _current_line
+            self._reset_editable_lines()  # reset all the EditableLines back to their original
         elif key == curses.KEY_BACKSPACE:
-            self.current_line().delete(-1)
+            current.delete(-1)
         elif key == curses.KEY_DC:
-            self.current_line().delete(1)
+            current.delete(1)
         elif key == 4 or key == 3:
-            self.should_exit = True
+            self.should_exit = True  # for a developer who wants to make a clean exit of the program
         elif key == curses.KEY_LEFT:
-            self.current_line().move(-1)
+            current.move(-1)
         elif key == curses.KEY_RIGHT:
-            self.current_line().move(1)
+            current.move(1)
+        elif key == curses.KEY_UP or key == curses.KEY_DOWN:
+            if key == curses.KEY_UP:
+                self._line_index += 1  # remember when 0, current line will be self._current_line
+            else:
+                self._line_index -= 1
+            self._line_index = max(0, min(self._line_index, len(self._editable_lines)))  # clamp
+        elif key == curses.KEY_END:
+            current.end()
+        elif key == curses.KEY_HOME:
+            current.home()
         else:
             self.current_line().type(str(curses.keyname(key)) + "int({})".format(key))
 

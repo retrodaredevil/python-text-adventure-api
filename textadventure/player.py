@@ -47,8 +47,7 @@ class Player(Entity):
         self.player_output.send_message(self.get_message(message))
 
     def send_wait(self, seconds):
-        self.player_output.send_message(Message("", message_type=MessageType.WAIT, ending="", before="",
-                                                wait_in_seconds=seconds, wait_after=False))
+        self.player_output.send_message(Message("", end="", wait_in_seconds=seconds))
 
     def send_line(self, amount: int = 1):
         ending = Message.DEFAULT_ENDING
@@ -56,7 +55,7 @@ class Player(Entity):
             ending = ""
             for i in range(0, amount):
                 ending += Message.DEFAULT_ENDING
-        self.send_message(Message("", MessageType.IMMEDIATE, ending=ending))
+        self.send_message(Message("", MessageType.IMMEDIATE, end=ending))
 
     def clear_screen(self):
         self.send_line(100)  # do I need to use a constant variable PLTW? I do? No voy hacerlo

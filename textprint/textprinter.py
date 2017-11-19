@@ -2,12 +2,16 @@ import os
 from typing import List, Optional
 
 from colorama import init, Cursor
-from colorama.ansi import CSI
+# from colorama.ansi import CSI
 
 from textprint.section import Section
 
 
 class TextPrinter:
+    """
+    This class is used to clear the whole screen and write to it using sections to make a awesome looking text \
+        interface using curses
+    """
     def __init__(self, sections: List[Section]):
         self.sections = sections
         self.__cursor = Cursor  # note that this isn't creating an object, it's an object already made
@@ -68,12 +72,12 @@ class TextPrinter:
         window_rows = os.popen("stty size", "r").read().split()[0]
         return int(window_rows)
 
-    def save_position(self):
-        """
-        :return: A solution that is meant to be simple to save where the mouse cursor is. You can retrieve it by \
-                calling retrieve_position
-        """
-        print(CSI + "s", end="", flush=False)
-
-    def retrieve_position(self):
-        print(CSI + "u", end="", flush=True)
+    # def save_position(self):
+    #     """
+    #     :return: A solution that is meant to be simple to save where the mouse cursor is. You can retrieve it by \
+    #             calling retrieve_position
+    #     """
+    #     print(CSI + "s", end="", flush=False)
+    #
+    # def retrieve_position(self):
+    #     print(CSI + "u", end="", flush=True)

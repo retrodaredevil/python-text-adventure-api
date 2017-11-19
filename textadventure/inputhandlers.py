@@ -1,8 +1,9 @@
 from typing import List
 
 from textadventure.handler import Handler
-from textadventure.input import InputHandler, InputObject, InputHandleType, InputHandle
-from textadventure.message import StreamOutput, Message, MessageType
+from textadventure.inputhandling import InputHandler, InputObject, InputHandleType, InputHandle
+from textadventure.message import Message, MessageType
+from textadventure.clientside.outputs import StreamOutput
 from textadventure.player import Player
 
 

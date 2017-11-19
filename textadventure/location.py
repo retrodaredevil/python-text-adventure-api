@@ -5,8 +5,8 @@ from typing import List, Optional, TypeVar, Type
 from textadventure.entity import EntityAction, Entity
 from textadventure.handler import Handler
 from textadventure.holder import Holder
-from textadventure.input import InputHandler
-from textadventure.input import InputObject
+from textadventure.inputhandling import InputHandler
+from textadventure.inputhandling import InputObject
 from textadventure.item import Item, FiveSensesHandler
 from textadventure.message import Message, MessageType
 from textadventure.player import Player
