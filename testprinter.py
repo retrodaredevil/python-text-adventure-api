@@ -25,8 +25,6 @@ title_bar = title_bar_section.print(printer, "Holder")
 
 def run_program(win):
     input_updater = InputLineUpdater(printer, input_line, win)
-    input_updater.daemon = True
-    input_updater.start()
 
     debug.update_lines(printer)
     title_bar_section.update_lines(printer)
@@ -52,11 +50,14 @@ def run_program(win):
         console_section.print(printer, "Hello there: {}".format(i))
         title_bar.update(printer)
 
-        input_line.contents = input_updater.current_line_string()
-        # debug.print(printer, input_updater.current_line_string())
-        input_line.update(printer)
-        input_updater.goto_cursor(flush=True)  # in case we moved the cursor (unlikely since we updated input_line)\
-        #       but it could happen if the player moves their cursor
+        # input_line.contents = input_updater.current_line_string()
+        # # debug.print(printer, input_updater.current_line_string())
+        # input_line.update(printer)
+        # input_updater.goto_cursor(flush=True)  # in case we moved the cursor (unlikely since we updated input_line)\
+        # #       but it could happen if the player moves their cursor
+
+        # input_updater.update_line()  # changed commented out stuff to this
+        input_updater.update()
         sleep(.02)
         if input_updater.should_exit:
             break

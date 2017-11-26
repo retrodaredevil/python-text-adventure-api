@@ -13,6 +13,11 @@ class TextPrinter:
         interface using curses
     """
     def __init__(self, sections: List[Section]):
+        """
+        Creates a TextPrinter object that will be used by the Sections
+        :param sections: The list of sections where the section at index 0 will be at the bottom. Ex: Most of the time\
+                you will have your input_section at the bottom
+        """
         self.sections = sections
         self.__cursor = Cursor  # note that this isn't creating an object, it's an object already made
 
@@ -66,18 +71,12 @@ class TextPrinter:
         :return: None
         """
         # print("\033[{};{}H".format(int(window_rows) - row, column), end="")
-        print(self.__cursor.POS(column, self.get_rows_in_current_window() - row), end="", flush=flush)
+        print(self.__cursor.POS(column, self.get_rows_columns()[0] - row), end="", flush=flush)
 
-    def get_rows_in_current_window(self):
-        window_rows = os.popen("stty size", "r").read().split()[0]
-        return int(window_rows)
+    def flush(self):
+        print(end="", flush=True)
 
-    # def save_position(self):
-    #     """
-    #     :return: A solution that is meant to be simple to save where the mouse cursor is. You can retrieve it by \
-    #             calling retrieve_position
-    #     """
-    #     print(CSI + "s", end="", flush=False)
-    #
-    # def retrieve_position(self):
-    #     print(CSI + "u", end="", flush=True)
+    def get_rows_columns(self):
+        rows, columns = os.popen('stty size', 'r').read().split()
+
+        return int(rows), int(columns)

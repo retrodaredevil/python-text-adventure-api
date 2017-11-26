@@ -4,8 +4,14 @@ import warnings
 from threading import Thread
 from typing import List
 
-from textadventure.message import PlayerOutput, Message, MessageType
+from textadventure.action import Action
+from textadventure.handler import Handler
+from textadventure.manager import Manager
+from textadventure.message import PlayerOutput, Message, MessageType, MessagePart
+from textadventure.player import Player
 from textadventure.utils import join_list
+from textprint.colors import Color
+from textprint.line import Line
 from textprint.section import Section
 from textprint.textprinter import TextPrinter
 
@@ -29,10 +35,11 @@ class StreamOutput(Thread, PlayerOutput):  # extending thread so we can let mess
         self.is_unix = is_unix
 
         self.messages = []
-        self.current_messages = []
         self.wait_multiplier = 1
         self.print_immediate = False  # if True, will be set back to False after done printing current_messages
 
+        # already defined, stuff and starting this Thread
+        self.daemon = True
         self.start()
 
     def send_message(self, message: Message):
@@ -49,15 +56,15 @@ class StreamOutput(Thread, PlayerOutput):  # extending thread so we can let mess
             self.stream = AnsiToWin32(self.stream).stream  # change the stream to one that automatically converts it
         while True:
             if len(self.messages) > 0:
-                self.current_messages = self.messages  # no need to clone because we will be resetting self.messages
+                current_messages = self.messages  # no need to clone because we will be resetting self.messages
                 self.messages = []
                 self.print_immediate = False
-                for message in self.current_messages:
+                for message in current_messages:
                     before_multiplier = 1  # used to make wait messages shorter
                     if self.print_immediate:
                         before_multiplier = 0.3
                     time.sleep(message.wait_in_seconds * before_multiplier)
-                    to_print = message.text + message.ending  # TODO readd before
+                    to_print = message.text + message.end
 
                     names: List[str] = []  # noinspection PyTypeChecker
                     for named in message.named_variables:
@@ -111,12 +118,92 @@ class StreamOutput(Thread, PlayerOutput):  # extending thread so we can let mess
                     self.stream.flush()
 
 
-class TextPrinterOutput(PlayerOutput):
+class TextPrinterOutput(Manager, PlayerOutput):
     def __init__(self, printer: TextPrinter, section: Section):
+        """
+        Creates a TextPrinterOutput but does not start the Thread
+        """
         super().__init__()
         self.printer = printer
         self.section = section
+        self.current_line = None
+
+        self.messages = []
+
+        self.message_number = 0
 
     def send_message(self, message: Message):
-        parts = message.create_parts()
-        pass  # TODO TextPrinterOutput send_message not created
+        # self.section.print(self.printer, str(["({},{},{}".format(part.print_before, part.main_text, part.print_after)
+        #                                       for part in message.create_parts()]), flush=True)
+        self.messages.append(message)
+
+    def on_action(self, handler: 'Handler', action: Action):
+        pass
+
+    def update(self, handler: 'Handler'):
+        # return
+        while True:
+            # self.input_line_updater.update_line()  # will be run after messages print and as often as possible
+            if len(self.messages) == 0:
+                break  # change to continue if this were a Thread
+            current_messages = self.messages
+            self.messages = []
+            for message in current_messages:
+                # self.section.print(self.printer, message.text, flush=True)
+                # continue
+                parts: List[MessagePart] = message.create_parts()  # noinspection PyTypeChecker
+                for index, part in enumerate(parts):
+                    # now since we are going to start using current_line, we should make sure it is initialized
+                    if self.current_line is None:
+                        # this will be fired if it hasn't been initialized before or there was a new line
+                        self.current_line = self.section.print(self.printer, "", flush=True)  # debug: change to "(a)"
+                    self.current_line.contents += part.print_before
+                    if part.wait_between == 0:
+                        self.current_line.contents += part.main_text
+                    else:
+                        for c in part.main_text:
+                            assert c != '\n', "There shouldn't be any backslashes in part.main_text"
+                            self.current_line.contents += c
+                            self.current_line.update(self.printer, flush=True)  # flush it because we are about to sleep
+                            time.sleep(part.wait_between)
+                    new_lines = 0
+                    after = part.print_after  # we don't want to change part.print_after
+                    while '\n' in after:  # check how many new lines we want
+                        new_lines += 1
+                        after = after.replace("\n", "")
+                    # now that we're out of the while loop and we know how many new lines we need, 'after' is not used
+                    if len(after) != 0:
+                        self.current_line.contents += after  # no new lines anymore, add after
+                        self.current_line.update(self.printer)
+                    for i in range(0, new_lines):  # right now, new_lines should only be 0 or 1, but prepare for future
+                        # self.current_line = self.section.print(self.printer, "#:'{}',p:'{}'".format(self.message_number,
+                        #                                                                             index))
+                        if self.current_line is None:
+                            # will happen if new_lines is > 1
+                            self.section.print(self.printer, "")  # change "" to "(b)" for debugging
+                        self.current_line.contents += ""  # change "" to "(c)" for debugging
+                        self.current_line = None
+                    # if new_lines != 0:  # update if we printed more lines in the for loop
+                    #     self.current_line.update(self.printer)
+                    # self.section.update_lines(self.printer, flush=True)  # this line makes it look bad
+                    if part.wait_after_print != 0:
+                        time.sleep(part.wait_after_print)
+
+                self.message_number += 1
+
+
+class LocationTitleBarManager(Manager):
+    def __init__(self, player: Player, printer: TextPrinter, line: Line):
+        self.player = player
+        self.printer = printer
+        self.line = line
+
+    def on_action(self, handler: 'Handler', action: Action):
+        pass
+
+    def update(self, handler: 'Handler'):
+        location = self.player.location
+        point = location.point
+        self.line.contents = Color.CYAN >> (Color.BOLD >> "{} at x: {}, y: {}, z: {}".format(location,
+                                                                                             point.x, point.y, point.z))
+        self.line.update(self.printer)  # don't flush it because it will put the cursor in a different spot

@@ -10,4 +10,8 @@ Note that many of the methods in this api give you the option to flush. It is re
     the contents of it. (Don't flush every call to methods because you'll see the cursor go crazy)
 
 Also note, that this is a separate package from textadventure, so this package doesn't import textadventure anywhere
+
+IMPORTANT:
+* This package does not seem to like multiple thread. It seems that it's best to call Section#print from the main \
+    thread and not your own. If you find your program is slow to print, it may be because of multiple threads
 """

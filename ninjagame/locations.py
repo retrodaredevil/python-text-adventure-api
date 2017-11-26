@@ -110,7 +110,7 @@ class Entrance(Location):  # players should only be in this location when starti
     def on_enter(self, player, previous_location: Optional[Location], handler: Handler):
         if previous_location is None:
             player.send_message("Welcome to the entrance to The Trail.")
-            player.send_wait(0.3)
+            # player.send_wait(0.3)  # TODO uncomment because I commented this because it was a pain to deal with
             player.send_message("Would you like to start your journey on this trail?")
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):

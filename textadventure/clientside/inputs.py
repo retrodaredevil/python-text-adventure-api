@@ -1,7 +1,10 @@
 from threading import Thread
 from typing import List
 
+from textadventure.action import Action
 from textadventure.clientside.outputs import StreamOutput
+from textadventure.handler import Handler
+from textadventure.manager import Manager
 from textadventure.message import PlayerInput
 from textprint.input import InputLineUpdater
 
@@ -59,7 +62,26 @@ class KeyboardInput(PlayerInput, Thread):
         return r
 
 
+class InputLineUpdaterManager(Manager):
+    """
+    Whenever the update method is called, updates self.updater using update_line.
+    Using this class helps the input look cleaner since InputLineUpdater runs on another Thread
+    """
+    def __init__(self, updater: InputLineUpdater):
+        self.updater = updater
+
+    def on_action(self, handler: 'Handler', action: Action):
+        pass
+
+    def update(self, handler: 'Handler'):
+        self.updater.update()
+
+
 class TextPrinterInput(PlayerInput):
+    """
+    Note that you should also probably add an instance of InputLineUpdaterManager to the list of managers in \
+        the Handler to show smoother input
+    """
     def __init__(self, updater: InputLineUpdater):
         """
         Creates a TextPrinterInput which wraps a InputLineUpdater and implements the PlayerInput class to provide\
@@ -71,6 +93,9 @@ class TextPrinterInput(PlayerInput):
         self._amount_taken = 0
 
     def take_input(self):
+        # self.updater.line_object.update(self.updater.text_printer)
+        # self.updater.goto_cursor(flush=True)
+
         lines = self.updater.string_lines()
         if self._amount_taken < len(lines):
             r = lines[self._amount_taken]

@@ -1,6 +1,10 @@
+import warnings
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import List
+
+from textadventure.utils import join_list
+from textprint.colors import Color
 
 
 class MessageType(Enum):
@@ -22,21 +26,24 @@ class MessageType(Enum):
 
 
 class MessagePart:  # work in progress
-    def __init__(self, main_text: str, print_before="", print_after="", wait_between=.2):
+    def __init__(self, main_text: str, print_before="", print_after="", wait_between=.018, wait_after_print=0):
         """
         Creates a MessagePart with the given attributes. print_before is normally used to change color but if \
                 print_before is empty, it's likely that the color has already been changed
 
         :param main_text: The main text to be printed, should be used for text that will be seen
         :param print_before: Text that will be immediately printed before the main_text, can be used for colors
-        :param print_after: Text that will be immediately printed after the main_text, can be used to reset
+        :param print_after: Text that will be immediately printed after the main_text, can be used to reset. If this\
+                MessagePart contains a new line feed, this is where it should be
         :param wait_between: The wait between each character that is printed in main_text, if 0, main_text should \
                 be printed immediately
+        :param wait_after_print: Normally 0, but if you just want to pause the output for a moment, change this
         """
         self.main_text = main_text
         self.print_before = print_before
         self.print_after = print_after
         self.wait_between = wait_between
+        self.wait_after_print = wait_after_print
 
 
 class Message:
@@ -60,7 +67,7 @@ class Message:
         """
         self.message_type = message_type
         self.text = text
-        self.ending = end
+        self.end = end
         self.wait_in_seconds = wait_in_seconds
         if named_variables is None:
             named_variables = []
@@ -73,7 +80,89 @@ class Message:
 
         :return:
         """
-        pass
+        text = self.text
+        names: List[str] = []  # noinspection PyTypeChecker
+        # create the names list (will be similar to self.named_variables)
+        for named in self.named_variables:
+            if isinstance(named, List):
+                names.append(join_list(list(map(str, named))))
+                # if you're wonder what the heck the above thing does, don't worry about it. But since you\
+                # asked, list(map(str, named)) transforms the list, named, into a list of strings, then\
+                # it calls join_list which there is some excellent documentation on that elsewhere. Good day
+            else:
+                names.append(str(named))  # named could be a string or something that has an __str__ method
+
+        try:
+            text = text.format(*names)
+        except IndexError:
+            warnings.warn("Couldn't format to_print: '{}' with names: len:{}, values:{}.".format(text,
+                                                                                                 len(names), names))
+            warnings.warn("named_variables: len: {}, values: {}".format(len(self.named_variables),
+                                                                        self.named_variables))
+        text += self.end
+
+        # variable text is now nicely formatted with self.named_variables
+        parts: List[MessagePart] = []
+        current = MessagePart("")
+        # we would have a variable named started here, but instead we can just check if current.main_text is empty
+        done = False  # are we done concatenating text to current.main_text
+        current_escape = ""  # variable that stores parts of the string that can be added to print_before or print_after
+        for c in text:  # go through all the characters
+            if len(current_escape) != 0:  # check if there's an escape we are currently appending to and checking
+                current_escape += c
+                result = Color.get_color(current_escape)
+                if isinstance(result, Color):
+                    # this is where we add the valid color to the text. In the future, we may add it to a list
+                    if len(current.main_text) != 0:
+                        if result == Color.RESET:
+                            current.print_after += result
+                            parts.append(current)
+                            current = MessagePart("")
+                        else:
+                            parts.append(current)  # append before since
+                            current = MessagePart("")
+                            current.print_after += result
+                    else:
+                        current.print_before += result
+                    continue  # continue if we added something to current
+                elif result:
+                    continue  # continue if the char added to current_escape is going to be valid later
+                else:
+                    # if this else fired, it means that the current_escape is not invalid and we should reset it
+                    current_escape = ""  # it will be reset anyway (below), but this makes the code more understandable
+                    # later, if the code below is changed, we should make sure to reset it
+
+            # even if the above conditional was True, we still need to run this code. Notice some of the above code\
+            #       has continue statements
+            if c == str(Color.ESCAPE):
+                current_escape = c  # yep, it's the same as str(Color.ESCAPE)
+            elif c == '\n':
+                # if this message has a new line character, add it to the end of a MessagePart
+                current_escape = ""
+                current.print_after += c
+                parts.append(current)
+                current = MessagePart("")
+            else:
+                current_escape = ""  # if we made it here, whatever was in current_escape is either invalid or has\
+                #       already been added as a color
+                if done:  # stuff has been added to all three
+                    parts.append(current)
+                    current = MessagePart("")
+                # now we should actually add the character to the current since it's a normal character
+                current.main_text += c
+
+        if current not in parts and (current.print_before or current.main_text or current.print_after):
+            # checks to make sure current isn't in parts and that there's a reason to add it to parts
+            """
+            Could be the cause of funny behaviour in the future because if there is Something after the NL, that's not
+                    in main_text, it will still put it. Depending on how the Message object changes over time, 
+                    it might be a good idea to change some of this code and or this if statement
+            """
+            parts.append(current)
+
+        # parts.append(MessagePart("", print_after=self.end))
+
+        return parts
 
 
 class PlayerInput(ABC):
@@ -102,4 +191,3 @@ class PlayerOutput(ABC):
         :param message: the message to send
         """
         pass
-

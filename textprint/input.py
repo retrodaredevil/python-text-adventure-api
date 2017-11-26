@@ -1,10 +1,9 @@
 import curses
-import sys
-from threading import Thread
 from typing import List, TYPE_CHECKING
 
-from textprint.line import Line
+import time
 
+from textprint.line import Line
 
 if TYPE_CHECKING:
     from textprint.textprinter import TextPrinter
@@ -68,27 +67,27 @@ class EditableLine:
         self.after = after
 
 
-class InputLineUpdater(Thread):
+class InputLineUpdater:
     """
     This class uses the curses library to get keyboard input before pressing enter.
     """
-    def __init__(self, text_printer: 'TextPrinter', line: Line, win):
+    def __init__(self, text_printer: 'TextPrinter', line: Line, stdscr):
         """
         Creates an InputLineUpdater but does not start the thread. Note that it is recommended to set daemon to True
+
         :param text_printer: The text TextPrinter object that this instance will be updating
         :param line: The line to display the user's input on
-        :param win: the object created by curses.initscr()
+        :param stdscr: the object created by curses.initscr()
         """
         super().__init__()
         self.text_printer = text_printer
         self.line_object = line
-        self._win = win
+        self.stdscr = stdscr
         # noinspection PyTypeChecker
         # self.lines: List[str] = []  # once a string is appended, it should not be altered on this list
         # self._current_line = ""
 
-        # noinspection PyTypeChecker
-        self._editable_lines: List[EditableLine] = []
+        self._editable_lines: List[EditableLine] = []  # noinspection PyTypeChecker
         self._current_line = EditableLine("")  # remember most of the time you should call current_line()
         """An EditableLine object that is used to keep track of what the player typed an the cursor position. When\
                 the player presses enter, this resets and the object that was here before the enter pressed has \
@@ -118,9 +117,15 @@ class InputLineUpdater(Thread):
         line = self.current_line()
         return line.before + line.after
 
-    def do_update(self):
+    def update_line(self):
+        """
+        Updates the Line object and sets the cursor in the right position for the input
+        Also flushes the stream.
+        """
         self.line_object.contents = self.current_line_string()
+        # self.line_object.contents = str(time.time())  # used to tell how fast this updates -> this method is fine
         self.line_object.update(self.text_printer)
+        # Even though the update changes the cursor position, it may not be correct because of arrow keys.
         self.goto_cursor(flush=True)  # now we will flush it
 
     def goto_cursor(self, flush=False):
@@ -165,31 +170,43 @@ class InputLineUpdater(Thread):
         else:
             self.current_line().type(str(curses.keyname(key)) + "int({})".format(key))
 
-        self.do_update()
+    # def run(self):
+    #     self._start_loop(self._win)
 
-    def run(self):
-        self._start_loop(self._win)
+    def update(self):
+        """
+        Should be called in a while True loop in order to update the input
+        """
+        if self.times_initialized == 0:
+            print("Initializing win using initscr. Initiation number: {} (Starts at 0)".format(self.times_initialized))
+            self.times_initialized += 1
+            self.__class__.reset_stdscr(self.stdscr)
 
-    def _start_loop(self, win):
-        # thanks https://stackoverflow.com/a/40154005/5434860
-        print("Initializing win using initscr. Initiation number: {} (Starts at 0)".format(self.times_initialized))
-        self.times_initialized += 1
-        win.clear()
-        curses.noecho()
-        win.keypad(True)  # allows constants from curses.<KEY_NAME>
-        curses.raw()  # allows us to receive keyboard interrupts
-        curses.cbreak()
-        # now that we have that initialized, we can start listening in on stuff
         while True:
-            if self.should_exit:
+            char_int = self.stdscr.getch()
+            if char_int == -1:
                 break
-            char_int = win.getch()
             character = chr(char_int)
-
+            # assert False, "Hey, we got something!: {}".format(char_int)
             if char_int not in range(32, 127):
                 self.keypad_key(char_int)
-                continue  # we don't want to add a character that's not valid here
+            else:
+                self.current_line().type(character)
 
-            # if we made it here, the character typed is a normal character
-            self.current_line().type(character)
-            self.do_update()
+        # time.sleep(1)
+        # print("here: {}".format(self.times_updated))
+        # time.sleep(1)
+        # self.times_updated += 1
+        # self.current_line().type("hi")
+        self.update_line()
+
+    @staticmethod
+    def reset_stdscr(stdscr):
+        stdscr.clear()
+        stdscr.keypad(True)  # allows constants from curses.<KEY_NAME> (ascii values above 255)
+        stdscr.nodelay(True)  # stops all getch from the curses library to pause the current Thread
+
+        curses.use_default_colors()
+        curses.noecho()
+        curses.raw()  # allows us to receive keyboard interrupts
+        curses.cbreak()

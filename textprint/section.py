@@ -8,18 +8,22 @@ if TYPE_CHECKING:
 
 class Section:
     def __init__(self, rows: Optional[int], columns: Optional[int] = None,
-                 force_rows: bool = True):
+                 force_rows: bool = True, fake_line: Optional[str] = None):
         """
         :param rows: The max number of rows to show, or None to show len(self.lines)
         :param columns: The max number of columns, unused for right now
         :param force_rows: By default True. When True and rows is not None, when the amount of rows printed is less \
                 than rows, this will still fill up the amount of rows determined by parameter rows. If False, this \
                 section will not be the max number of rows (rows) until this has printed enough.
+        :param fake_line: A string that is only used if force_rows is True, if None, fake_lines aren't used, otherwise\
+                fake_lines are placed in all the lines that the section occupies except for the ones that have already\
+                been printed.
         """
         super().__init__()  # for multiple inheritance
         self.rows = rows
         self.columns = columns
         self.force_rows = force_rows
+        self.fake_line = fake_line
 
         self.lines: List[Line] = []  # noinspection PyTypeChecker
 
@@ -37,7 +41,7 @@ class Section:
         after = printer.calculate_lines_after(self)
         else_height = (before + after)
         # isn't recursive because it doesn't call the get_lines_taken method from the passed section (self)
-        height = printer.get_rows_in_current_window()
+        height = printer.get_rows_columns()[0]
         if else_height + length >= height or self.force_rows:  # if length will put other things off screen or full
             length = height - else_height  # will set the exact amount needed to show everything on screen (by hiding\
             #       lines)
@@ -78,12 +82,16 @@ class Section:
         row = 0
         for line in self.lines:
             if len(self.lines) - row <= taken:
-                line.update(text_printer, flush=flush)
+                line.update(text_printer)
             row += line.get_rows_taken()  # TODO if the Section#row is only 1 and it overflows, it will glitch
 
-        for i in range(row - taken, 0):
-            # this was very painful to think about, basically, it creates a fake line for each empty line that is \
-            #       owned by the section and that is not an actual line that has already been printed.
-            # notice that we go to zero. This is because the first line's line_number is 0. Yes, it's weird but it works
-            fake_line = Line("", self, i)
-            fake_line.update(text_printer)
+        if self.fake_line is not None:
+            for i in range(row - taken, 0):
+                # this was very painful to think about, basically, it creates a fake line for each empty line that is \
+                #       owned by the section and that is not an actual line that has already been printed.
+                # notice that we go to zero. This is because the first line's line_number is 0. Weird but works
+                fake_line = Line(self.fake_line, self, i)
+                fake_line.update(text_printer)
+
+        if flush:
+            text_printer.flush()

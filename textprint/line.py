@@ -35,8 +35,11 @@ class Line:
         Takes no arguments because it updates the line based on the state of this Line
         :return: None
         """
-        self._do_goto(text_printer, flush=flush)
-        print(clear_line() + self.contents, end="", flush=flush)
+        self._do_goto(text_printer, flush=False)
+        columns = text_printer.get_rows_columns()[1]
+        show = self.contents[:columns]  # TODO somehow get it to go onto the next line without glitching and fix colors
+        # show = self.contents
+        print(clear_line() + show, end="", flush=flush)
 
     def get_rows_taken(self):
         """
