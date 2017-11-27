@@ -6,10 +6,8 @@ from textadventure.manager import Manager
 from textadventure.player import Player, Living
 from textadventure.utils import Point, get_type_from_list
 
-
 if TYPE_CHECKING:
     from textadventure.inputhandling import InputHandler
-
 
 T = TypeVar("T")
 
@@ -66,6 +64,10 @@ class Handler:
 
     def __do_input(self, player: Player, inp: str):
         from textadventure.inputhandling import InputObject, InputHandleType, InputHandle
+        if len(inp) == 0:
+            player.send_message(
+                "You must enter a command. Normally, pressing enter with a blank line won't trigger this.")
+            return
         input_object = InputObject(inp)
         input_handles: List[InputHandle] = []
         for input_handler in self.get_input_handlers():
@@ -86,7 +88,7 @@ class Handler:
                 self.input_handlers.remove(input_handle.input_handler)
             elif handle_type is InputHandleType.HANDLED_AND_DONE:
                 break  # we don't care what others have to say. We're done handling this input
-        
+
         # player.send_line()  # for the debug
         if len(already_handled) == 0 or has_only(already_handled,
                                                  [InputHandleType.NOT_HANDLED, InputHandleType.UNNOTICEABLE]):
@@ -141,4 +143,3 @@ class Handler:
             if location.point == point:
                 return location
         return None
-

@@ -176,8 +176,6 @@ class TextPrinterOutput(Manager, PlayerOutput):
                         self.current_line.contents += after  # no new lines anymore, add after
                         self.current_line.update(self.printer)
                     for i in range(0, new_lines):  # right now, new_lines should only be 0 or 1, but prepare for future
-                        # self.current_line = self.section.print(self.printer, "#:'{}',p:'{}'".format(self.message_number,
-                        #                                                                             index))
                         if self.current_line is None:
                             # will happen if new_lines is > 1
                             self.section.print(self.printer, "")  # change "" to "(b)" for debugging

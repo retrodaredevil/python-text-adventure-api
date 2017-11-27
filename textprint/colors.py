@@ -39,8 +39,8 @@ class Color(Enum):
     RESET = str(Style.RESET_ALL)
     """Used to reset everything back to normal. Should be used instead of TOTAL_RESET whenever possible because \
             this may be interpreted differently by PlayerOutput implementations"""
-    TOTAL_RESET = str(Fore.RESET) + str(Style.NORMAL) + str(Back.RESET)
-    """Used to reset the text completely back to normal. Not the same as RESET."""
+    # TOTAL_RESET = str(Fore.RESET) + str(Style.NORMAL) + str(Back.RESET)
+    # """Used to reset the text completely back to normal. Not the same as RESET."""
 
     ESCAPE = str(CSI)
     """The escape character that is at the front of all the values in this enum."""

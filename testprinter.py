@@ -9,7 +9,7 @@ from textprint.input import InputLineUpdater
 from textprint.textprinter import TextPrinter
 
 
-LOADING_BAR_WIDTH = 80
+LOADING_BAR_WIDTH = 70
 
 
 debug = Section(3)
@@ -57,7 +57,7 @@ def run_program(win):
         # #       but it could happen if the player moves their cursor
 
         # input_updater.update_line()  # changed commented out stuff to this
-        input_updater.update()
+        input_updater.update()  # this method also flushes the output
         sleep(.02)
         if input_updater.should_exit:
             break

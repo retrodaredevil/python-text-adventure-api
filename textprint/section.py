@@ -28,10 +28,11 @@ class Section:
         self.lines: List[Line] = []  # noinspection PyTypeChecker
 
     def get_lines_taken(self, printer: 'TextPrinter', include_extra_rows=True):
+        terminal_width = printer.get_rows_columns()[1]
         length = len(self.lines)
         if include_extra_rows:
             for line in self.lines:
-                length += line.get_rows_taken()  # could be 2 or 3 if the line is overflowing
+                length += line.get_rows_taken(terminal_width)  # could be 2 or 3 if the line is overflowing
         if self.rows is not None:
             if self.force_rows or length > self.rows:
                 return self.rows  # this is very likely to be returned
@@ -78,18 +79,27 @@ class Section:
         return line
 
     def update_lines(self, text_printer: 'TextPrinter', flush: bool = False):
-        taken = self.get_lines_taken(text_printer)
-        row = 0
+        terminal_width = text_printer.get_rows_columns()[1]
+
+        length = len(self.lines)
+        length = 0
         for line in self.lines:
-            if len(self.lines) - row <= taken:
+            length += line.get_rows_taken(terminal_width)
+        taken = self.get_lines_taken(text_printer)  # how many lines should this section take
+        row = 0  # the current row usually incremented by 1 or 2 if a line overflows
+        for line in self.lines:  # update all the lines that should be on screen
+            if length - row <= taken:
                 line.update(text_printer)
-            row += line.get_rows_taken()  # TODO if the Section#row is only 1 and it overflows, it will glitch
+            row += line.get_rows_taken(terminal_width)  # TODO if the Section#row is only 1 and it overflows, it will glitch
 
         if self.fake_line is not None:
-            for i in range(row - taken, 0):
+            extra_lines = 0
+            for line in self.lines:
+                extra_lines += line.get_rows_taken(terminal_width) - 1
+            for i in range(row - taken, extra_lines * -1):
                 # this was very painful to think about, basically, it creates a fake line for each empty line that is \
                 #       owned by the section and that is not an actual line that has already been printed.
-                # notice that we go to zero. This is because the first line's line_number is 0. Weird but works
+                # notice that we go to zero. This is because the first line's line_number is 0. (Goes negative to pos)
                 fake_line = Line(self.fake_line, self, i)
                 fake_line.update(text_printer)
 
