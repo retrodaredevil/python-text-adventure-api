@@ -1,15 +1,19 @@
 from threading import Thread
 from typing import List
 
+import time
+
+from colorama import Cursor
+
 from textadventure.action import Action
 from textadventure.clientside.outputs import StreamOutput
 from textadventure.handler import Handler
 from textadventure.manager import Manager
-from textadventure.message import PlayerInput
+from textadventure.message import PlayerInputGetter
 from textprint.input import InputLineUpdater
 
 
-class KeyboardInput(PlayerInput, Thread):
+class KeyboardInputGetter(PlayerInputGetter, Thread):
     DEFAULT_INPUT_PROMPT = ""  # because it doesn't look how we want it to
 
     def __init__(self, stream_output: StreamOutput):
@@ -74,10 +78,15 @@ class InputLineUpdaterManager(Manager):
         pass
 
     def update(self, handler: 'Handler'):
+        # start = time.time()  # tested and seems to have a good speed
         self.updater.update()
+        # after = time.time()
+        # taken = after - start
+        # print(Cursor.POS(0, 0) + str(taken) + " seconds. inputs.py out", end="", flush=True)
+        # time.sleep(1)
 
 
-class TextPrinterInput(PlayerInput):
+class TextPrinterInputGetter(PlayerInputGetter):
     """
     Note that you should also probably add an instance of InputLineUpdaterManager to the list of managers in \
         the Handler to show smoother input

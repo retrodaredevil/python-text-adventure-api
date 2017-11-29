@@ -1,10 +1,14 @@
 import warnings
 from abc import ABC, abstractmethod
 from enum import Enum, auto
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from textadventure.utils import join_list
 from textprint.colors import Color
+
+if TYPE_CHECKING:
+    from textadventure.player import Player
+    from textadventure.inputhandling import InputObject
 
 
 class MessageType(Enum):
@@ -25,8 +29,11 @@ class MessageType(Enum):
     TYPE_SLOW = auto()
 
 
-class MessagePart:  # work in progress
-    def __init__(self, main_text: str, print_before="", print_after="", wait_between=.018, wait_after_print=0):
+class MessagePart:
+    DEFAULT_WAIT_BETWEEN = .026
+
+    def __init__(self, main_text: str, print_before="", print_after="", wait_between=DEFAULT_WAIT_BETWEEN,
+                 wait_after_print=0):
         """
         Creates a MessagePart with the given attributes. print_before is normally used to change color but if \
                 print_before is empty, it's likely that the color has already been changed
@@ -44,6 +51,7 @@ class MessagePart:  # work in progress
         self.print_after = print_after
         self.wait_between = wait_between
         self.wait_after_print = wait_after_print
+        # self.main_text += "'{}'".format(wait_between)
 
 
 class Message:
@@ -103,7 +111,10 @@ class Message:
 
         # variable text is now nicely formatted with self.named_variables
         parts: List[MessagePart] = []
-        current = MessagePart("")
+        wait_between = MessagePart.DEFAULT_WAIT_BETWEEN
+        if self.message_type == MessageType.IMMEDIATE:
+            wait_between = 0
+        current = MessagePart("", wait_between=wait_between)
         # we would have a variable named started here, but instead we can just check if current.main_text is empty
         done = False  # are we done concatenating text to current.main_text
         current_escape = ""  # variable that stores parts of the string that can be added to print_before or print_after
@@ -165,7 +176,7 @@ class Message:
         return parts
 
 
-class PlayerInput(ABC):
+class PlayerInputGetter(ABC):
     @abstractmethod
     def take_input(self) -> str:
         """
@@ -191,3 +202,20 @@ class PlayerOutput(ABC):
         :param message: the message to send
         """
         pass
+
+    def on_input(self, player: 'Player', player_input: 'InputObject') -> bool:
+        """
+        By default, this method returns False the string is empty. Subclasses of PlayerOutput may change this.
+        And if they do change the implementation, they should check if player_input.is_empty() or call super.
+
+        Note that if this method returns False, no message is sent to the player so you should send a message to the \
+        player or do something like speeding up text. (Different implementations can handle this differently)
+
+        :param player: The player that this PlayerOutput is attached to
+        :param player_input: The input that the player typed. Notice that the method is_empty() could return True
+        :return: True if you want to cancel the handling/sending of the input. False otherwise (Normally False)
+        """
+        if player_input.is_empty():
+            player.send_message("You entered an empty line.")
+            return True
+        return False

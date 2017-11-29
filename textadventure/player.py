@@ -1,13 +1,13 @@
 from typing import TypeVar, Type, Optional
 
 from textadventure.entity import Entity, Health, Living
-from textadventure.message import PlayerOutput, PlayerInput, Message, MessageType
+from textadventure.message import PlayerOutput, PlayerInputGetter, Message, MessageType
 
 T = TypeVar("T")
 
 
 class Player(Entity):
-    def __init__(self, player_input: PlayerInput, player_output: PlayerOutput, name: Optional[str]):
+    def __init__(self, player_input: PlayerInputGetter, player_output: PlayerOutput, name: Optional[str]):
         """
         :param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
                     that players' names are one word while other entities are multiple so no one can name themselves\
@@ -58,6 +58,7 @@ class Player(Entity):
         self.send_message(Message("", MessageType.IMMEDIATE, end=ending))
 
     def clear_screen(self):
+        # TODO sending 100 lines won't be good for some implementations of PlayerOutput, so lets change this sometime
         self.send_line(100)  # do I need to use a constant variable PLTW? I do? No voy hacerlo
 
     def update(self, handler) -> None:

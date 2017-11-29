@@ -28,7 +28,7 @@ class Section:
         self.lines: List[Line] = []  # noinspection PyTypeChecker
 
     def get_lines_taken(self, printer: 'TextPrinter', include_extra_rows=True):
-        terminal_width = printer.get_rows_columns()[1]
+        terminal_width = printer.dimensions[1]
         length = len(self.lines)
         if include_extra_rows:
             for line in self.lines:
@@ -42,7 +42,7 @@ class Section:
         after = printer.calculate_lines_after(self)
         else_height = (before + after)
         # isn't recursive because it doesn't call the get_lines_taken method from the passed section (self)
-        height = printer.get_rows_columns()[0]
+        height = printer.dimensions[0]
         if else_height + length >= height or self.force_rows:  # if length will put other things off screen or full
             length = height - else_height  # will set the exact amount needed to show everything on screen (by hiding\
             #       lines)
@@ -79,7 +79,7 @@ class Section:
         return line
 
     def update_lines(self, text_printer: 'TextPrinter', flush: bool = False):
-        terminal_width = text_printer.get_rows_columns()[1]
+        terminal_width = text_printer.dimensions[1]
 
         length = len(self.lines)
         length = 0
@@ -91,11 +91,13 @@ class Section:
             if length - row <= taken:
                 line.update(text_printer)
             row += line.get_rows_taken(terminal_width)  # TODO if the Section#row is only 1 and it overflows, it will glitch
-
+        assert row == length, "Since this is False, then one of the Line#update isn't doing something right."
         if self.fake_line is not None:
-            extra_lines = 0
-            for line in self.lines:
-                extra_lines += line.get_rows_taken(terminal_width) - 1
+            # adding extra lines may look like it affected the speed, but it's because it happens even with regular \
+            #       lines when the screen fills up.
+            extra_lines = length - len(self.lines)
+            # for line in self.lines:  used when extra_lines is initially 0
+            #     extra_lines += line.get_rows_taken(terminal_width) - 1
             for i in range(row - taken, extra_lines * -1):
                 # this was very painful to think about, basically, it creates a fake line for each empty line that is \
                 #       owned by the section and that is not an actual line that has already been printed.

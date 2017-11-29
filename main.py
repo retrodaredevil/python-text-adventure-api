@@ -13,7 +13,7 @@ from ninjagame.managing import NinjaGamePropertyManager
 from textadventure.actions import EntityActionToEntityManager
 from textadventure.battling.commands import AttackCommandHandler
 from textadventure.battling.managing import HostileEntityManager, BattleManager, DamageActionManager
-from textadventure.clientside.inputs import TextPrinterInput, InputLineUpdaterManager
+from textadventure.clientside.inputs import TextPrinterInputGetter, InputLineUpdaterManager
 from textadventure.clientside.outputs import TextPrinterOutput, LocationTitleBarManager
 from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
     UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
@@ -72,7 +72,7 @@ def setup():
 
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 
-    def start(win):
+    def start(stdscr):
         # stream_output = StreamOutput()
         # stream_output.is_unix = "y" in input("Is your terminal unix based? (y/n) (No if you don't know) > ").lower()
         # player = Player(KeyboardInput(stream_output), stream_output, None)
@@ -82,9 +82,10 @@ def setup():
         print_section = Section(None, fake_line=".")
         title_section = Section(1)
         printer = TextPrinter([input_section, print_section, title_section])
+        printer.update_dimensions()
 
-        updater = InputLineUpdater(printer, input_section.print(printer, "", flush=True), win)
-        player_input = TextPrinterInput(updater)
+        updater = InputLineUpdater(printer, input_section.print(printer, "", flush=True), stdscr)
+        player_input = TextPrinterInputGetter(updater)
         input_manager = InputLineUpdaterManager(updater)  # calls updater's update
         handler.managers.append(input_manager)
 

@@ -41,7 +41,7 @@ class Line:
                 down 1.
         :return:
         """
-        width = text_printer.get_rows_columns()[1]
+        width = text_printer.dimensions[1]
         # length = len(self.section.lines)
         length = 0  # after for loop, will be just like len(self.section.lines) but accounting for extra lines
         for line in self.section.lines:
@@ -75,7 +75,7 @@ class Line:
         :param text_printer: The text printer object
         :param flush: By default false, set to True if you want to flush the stream
         """
-        columns = text_printer.get_rows_columns()[1]
+        columns = text_printer.dimensions[1]  # TODO I think this is slowing it down
 
         # show = Color.RESET + contents[:columns]  # TODO somehow get it to go onto the next line without glitching
         contents = self.contents

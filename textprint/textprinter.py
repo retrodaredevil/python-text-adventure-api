@@ -21,9 +21,23 @@ class TextPrinter:
         self.sections = sections
         self.__cursor = Cursor  # note that this isn't creating an object, it's an object already made
 
+        self.dimensions = (80, 24)
+        """[0] is rows [1] is columns"""
         # noinspection PyTypeChecker
         # self.default_position: Optional[Tuple[int, int]] = (0, 0)  # Optional Tuple where [0] is rows and [1] is col
         init()
+
+    def update_all_lines(self, flush: bool = True):
+        """
+        A simple method used to update all lines. Note that normally, this shouldn't be called at all unless you \
+        REALLY need to reset the screen.
+        :param flush: True if you want to flush the stream. This is True by default unlike most other methods
+        """
+        for section in self.sections:
+            section.update_lines(self, False)
+
+        if flush:
+            self.flush()
 
     def calculate_lines_to(self, section: Optional[Section]) -> int:
         """
@@ -71,12 +85,15 @@ class TextPrinter:
         :return: None
         """
         # print("\033[{};{}H".format(int(window_rows) - row, column), end="")
-        print(self.__cursor.POS(column, self.get_rows_columns()[0] - row), end="", flush=flush)
+        print(self.__cursor.POS(column, self.dimensions[0] - row), end="", flush=flush)
 
     def flush(self):
         print(end="", flush=True)
 
-    def get_rows_columns(self):
+    def update_dimensions(self):
+        """
+        Updates self.dimensions.
+        Note that calling this repeatedly will slow down your program A LOT
+        """
         rows, columns = os.popen('stty size', 'r').read().split()
-
-        return int(rows), int(columns)
+        self.dimensions = (int(rows), int(columns))

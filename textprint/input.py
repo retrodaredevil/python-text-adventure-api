@@ -86,7 +86,6 @@ class InputLineUpdater:
         # noinspection PyTypeChecker
         # self.lines: List[str] = []  # once a string is appended, it should not be altered on this list
         # self._current_line = ""
-
         self._editable_lines: List[EditableLine] = []  # noinspection PyTypeChecker
         self._current_line = EditableLine("")  # remember most of the time you should call current_line()
         """An EditableLine object that is used to keep track of what the player typed an the cursor position. When\
@@ -167,8 +166,13 @@ class InputLineUpdater:
             current.end()
         elif key == curses.KEY_HOME:
             current.home()
+        elif key == curses.KEY_RESIZE:
+            # time.sleep(.3)
+            self.stdscr.refresh()  # stops terminal from clearing
+            self.text_printer.update_dimensions()  # this is the place where we actually get the new dimensions
+            self.text_printer.update_all_lines()  # This will reload all of the sections and lines (Check for line over
         else:
-            self.current_line().type(str(curses.keyname(key)) + "int({})".format(key))
+            current.type("[{} ord: {}]".format(curses.keyname(key).decode("utf-8"), key))
 
     # def run(self):
     #     self._start_loop(self._win)

@@ -1,5 +1,9 @@
 from typing import List, Optional, TypeVar, Type, Union, TYPE_CHECKING
 
+import time
+
+from colorama import Cursor
+
 from textadventure.action import Action
 from textadventure.entity import Entity
 from textadventure.manager import Manager
@@ -52,23 +56,36 @@ class Handler:
                 player.update(self)
                 inp = player.take_input()  # this does not pause the thread
                 if inp is not None:  # since taking input doesn't pause the thread this could be null
+                    # SPEED print(Cursor.POS(0, 0) + "here", end="", flush=True) getting here good time
                     self.__do_input(player, inp)
+                    # SPEED also tested speed of __do_input and it's fine too
 
             for location in self.locations:
                 location.update(self)
 
             for manager in self.managers:
+                # SPEED start = time.time()
                 manager.update(self)
+                # after = time.time()
+                # taken = after - start
+                # from textadventure.clientside.outputs import TextPrinterOutput
+                # assert isinstance(manager, TextPrinterOutput) or taken < .04, \
+                #     "Manager: {} took: {} seconds".format(manager, taken)
+
                 #  except TypeError: don't forget the () when creating the Manager (call the constructor)
                 #  ^ That comment is there because in the Manager list, I added the class instead of creating the obj
 
     def __do_input(self, player: Player, inp: str):
         from textadventure.inputhandling import InputObject, InputHandleType, InputHandle
-        if len(inp) == 0:
+        input_object = InputObject(inp)
+        if player.player_output.on_input(player, input_object):
+            # since the on_input method returned True, it must have done something, so we don't need to send a message
+            return
+        if input_object.is_empty():
+            # since the player's PlayerOutput didn't handle this, we should do it
             player.send_message(
                 "You must enter a command. Normally, pressing enter with a blank line won't trigger this.")
             return
-        input_object = InputObject(inp)
         input_handles: List[InputHandle] = []
         for input_handler in self.get_input_handlers():
             handle = input_handler.on_input(self, player, input_object)  # call on_input for each handler

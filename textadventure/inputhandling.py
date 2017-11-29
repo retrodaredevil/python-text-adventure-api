@@ -59,6 +59,19 @@ class InputObject:
         # DONE actually make this good. I deleted a bunch of this and now it doesn't work. I need to find a better way
         # if you're wondering, this class used to be a lot different.
 
+    def is_empty(self):
+        """
+        Will almost always return False unless you are handling this InputObject in something like a PlayerOutput\
+        because this object should not be passed to methods that are not prepared to handle this.
+        Note that you shouldn't try to check this unless you plan to do something if the input is actually empty.
+
+        The implementation of handler doesn't pass this InputObject to InputHandlers if this object returns True,\
+        so you won't have to check for this.
+
+        :return: True if the string is empty, False otherwise. (Normally False)
+        """
+        return len(self.string_input) == 0
+
     def get_split(self) -> List[str]:
         r = self.string_input.split(" ")
         for element in list(r):
