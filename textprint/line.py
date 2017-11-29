@@ -4,6 +4,7 @@ import math
 from colorama.ansi import clear_line
 
 from textprint.colors import Color
+from textutil import length_without_ansi
 
 if TYPE_CHECKING:
     from textprint.section import Section
@@ -85,7 +86,8 @@ class Line:
             current = lines[index]
             current += c
             lines[index] = current
-            if len(current) >= columns:
+            if len(current) >= columns and length_without_ansi(current) >= columns:
+                # if the first part of if clause if False, the second part won't be tested (what we want)
                 lines.append("")
         # show = str(Color.RESET)
         for index, line in enumerate(lines):
@@ -122,7 +124,10 @@ class Line:
         """
         if allowed_columns is None:
             return 1
-        char_count = len(self.contents) + 1  # if we remove + 1, we must account for this being 0
+        length = len(self.contents) + 1
+        if length >= allowed_columns:  # don't call length_without_ansi until it might be going to the next line
+            length = length_without_ansi(self.contents) + 1
+        char_count = length + 1  # if we remove + 1, we must account for this being 0
         # assert False, "char_count: {}, allowed_columns: {}".format(char_count, allowed_columns) for debugging
 
         r = int(math.ceil(char_count / allowed_columns))

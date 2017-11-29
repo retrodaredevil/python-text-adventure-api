@@ -43,7 +43,7 @@ class Color(Enum):
     # """Used to reset the text completely back to normal. Not the same as RESET."""
 
     ESCAPE = str(CSI)
-    """The escape character that is at the front of all the values in this enum."""
+    """The escape string that is at the front of all the values in this enum. Note this does not have a length of 1"""
 
     # def value(self):
     #     return self.value
@@ -68,12 +68,16 @@ class Color(Enum):
         """
         Note should should check whether or not the passed string_color starts with ESCAPE or an assert error will rise
 
+        Note does not count ESCAPE since that would make this method mostly pointless
+
         :param string_color: The string code of the color. Note if this contains any text other than the color, \
                 this method will return None
         :return: The color object or a bool that's True if any of the colors start with the passed string_color
         """
         r = False
         for color in cls:
+            if color == cls.ESCAPE:
+                continue
             if str(color) == string_color:
                 return color
             if not r:

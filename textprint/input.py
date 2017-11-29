@@ -171,6 +171,17 @@ class InputLineUpdater:
             self.stdscr.refresh()  # stops terminal from clearing
             self.text_printer.update_dimensions()  # this is the place where we actually get the new dimensions
             self.text_printer.update_all_lines()  # This will reload all of the sections and lines (Check for line over
+        elif key == 8 or key == 519:  # ctrl+backspace or ctrl+delete
+            # TODO this code doesn't work perfectly like most ctrl+backspaces since it stops when it get to a space
+            backspace = key == 8
+            amount = -1 if backspace else 1
+
+            def get_using():
+                return current.before if backspace else current.after
+            i = 0
+            while len(get_using()) != 0 and (get_using()[-1 if backspace else 0] != " " or i == 0):
+                current.delete(amount)
+                i += 1
         else:
             current.type("[{} ord: {}]".format(curses.keyname(key).decode("utf-8"), key))
 

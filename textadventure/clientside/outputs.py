@@ -157,7 +157,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
         if player_input.is_empty():
             self.is_instant = True
             return True
-        self.send_message(Message(player_input.string_input, message_type=MessageType.IMMEDIATE))
+        self.send_message(Message(Color.YELLOW >> player_input.string_input, message_type=MessageType.IMMEDIATE))
         return False
 
     def on_action(self, handler: 'Handler', action: Action):
@@ -191,7 +191,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
         self.__print_parts()
 
     def __print_parts(self):
-        def iterate_parts():
+        def iterate_parts():  # called below. This was turned into a method because we need to be able to return
             """Returns True at[0] if all of the parts were printed. And returns contents of line at [1]"""
             parts: List[MessagePart] = self.current_line_parts[0]  # noinspection PyTypeChecker
 
@@ -207,9 +207,10 @@ class TextPrinterOutput(Manager, PlayerOutput):
                     for c in part.main_text:
                         contents += c
                         time_count += wait
-                        if time_count >= passed:
+                        if time_count >= passed and not self.is_instant:
                             return False, contents
                 contents += part.print_after
+            self.is_instant = False  # This makes it per line
             return True, contents
 
         now = time.time()
@@ -223,7 +224,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
                 self.message_parts.remove(first_list)
                 self.current_line_parts = (first_list, time.time())
                 self.current_line = self.section.print(self.printer, "")
-            result = iterate_parts()
+            result = iterate_parts()  # this is where we call iterate_parts
             self.current_line.contents = result[1]
             self.current_line.update(self.printer)  # don't flush because whatever's controlling input will
             if not result[0]:

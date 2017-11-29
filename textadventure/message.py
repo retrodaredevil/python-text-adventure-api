@@ -116,52 +116,64 @@ class Message:
             wait_between = 0
         current = MessagePart("", wait_between=wait_between)
         # we would have a variable named started here, but instead we can just check if current.main_text is empty
-        done = False  # are we done concatenating text to current.main_text
         current_escape = ""  # variable that stores parts of the string that can be added to print_before or print_after
+        is_immediate_flag = False  # the char '|' alters whether part of something should be printed immediately
         for c in text:  # go through all the characters
             if len(current_escape) != 0:  # check if there's an escape we are currently appending to and checking
+                assert c != chr(27), "Why would we ever have an escape in an escape?"
+                # current.main_text += "({})".format(ord(c))
                 current_escape += c
                 result = Color.get_color(current_escape)
                 if isinstance(result, Color):
                     # this is where we add the valid color to the text. In the future, we may add it to a list
+
                     if len(current.main_text) != 0:
+                        the_wait = wait_between if not is_immediate_flag else 0
+                        # current.print_after += result.name  # if you want to debug, uncomment
+                        # the reason we have this if-else clause, is because if the escape code is RESET, that should\
+                        #       go on the end of the MessagePart because that's the best way to represent MessageParts:\
+                        #       with RESET codes on print_after and anything else on the print_before of the next MP
+                        # In both clauses, we create a new MessagePart because we don't want a MessagePart with \
+                        #       multiple escapes on print_after (And it's easy to program this way) (could change later)
+
                         if result == Color.RESET:
-                            current.print_after += result
+                            current.print_after += result  # add to print after here
                             parts.append(current)
-                            current = MessagePart("")
+                            current = MessagePart("", wait_between=the_wait)
                         else:
-                            parts.append(current)  # append before since
-                            current = MessagePart("")
-                            current.print_after += result
+                            parts.append(current)  # append before since we want to add result to next MessagePart
+                            current = MessagePart("", wait_between=the_wait)
+                            current.print_before += result  # add to print after here
                     else:
+                        # since there's nothing in main_text, we should add this to the beginning
                         current.print_before += result
+                    current_escape = ""  # now that we've adding something, we're done with it.
                     continue  # continue if we added something to current
-                elif result:
+                elif result:  # result should now be a boolean
                     continue  # continue if the char added to current_escape is going to be valid later
-                else:
-                    # if this else fired, it means that the current_escape is not invalid and we should reset it
-                    current_escape = ""  # it will be reset anyway (below), but this makes the code more understandable
-                    # later, if the code below is changed, we should make sure to reset it
+
+            current_escape = ""
 
             # even if the above conditional was True, we still need to run this code. Notice some of the above code\
             #       has continue statements
-            if c == str(Color.ESCAPE):
+            if c == chr(27):
+                # current.main_text += "(esc)"
                 current_escape = c  # yep, it's the same as str(Color.ESCAPE)
             elif c == '\n':
                 # if this message has a new line character, add it to the end of a MessagePart
-                current_escape = ""
                 current.print_after += c
                 parts.append(current)
-                current = MessagePart("")
+                current = MessagePart("", wait_between=wait_between)
+                is_immediate_flag = False  # if there's a new line, we don't really want to carry this
+            elif c == '|':  # this character is used to mark part of the text that is printed immediately
+                is_immediate_flag = not is_immediate_flag
+                parts.append(current)
+                current = MessagePart("", wait_between=(wait_between if not is_immediate_flag else 0))
             else:
-                current_escape = ""  # if we made it here, whatever was in current_escape is either invalid or has\
-                #       already been added as a color
-                if done:  # stuff has been added to all three
-                    parts.append(current)
-                    current = MessagePart("")
                 # now we should actually add the character to the current since it's a normal character
                 current.main_text += c
 
+        # now we are out of the for loop
         if current not in parts and (current.print_before or current.main_text or current.print_after):
             # checks to make sure current isn't in parts and that there's a reason to add it to parts
             """
