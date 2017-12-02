@@ -78,7 +78,7 @@ class Handler:
     def __do_input(self, player: Player, inp: str):
         from textadventure.inputhandling import InputObject, InputHandleType, InputHandle
         input_object = InputObject(inp)
-        if player.player_output.on_input(player, input_object):
+        if player.player_output.on_input(self, player, input_object):
             # since the on_input method returned True, it must have done something, so we don't need to send a message
             return
         if input_object.is_empty():

@@ -8,6 +8,7 @@ from textprint.colors import Color
 
 if TYPE_CHECKING:
     from textadventure.player import Player
+    from textadventure.handler import Handler
     from textadventure.inputhandling import InputObject
 
 
@@ -215,7 +216,7 @@ class PlayerOutput(ABC):
         """
         pass
 
-    def on_input(self, player: 'Player', player_input: 'InputObject') -> bool:
+    def on_input(self, handler: 'Handler', player: 'Player', player_input: 'InputObject') -> bool:
         """
         By default, this method returns False the string is empty. Subclasses of PlayerOutput may change this.
         And if they do change the implementation, they should check if player_input.is_empty() or call super.
@@ -223,6 +224,7 @@ class PlayerOutput(ABC):
         Note that if this method returns False, no message is sent to the player so you should send a message to the \
         player or do something like speeding up text. (Different implementations can handle this differently)
 
+        :param handler: The Handler object
         :param player: The player that this PlayerOutput is attached to
         :param player_input: The input that the player typed. Notice that the method is_empty() could return True
         :return: True if you want to cancel the handling/sending of the input. False otherwise (Normally False)

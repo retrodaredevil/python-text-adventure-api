@@ -153,17 +153,29 @@ class TextPrinterOutput(Manager, PlayerOutput):
         #                                       for part in message.create_parts()]), flush=True)
         self.messages.append(message)
 
-    def on_input(self, player: 'Player', player_input: 'InputObject'):
+    def on_input(self, handler: 'Handler', player: 'Player', player_input: 'InputObject'):
         if player_input.is_empty():
             self.is_instant = True
             return True
+        current_is_instant = self.is_instant
+
         self.send_message(Message(Color.YELLOW >> player_input.string_input, message_type=MessageType.IMMEDIATE))
+        # self.send_message(Message(str([part.main_text for part in self.current_line_parts[0]])))
+        self.is_instant = True  # we have regular so all the stuff before it should print immediately
+        self.__add_messages()  # add the current message we just printed
+        self.__print_parts(reset_is_instant=False)  # by default, this will change self.is_instant
+        self.is_instant = current_is_instant  # reset is_instant to what is was before
         return False
 
     def on_action(self, handler: 'Handler', action: Action):
         pass
 
     def update(self, handler: 'Handler'):
+        self.__add_messages()
+
+        self.__print_parts()
+
+    def __add_messages(self):
         if len(self.message_parts) == 0:
             self.message_parts.append([])
         while len(self.messages) != 0:
@@ -188,9 +200,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
                     for i in range(0, new_lines):
                         self.message_parts.append([])
 
-        self.__print_parts()
-
-    def __print_parts(self):
+    def __print_parts(self, reset_is_instant: bool = True):
         def iterate_parts():  # called below. This was turned into a method because we need to be able to return
             """Returns True at[0] if all of the parts were printed. And returns contents of line at [1]"""
             parts: List[MessagePart] = self.current_line_parts[0]  # noinspection PyTypeChecker
@@ -210,7 +220,8 @@ class TextPrinterOutput(Manager, PlayerOutput):
                         if time_count >= passed and not self.is_instant:
                             return False, contents
                 contents += part.print_after
-            self.is_instant = False  # This makes it per line
+            if reset_is_instant:
+                self.is_instant = False  # This makes it per line
             return True, contents
 
         now = time.time()

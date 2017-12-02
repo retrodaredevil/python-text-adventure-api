@@ -157,11 +157,21 @@ class InputLineUpdater:
         elif key == curses.KEY_RIGHT:
             current.move(1)
         elif key == curses.KEY_UP or key == curses.KEY_DOWN:
-            if key == curses.KEY_UP:
-                self._line_index += 1  # remember when 0, current line will be self._current_line
-            else:
-                self._line_index -= 1
-            self._line_index = max(0, min(self._line_index, len(self._editable_lines)))  # clamp
+
+            def go_direction():
+                if key == curses.KEY_UP:
+                    self._line_index += 1  # remember when 0, current line will be self._current_line
+                else:
+                    self._line_index -= 1
+                self._line_index = max(0, min(self._line_index, len(self._editable_lines)))  # clamp
+            last_index = None  # keeps us from checking errors
+            first_iteration = True
+            while first_iteration or (last_index != self._line_index and self.current_line().original == ""):
+                first_iteration = False  # makes it like a do while loop
+                # keep going until we find a line that wasn't originally a blank one
+                last_index = self._line_index
+                go_direction()
+
         elif key == curses.KEY_END:
             current.end()
         elif key == curses.KEY_HOME:
