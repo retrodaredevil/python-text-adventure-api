@@ -187,8 +187,10 @@ class InputLineUpdater:
             amount = -1 if backspace else 1
 
             def get_using():
+                """Gets the current string that we will delete from based on if the user pressed backspace or delete"""
                 return current.before if backspace else current.after
-            i = 0
+            i = 0  # this while loop gets the string we are going to use, then checks if the character we will delete\
+            #       is a space, if it is and we've already deleted stuff, then stop deleting
             while len(get_using()) != 0 and (get_using()[-1 if backspace else 0] != " " or i == 0):
                 current.delete(amount)
                 i += 1
@@ -202,10 +204,6 @@ class InputLineUpdater:
         """
         Should be called in a while True loop in order to update the input
         """
-        if self.times_initialized == 0:
-            print("Initializing win using initscr. Initiation number: {} (Starts at 0)".format(self.times_initialized))
-            self.times_initialized += 1
-            self.__class__.reset_stdscr(self.stdscr)
 
         while True:
             char_int = self.stdscr.getch()
@@ -224,14 +222,3 @@ class InputLineUpdater:
         # self.times_updated += 1
         # self.current_line().type("hi")
         self.update_line()
-
-    @staticmethod
-    def reset_stdscr(stdscr):
-        stdscr.clear()
-        stdscr.keypad(True)  # allows constants from curses.<KEY_NAME> (ascii values above 255)
-        stdscr.nodelay(True)  # stops all getch from the curses library to pause the current Thread
-
-        curses.use_default_colors()
-        curses.noecho()
-        curses.raw()  # allows us to receive keyboard interrupts
-        curses.cbreak()

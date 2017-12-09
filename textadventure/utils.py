@@ -2,6 +2,10 @@ import sys
 from difflib import SequenceMatcher
 from typing import Union, List, Tuple, TypeVar, Type, Optional
 
+# if TYPE_CHECKING:
+#     from textadventure.message import Message
+
+
 """
 Imports should not import any of the other modules we've made. It could conflict when trying to import utils
 """

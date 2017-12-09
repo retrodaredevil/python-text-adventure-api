@@ -4,14 +4,13 @@ from typing import List, Optional, TypeVar, Type
 
 from textadventure.entity import EntityAction, Entity
 from textadventure.handler import Handler
-from textadventure.holder import Holder
-from textadventure.inputhandling import InputHandler
-from textadventure.inputhandling import InputObject
-from textadventure.item import Item, FiveSensesHandler
+from textadventure.input.inputhandling import InputHandler
+from textadventure.input.inputhandling import InputObject
+from textadventure.item.holder import Holder
+from textadventure.item.item import Item, FiveSensesHandler
 from textadventure.message import Message, MessageType
 from textadventure.player import Player
 from textadventure.utils import Point, MessageConstant, are_mostly_equal, CanDo
-
 
 T = TypeVar('T')
 
@@ -36,7 +35,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     """
 
     def __init__(self, name, description, point: Point):
-        from textadventure.command import CommandHandler
+        from textadventure.commands.command import CommandHandler
         super().__init__()
         self.name = name
         self.description = description
@@ -56,7 +55,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
             is currently at, it would have the exact same effect. I'm leaving like this for now though.
         :return: None
         """
-        from textadventure.commands import LookCommandHandler, FeelCommandHandler, SmellCommandHandler, \
+        from textadventure.commands.commands import LookCommandHandler, FeelCommandHandler, SmellCommandHandler, \
             TasteCommandHandler, ListenCommandHandler
         self.command_handlers.extend([LookCommandHandler(self), FeelCommandHandler(self), SmellCommandHandler(self),
                                       TasteCommandHandler(self), ListenCommandHandler(self)])

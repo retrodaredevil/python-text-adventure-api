@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from textadventure.battling.choosing import MoveOption
 from textadventure.handler import Handler
-from textadventure.item import Item
+from textadventure.item.item import Item
 from textadventure.player import Player
 
 

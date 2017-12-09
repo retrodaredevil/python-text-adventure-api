@@ -1,10 +1,13 @@
 from abc import abstractmethod, ABC
 from enum import Enum, unique, auto
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, TYPE_CHECKING
 
-from textadventure.handler import Handler
 from textadventure.player import Player
 from textadventure.utils import get_unimportant
+
+
+if TYPE_CHECKING:
+    from textadventure.handler import Handler
 
 
 @unique
@@ -139,17 +142,15 @@ class InputObject:
 
 class InputHandler(ABC):
     @abstractmethod
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject) -> Optional['InputHandle']:
+    def on_input(self, handler: 'Handler', player: Player, player_input: InputObject) -> Optional['InputHandle']:
         """
         The reason this doesn't handle the input is because we want all the input handlers to be able to give\
         us their priority and depending on that, we'll call the lower priority number first\
         (lower number higher priority. Explained in InputHandle)
 
         :param handler: The handler object
-        :type handler: Handler
         :param player: the player object that gave the input
         :param player_input: The InputObject that contains the string input and other useful data
-        :rtype: Optional[InputHandle]
         :return: An InputHandle that handles the inputs or None if it won't handle the input
         """
         pass

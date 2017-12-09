@@ -4,9 +4,9 @@ from textadventure.battling.actions import EntityChallengeAction
 from textadventure.battling.choosing import SetMoveChooser, MoveOption
 from textadventure.battling.managing import BattleManager
 from textadventure.battling.move import Target
-from textadventure.command import SimpleCommandHandler
+from textadventure.commands.command import SimpleCommandHandler
 from textadventure.handler import Handler
-from textadventure.inputhandling import InputObject, InputHandleType
+from textadventure.input.inputhandling import InputObject, InputHandleType
 from textadventure.message import Message
 from textadventure.player import Player
 from textadventure.utils import join_list

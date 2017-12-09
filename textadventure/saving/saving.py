@@ -1,16 +1,15 @@
 import os
 import pickle
+import sys
 from pathlib import Path
 from pickle import UnpicklingError
 from typing import Iterable, Optional
 
-import sys
-
-import textadventure.savable
-from textadventure.command import SimpleCommandHandler
-from textadventure.inputhandling import InputObject, InputHandleType
+import textadventure.saving.savable
+from textadventure.commands.command import SimpleCommandHandler
+from textadventure.input.inputhandling import InputObject, InputHandleType
 from textadventure.player import Player
-from textadventure.savable import Savable
+from textadventure.saving.savable import Savable
 from textadventure.utils import CanDo
 
 DEFAULT_PATH: Path = Path("./save.data")
@@ -36,7 +35,7 @@ def save(handler, player: Player, path: Path=DEFAULT_PATH, override_file: bool=F
     to_save = []
     # noinspection PyBroadException
     try:
-        textadventure.savable.is_saving = True
+        textadventure.saving.savable.is_saving = True
         data = player.handled_objects  # one of the only places it can do this
 
         for part in data:
@@ -51,7 +50,7 @@ def save(handler, player: Player, path: Path=DEFAULT_PATH, override_file: bool=F
         info = sys.exc_info()
         return False, "Got error: {}, {}".format(info[0], info[1])
     finally:
-        textadventure.savable.is_saving = False
+        textadventure.saving.savable.is_saving = False
 
     return True, "Success in saving to file: '{}'. Saved {} parts".format(path.absolute().name, len(to_save))
 

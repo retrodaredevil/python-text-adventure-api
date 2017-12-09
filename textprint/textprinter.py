@@ -1,8 +1,8 @@
 import os
 from typing import List, Optional
 
-from colorama import init, Cursor
-# from colorama.ansi import CSI
+import sys
+from colorama import Cursor
 
 from textprint.section import Section
 
@@ -12,20 +12,29 @@ class TextPrinter:
     This class is used to clear the whole screen and write to it using sections to make a awesome looking text \
         interface using curses
     """
-    def __init__(self, sections: List[Section]):
+    def __init__(self, sections: List[Section], output=sys.stdout, print_from_top=False):
         """
         Creates a TextPrinter object that will be used by the Sections
+
         :param sections: The list of sections where the section at index 0 will be at the bottom. Ex: Most of the time\
-                you will have your input_section at the bottom
+                you will have your input_section at the bottom. Note that there can only be one Section where\
+                Section#rows is None and Section#force_rows is True. If there are multiple with that, then two \
+                sections will conflict with each other and you will get a recursion error.
+        :param output: The output to write to. Defaults to sys.stdout and if you change it, you must make sure that\
+                other libraries like curses that are being used are altered correctly
+        :param print_from_top: Normally False. If True, text will print from the top and the order of the sections\
+                will be flipped (Every line seen will be flipped
         """
         self.sections = sections
+        self.output = output
+        self.print_from_top = print_from_top
+
         self.__cursor = Cursor  # note that this isn't creating an object, it's an object already made
 
         self.dimensions = (80, 24)
         """[0] is rows [1] is columns"""
         # noinspection PyTypeChecker
         # self.default_position: Optional[Tuple[int, int]] = (0, 0)  # Optional Tuple where [0] is rows and [1] is col
-        init()
 
     def update_all_lines(self, flush: bool = True):
         """
@@ -66,7 +75,7 @@ class TextPrinter:
         adding = False
         for s in self.sections:
             if adding:
-                # assert section != s, "This should not happen in calculate_lines_after"
+                # assert section != s, "This should not happen in calculate_lines_after", really we shouldn't need this
                 lines += s.get_lines_taken(self)
             elif s == section:
                 adding = True
@@ -85,10 +94,26 @@ class TextPrinter:
         :return: None
         """
         # print("\033[{};{}H".format(int(window_rows) - row, column), end="")
-        print(self.__cursor.POS(column, self.dimensions[0] - row), end="", flush=flush)
+
+        self.print(self.__cursor.POS(column, self.dimensions[0] - row if not self.print_from_top else row),
+                   end="", flush=flush)
+
+    def print(self, text="", flush=False, end=""):
+        """
+        Allows you to print text to self.output. Normally, you would use unix escapes since that what this library \
+            uses. Normally, you shouldn't call this method because you should let
+        :param text: The text you want to print
+        :param flush: Do you want to flush it?
+        :param end: The ending, by default and normally an empty string. Since this library handles multiple lines\
+                with Line objects, normally you wouldn't and shouldn't change this.
+        """
+        # print(text, flush=flush, end=end)
+        self.output.write(text + end)
+        if flush:
+            self.output.flush()
 
     def flush(self):
-        print(end="", flush=True)
+        self.print(flush=True)
 
     def update_dimensions(self):
         """

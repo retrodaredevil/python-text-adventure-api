@@ -2,19 +2,17 @@ from typing import List, Optional
 
 from ninjagame.data import EventsObject
 from ninjagame.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend, NinjaEntity
-
 from ninjagame.items import Sword, SwordType
 from textadventure.entity import Health
 from textadventure.handler import Handler
-from textadventure.inputhandling import InputHandler
-from textadventure.inputhandling import InputObject, InputHandle, InputHandleType
-from textadventure.item import Item
-from textadventure.items import Wallet, Coin, CoinType
+from textadventure.input.inputhandling import InputHandler
+from textadventure.input.inputhandling import InputObject, InputHandle, InputHandleType
+from textadventure.item.item import Item
+from textadventure.item.items import Wallet, Coin, CoinType
 from textadventure.location import Location, GoAction
 from textadventure.message import Message, MessageType
 from textadventure.player import Player
 from textadventure.utils import is_string_true, Point, SOUTH, EAST, WEST, NORTH, UP, DOWN, DIRECTIONS, CanDo
-
 
 """
 Don't be scared by the size of this file, each location has a few abstract methods that must be implemented, and \

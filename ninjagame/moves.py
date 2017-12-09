@@ -5,7 +5,7 @@ from textadventure.battling.actions import DamageAction
 from textadventure.battling.battle import Battle
 from textadventure.battling.move import Move, Target
 from textadventure.battling.outcome import OutcomePart, UseMoveOutcome
-from textadventure.item import Item
+from textadventure.item.item import Item
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler

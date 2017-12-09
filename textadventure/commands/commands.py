@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import List, Optional
 
-from textadventure.command import LocationCommandHandler, SimpleCommandHandler
+from textadventure.commands.command import LocationCommandHandler, SimpleCommandHandler
 from textadventure.handler import Handler
-from textadventure.inputhandling import InputObject, InputHandleType, InputHandler, InputHandle
-from textadventure.item import FiveSensesHandler, Item
+from textadventure.input.inputhandling import InputObject, InputHandleType, InputHandler, InputHandle
+from textadventure.item.item import FiveSensesHandler, Item
 from textadventure.location import Location
 from textadventure.message import Message, MessageType
 from textadventure.player import Player

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Type, List
 
 from textadventure.action import Action
-from textadventure.holder import Holder
+from textadventure.item.holder import Holder
 from textadventure.message import Message
 from textadventure.utils import MessageConstant, CanDo, are_mostly_equal
 

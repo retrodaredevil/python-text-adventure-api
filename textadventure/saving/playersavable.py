@@ -1,7 +1,7 @@
 from typing import List
 
 from textadventure.player import Player
-from textadventure.savable import Savable
+from textadventure.saving.savable import Savable
 from textadventure.utils import Point
 
 
@@ -14,7 +14,7 @@ class PlayerSavable(Savable):
     """
 
     def __init__(self):
-        from textadventure.item import Item
+        from textadventure.item.item import Item
         super().__init__()
         self.point = Point(0, 0)
         self.items: List[Item] = []  # noinspection PyTypeChecker

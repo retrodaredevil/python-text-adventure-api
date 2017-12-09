@@ -3,7 +3,7 @@ This file is used for data specific things.
 It was moved from player.py to locations.py because it wasn't for the api (it was for the game)
 Then, it was moved from locations.py to here because of importing errors
 """
-from textadventure.savable import Savable
+from textadventure.saving.savable import Savable
 
 
 class EventsObject(Savable):

@@ -1,9 +1,5 @@
 from typing import List, Optional, TypeVar, Type, Union, TYPE_CHECKING
 
-import time
-
-from colorama import Cursor
-
 from textadventure.action import Action
 from textadventure.entity import Entity
 from textadventure.manager import Manager
@@ -11,7 +7,8 @@ from textadventure.player import Player, Living
 from textadventure.utils import Point, get_type_from_list
 
 if TYPE_CHECKING:
-    from textadventure.inputhandling import InputHandler
+    from textadventure.input.inputhandling import InputHandler
+    from textadventure.location import Location
 
 T = TypeVar("T")
 
@@ -39,11 +36,9 @@ class Handler:
     """
 
     def __init__(self):
-        from textadventure.location import Location
-        from textadventure.inputhandling import InputHandler
         self.entities: List[Entity] = []
-        self.locations: List[Location] = []
-        self.input_handlers: List[InputHandler] = []
+        self.locations: List['Location'] = []
+        self.input_handlers: List['InputHandler'] = []
         self.managers: List[Manager] = []
         self.living_things: List[Living] = []
 
@@ -56,27 +51,16 @@ class Handler:
                 player.update(self)
                 inp = player.take_input()  # this does not pause the thread
                 if inp is not None:  # since taking input doesn't pause the thread this could be null
-                    # SPEED print(Cursor.POS(0, 0) + "here", end="", flush=True) getting here good time
                     self.__do_input(player, inp)
-                    # SPEED also tested speed of __do_input and it's fine too
 
             for location in self.locations:
                 location.update(self)
 
             for manager in self.managers:
-                # SPEED start = time.time()
                 manager.update(self)
-                # after = time.time()
-                # taken = after - start
-                # from textadventure.clientside.outputs import TextPrinterOutput
-                # assert isinstance(manager, TextPrinterOutput) or taken < .04, \
-                #     "Manager: {} took: {} seconds".format(manager, taken)
-
-                #  except TypeError: don't forget the () when creating the Manager (call the constructor)
-                #  ^ That comment is there because in the Manager list, I added the class instead of creating the obj
 
     def __do_input(self, player: Player, inp: str):
-        from textadventure.inputhandling import InputObject, InputHandleType, InputHandle
+        from textadventure.input.inputhandling import InputObject, InputHandleType, InputHandle
         input_object = InputObject(inp)
         if player.player_output.on_input(self, player, input_object):
             # since the on_input method returned True, it must have done something, so we don't need to send a message

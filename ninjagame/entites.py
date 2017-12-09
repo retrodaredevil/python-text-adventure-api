@@ -1,7 +1,7 @@
 from ninjagame.data import EventsObject
 from textadventure.entity import Living, CommunityHostileEntity
 from textadventure.player import Player
-from textadventure.savable import Savable
+from textadventure.saving.savable import Savable
 
 
 class PlayerFriend(Living, Savable):

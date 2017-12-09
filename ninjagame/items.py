@@ -3,7 +3,7 @@ from typing import Tuple
 
 from textadventure.battling.weapon import Weapon
 from textadventure.handler import Handler
-from textadventure.items import Item
+from textadventure.item.items import Item
 from textadventure.message import Message
 from textadventure.player import Player
 from textadventure.utils import MessageConstant

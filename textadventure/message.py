@@ -9,7 +9,7 @@ from textprint.colors import Color
 if TYPE_CHECKING:
     from textadventure.player import Player
     from textadventure.handler import Handler
-    from textadventure.inputhandling import InputObject
+    from textadventure.input.inputhandling import InputObject
 
 
 class MessageType(Enum):

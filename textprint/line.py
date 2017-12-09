@@ -98,7 +98,7 @@ class Line:
             after = ""
             if index == len(lines) - 1:
                 after = str(Color.RESET)
-            print(clear_line() + before + line + after, end="", flush=False)
+            text_printer.print(clear_line() + before + line + after, end="", flush=False)
 
         last_length = self._last_length_lines
         self._last_length_lines = len(lines)

@@ -4,8 +4,6 @@ import warnings
 from threading import Thread
 from typing import List, TYPE_CHECKING, Tuple, Optional
 
-from colorama import Cursor
-
 from textadventure.action import Action
 from textadventure.handler import Handler
 from textadventure.manager import Manager
@@ -17,9 +15,8 @@ from textprint.line import Line
 from textprint.section import Section
 from textprint.textprinter import TextPrinter
 
-
 if TYPE_CHECKING:
-    from textadventure.inputhandling import InputObject
+    from textadventure.input.inputhandling import InputObject
 
 
 # deprecated
@@ -146,7 +143,11 @@ class TextPrinterOutput(Manager, PlayerOutput):
         """This is a list of lists of MessageParts where each list inside the list is a line."""
         self.current_line_parts: Optional[Tuple[List[MessagePart], int]] = None  # noinspection PyTypeChecker
         """[0] represents the MessageParts that should be on one line. [1] represents the time they started printing"""
+
         self.is_instant = False  # set to True when you want the update method to immediately print current message
+        self._last_blank = 0
+        """Used in on_input to tell how long it's been since the user pressed enter with no input"""
+        self._reset_is_instant_time = None
 
     def send_message(self, message: Message):
         # self.section.print(self.printer, str(["({},{},{}".format(part.print_before, part.main_text, part.print_after)
@@ -155,7 +156,11 @@ class TextPrinterOutput(Manager, PlayerOutput):
 
     def on_input(self, handler: 'Handler', player: 'Player', player_input: 'InputObject'):
         if player_input.is_empty():
+            now = time.time()
             self.is_instant = True
+            if self._last_blank + 1 > now:
+                self._reset_is_instant_time = now + 0.5
+            self._last_blank = now
             return True
         current_is_instant = self.is_instant
 
@@ -171,9 +176,25 @@ class TextPrinterOutput(Manager, PlayerOutput):
         pass
 
     def update(self, handler: 'Handler'):
+        """If you're reading this, all you have to know is that this calls __add_messages and __print_parts"""
         self.__add_messages()
 
-        self.__print_parts()
+        force_is_instant = False
+        now = time.time()
+        if self._reset_is_instant_time is not None:
+            if now <= self._reset_is_instant_time:  # if we shouldn't reset it yet
+                force_is_instant = True
+            else:
+                self.is_instant = False
+                self._reset_is_instant_time = None
+
+        if force_is_instant:
+            before = self.is_instant
+            self.is_instant = True
+            self.__print_parts(reset_is_instant=False)
+            self.is_instant = before
+        else:
+            self.__print_parts()
 
     def __add_messages(self):
         if len(self.message_parts) == 0:

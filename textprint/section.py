@@ -30,23 +30,27 @@ class Section:
     def get_lines_taken(self, printer: 'TextPrinter', include_extra_rows=True):
         terminal_width = printer.dimensions[1]
         length = len(self.lines)
-        if include_extra_rows:
+        if include_extra_rows:  # most of the time, this is True
+            length = 0
             for line in self.lines:
                 length += line.get_rows_taken(terminal_width)  # could be 2 or 3 if the line is overflowing
-        if self.rows is not None:
-            if self.force_rows or length > self.rows:
-                return self.rows  # this is very likely to be returned
-            return length
-        # now this code will only be run if self.rows is None
-        before = printer.calculate_lines_to(self)
-        after = printer.calculate_lines_after(self)
-        else_height = (before + after)
-        # isn't recursive because it doesn't call the get_lines_taken method from the passed section (self)
-        height = printer.dimensions[0]
-        if else_height + length >= height or self.force_rows:  # if length will put other things off screen or full
-            length = height - else_height  # will set the exact amount needed to show everything on screen (by hiding\
-            #       lines)
+        if self.rows is None:  # is there no set number of rows?
+            if not self.force_rows:  # if we aren't forcing the number of rows this section has
+                return length  # Now then, we'll just use as many rows as we'd like
 
+            before = printer.calculate_lines_to(self)
+            after = printer.calculate_lines_after(self)
+            else_height = (before + after)
+            # isn't recursive because it doesn't call the get_lines_taken method from the passed section (self)
+            height = printer.dimensions[0]
+            if else_height + length >= height or self.force_rows:  # if length will put other things off screen or full
+                length = height - else_height  # will set the exact amount needed to show everything on screen (by \
+                #       hiding lines)
+            return length
+
+        # self.rows is not None
+        if self.force_rows or length > self.rows:
+            return self.rows  # this is very likely to be returned
         return length
 
     def goto(self, text_printer: 'TextPrinter', row: int, column: int, flush: bool = False) -> Tuple[int, int]:
@@ -78,7 +82,20 @@ class Section:
         #       if a new line was needed, it should have been added
         return line
 
+    def __remove_old_lines(self):
+        length = len(self.lines)
+        if length < 110:  # we should remove 10 lines at a time -> might improve performance
+            return
+        amount_removed = 0
+        while length > 100:
+            del self.lines[0]  # removes first item by index
+            amount_removed += 1
+
+        for line in self.lines:
+            line.line_number -= amount_removed
+
     def update_lines(self, text_printer: 'TextPrinter', flush: bool = False):
+        self.__remove_old_lines()
         terminal_width = text_printer.dimensions[1]
 
         length = len(self.lines)

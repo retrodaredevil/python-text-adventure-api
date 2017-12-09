@@ -2,8 +2,8 @@ from enum import unique, Enum
 from typing import Tuple, Optional
 
 from textadventure.handler import Handler
-from textadventure.holder import Holder
-from textadventure.item import Item
+from textadventure.item.item import Item
+from textadventure.item.holder import Holder
 from textadventure.player import Player
 
 CoinTuple = Tuple[int, str]

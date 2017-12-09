@@ -15,14 +15,15 @@ from textadventure.battling.commands import AttackCommandHandler
 from textadventure.battling.managing import HostileEntityManager, BattleManager, DamageActionManager
 from textadventure.clientside.inputs import TextPrinterInputGetter, InputLineUpdaterManager
 from textadventure.clientside.outputs import TextPrinterOutput, LocationTitleBarManager
-from textadventure.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
+from textadventure.commands.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
     UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
     HelpCommandHandler
 from textadventure.handler import Handler
-from textadventure.inputhandlers import SettingsHandler
+from textadventure.input.inputhandlers import SettingsHandler
 from textadventure.player import Player
-from textadventure.playersavable import PlayerSavable
-from textadventure.saving import SaveCommandHandler, LoadCommandHandler
+from textadventure.saving.saving import SaveCommandHandler, LoadCommandHandler
+from textadventure.saving.playersavable import PlayerSavable
+from textprint.inithelper import curses_init, std_init, colorama_init
 from textprint.input import InputLineUpdater
 from textprint.section import Section
 from textprint.textprinter import TextPrinter
@@ -76,13 +77,16 @@ def setup():
         # stream_output = StreamOutput()
         # stream_output.is_unix = "y" in input("Is your terminal unix based? (y/n) (No if you don't know) > ").lower()
         # player = Player(KeyboardInput(stream_output), stream_output, None)
-        curses.use_default_colors()
+        std_init(stdscr)
+        curses_init()
+        colorama_init()
 
         input_section = Section(1)
-        print_section = Section(None, fake_line=".")
+        print_section = Section(None)
         title_section = Section(1)
         printer = TextPrinter([input_section, print_section, title_section])
         printer.update_dimensions()
+        # print_section.fake_line = "|" + (" " * (printer.dimensions[1] - 4)) + "|"
 
         updater = InputLineUpdater(printer, input_section.print(printer, "", flush=True), stdscr)
         player_input = TextPrinterInputGetter(updater)

@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import List
 
 from textadventure.handler import Handler
-from textadventure.inputhandling import InputHandler, InputObject, InputHandle, InputHandleType
+from textadventure.input.inputhandling import InputHandler, InputObject, InputHandle, InputHandleType
 from textadventure.location import Location
 from textadventure.player import Player
 

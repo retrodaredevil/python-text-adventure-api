@@ -2,9 +2,9 @@ from abc import abstractmethod, ABC
 from typing import Optional
 
 from textadventure.handler import Handler
-from textadventure.holder import Holder
+from textadventure.item.holder import Holder
 from textadventure.player import Player
-from textadventure.savable import Savable
+from textadventure.saving.savable import Savable
 from textadventure.utils import are_mostly_equal, CanDo
 
 

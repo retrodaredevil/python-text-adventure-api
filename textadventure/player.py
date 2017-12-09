@@ -84,7 +84,7 @@ class Player(Entity):
         :rtype Wallet
         :return: The wallet that's in the player's items or None if there is no Wallet
         """
-        from textadventure.items import Wallet
+        from textadventure.item.items import Wallet
         for item in self.items:
             if isinstance(item, Wallet):
                 return item
