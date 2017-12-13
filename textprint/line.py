@@ -61,7 +61,7 @@ class Line:
             assert line_number == length, "If this is False, then it's likely this isn't a fake line."
             line_number += difference  # since line_number == length, and difference is a big negative number \
             #       we account for extra lines and get a nice negative number we can use for a fake line
-            assert line_number < 0
+            # assert line_number < 0  we don't need this because of the first assert difference < 0
         rows = length - line_number - 1  # - 1 because we don't want the lowest value of rows as 1
 
         columns = 0

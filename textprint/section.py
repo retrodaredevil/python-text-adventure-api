@@ -83,11 +83,10 @@ class Section:
         return line
 
     def __remove_old_lines(self):
-        length = len(self.lines)
-        if length < 110:  # we should remove 10 lines at a time -> might improve performance
+        if len(self.lines) < 110:  # we should remove 10 lines at a time -> might improve performance
             return
         amount_removed = 0
-        while length > 100:
+        while len(self.lines) > 100:
             del self.lines[0]  # removes first item by index
             amount_removed += 1
 

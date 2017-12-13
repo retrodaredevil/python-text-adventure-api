@@ -177,10 +177,11 @@ class InputLineUpdater:
         elif key == curses.KEY_HOME:
             current.home()
         elif key == curses.KEY_RESIZE:
+            # self.stdscr.refresh()  # stops terminal from clearing
             # time.sleep(.3)
             self.stdscr.refresh()  # stops terminal from clearing
             self.text_printer.update_dimensions()  # this is the place where we actually get the new dimensions
-            self.text_printer.update_all_lines()  # This will reload all of the sections and lines (Check for line over
+            self.text_printer.update_all_lines()  # This will reload all of the sections and lines (Check overflows)
         elif key == 8 or key == 519:  # ctrl+backspace or ctrl+delete
             # TODO this code doesn't work perfectly like most ctrl+backspaces since it stops when it get to a space
             backspace = key == 8

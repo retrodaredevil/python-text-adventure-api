@@ -95,7 +95,7 @@ class TextPrinter:
         """
         # print("\033[{};{}H".format(int(window_rows) - row, column), end="")
 
-        self.print(self.__cursor.POS(column, self.dimensions[0] - row if not self.print_from_top else row),
+        self.print(self.__cursor.POS(column, self.dimensions[0] - row if not self.print_from_top else row + 1),
                    end="", flush=flush)
 
     def print(self, text="", flush=False, end=""):
