@@ -366,6 +366,7 @@ class WestInsideEntrance(Location):  # introduce Laura
             player.send_message("You feel a hand go over your mouth.")
             player.send_message("You see a rock coming at your fa-")
             player.clear_screen()
+
             player.send_wait(1)
             laura = handler.get_livings(LauraPerson, 1)[0]
             laura.tell(player, "Who are you?")
@@ -375,13 +376,14 @@ class WestInsideEntrance(Location):  # introduce Laura
             player.send_wait(0.3)
             player.tell(player, "He's my fri-")
             laura.tell(player, "Lies!")
-            player.send_wait(0.7)
+            player.send_wait(1.2)
             player.clear_screen()
+
             player.send_wait(1)
             laura.tell(player, Message("Hi I'm {}. Sorry about that. Everything is cleared up now.",
                                        named_variables=[laura]))
-            player[EventsObject].knows_laura = True
-            sword = Sword(SwordType.WOODEN)
+            player[EventsObject].knows_laura = True  # make sure this code isn't run for the player again
+            sword = Sword(SwordType.WOODEN)  # we just need this variable to reference in named_variables
             sword.change_holder(None, player.location)
             laura.tell(player, Message("How about for all your troubles I'll give you this {}. Take it.",
                                        named_variables=[sword]))

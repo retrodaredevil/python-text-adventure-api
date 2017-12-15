@@ -80,6 +80,9 @@ class Line:
 
         # show = Color.RESET + contents[:columns]  # TODO somehow get it to go onto the next line without glitching
         contents = self.contents
+        if str(Color.CLEAR_SECTION) in contents:
+            self.section.lines.clear()  # clear all lines. Even this line.
+            return
         lines = [""]
         for c in contents:
             index = len(lines) - 1

@@ -2,7 +2,7 @@ from typing import TypeVar, Type, Optional, TYPE_CHECKING
 
 from textadventure.entity import Entity, Health, Living
 from textadventure.message import PlayerOutput, PlayerInputGetter, Message, MessageType
-
+from textprint.colors import Color
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler
@@ -64,8 +64,7 @@ class Player(Entity):
         self.send_message(Message("", MessageType.IMMEDIATE, end=ending))
 
     def clear_screen(self):
-        # TODO sending 100 lines won't be good for some implementations of PlayerOutput, so lets change this sometime
-        self.send_line(100)  # do I need to use a constant variable PLTW? I do? No voy hacerlo
+        self.send_message(str(Color.CLEAR_SECTION))
 
     def update(self, handler: 'Handler') -> None:
         """

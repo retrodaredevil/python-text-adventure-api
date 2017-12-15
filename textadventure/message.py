@@ -26,6 +26,10 @@ class MessageType(Enum):
 
 
 class MessagePart:
+    """
+    A class to represent a small and simple part of a message where all of the text in this part has the same\
+    properties.
+    """
     DEFAULT_WAIT_BETWEEN = .026
 
     def __init__(self, main_text: str, print_before="", print_after="", wait_between=DEFAULT_WAIT_BETWEEN,
@@ -105,6 +109,8 @@ class Message:
 
         # variable text is now nicely formatted with self.named_variables
         parts: List[MessagePart] = []
+        if self.wait_in_seconds != 0:
+            parts.append(MessagePart("", wait_after_print=self.wait_in_seconds))
         wait_between = MessagePart.DEFAULT_WAIT_BETWEEN
         if self.message_type == MessageType.IMMEDIATE:
             wait_between = 0
@@ -130,7 +136,7 @@ class Message:
                         # In both clauses, we create a new MessagePart because we don't want a MessagePart with \
                         #       multiple escapes on print_after (And it's easy to program this way) (could change later)
 
-                        if result == Color.RESET:
+                        if result == Color.RESET or result == Color.CLEAR_SECTION:
                             current.print_after += result  # add to print after here
                             parts.append(current)
                             current = MessagePart("", wait_between=the_wait)
@@ -146,6 +152,7 @@ class Message:
                 elif result:  # result should now be a boolean
                     continue  # continue if the char added to current_escape is going to be valid later
 
+            # if we are here, current_escape is invalid or empty already
             current_escape = ""
 
             # even if the above conditional was True, we still need to run this code. Notice some of the above code\

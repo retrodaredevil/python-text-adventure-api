@@ -42,6 +42,8 @@ class Color(Enum):
     # TOTAL_RESET = str(Fore.RESET) + str(Style.NORMAL) + str(Back.RESET)
     # """Used to reset the text completely back to normal. Not the same as RESET."""
 
+    CLEAR_SECTION = str("\033[2J")
+
     ESCAPE = str(CSI)
     """The escape string that is at the front of all the values in this enum. Note this does not have a length of 1"""
 

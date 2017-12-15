@@ -233,14 +233,18 @@ class TextPrinterOutput(Manager, PlayerOutput):
                 contents += part.print_before
                 wait = part.wait_between
                 if wait == 0:
+                    if time_count >= passed:  # time_count from a previous wait could cause this
+                        return False, contents
                     contents += part.main_text
                 else:
                     for c in part.main_text:
                         contents += c
-                        time_count += wait
-                        if time_count >= passed and not self.is_instant:
+                        if not self.is_instant:  # we don't want to count time on something that's instant
+                            time_count += wait
+                        if time_count >= passed:
                             return False, contents
                 contents += part.print_after
+                time_count += part.wait_after_print  # we are going to move onto next part so make sure we wait
             if reset_is_instant:
                 self.is_instant = False  # This makes it per line
             return True, contents
@@ -260,9 +264,10 @@ class TextPrinterOutput(Manager, PlayerOutput):
             self.current_line.contents = result[1]
             self.current_line.update(self.printer)  # don't flush because whatever's controlling input will
             if not result[0]:
-                return
+                return  # return if we still need to print more from the current parts
             else:
-                self.current_line_parts = None
+
+                self.current_line_parts = None  # we're done printing all available parts
 
 
 class LocationTitleBarManager(Manager):
