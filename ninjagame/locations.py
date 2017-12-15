@@ -45,8 +45,8 @@ class NameTaker(InputHandler):
         self.current_friend_name = None
         self.player = player
 
-        message = "Oh hey! You've just accepted to start your journey too! I just did too. Wait, what's you name again?"
-        player[PlayerFriend].tell(player, message)
+        player[PlayerFriend].tell(player, "Oh hey! You've just accepted to start your journey too! "
+                                          "I just did too. Wait, what's your name again?")
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject) -> Optional[InputHandle]:
         if player != self.player:
@@ -93,7 +93,7 @@ class NameTaker(InputHandler):
             self.current_name = None  # reset
             return InputHandleType.HANDLED
 
-        return InputHandle(2, handle_function, self)
+        return InputHandle(4, handle_function, self)
 
 
 class Entrance(Location):  # players should only be in this location when starting the ninjagame
@@ -576,7 +576,7 @@ class EastCenterSpiderWebForest(Location):
         action.can_do = CAN_GO_TO_LOCATION
         handler.do_action(action)
         return action.try_action(handler)
-    
+
     def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
         self._send_welcome(player)
         if player not in self.ninja.entities_lost_to:

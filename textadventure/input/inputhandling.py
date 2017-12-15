@@ -40,6 +40,7 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
     def should_give_response(self):
         """
         Indicates whether there should be more responses allowed
+
         :return: True if there are more responses allowed. False if it is advised against that
         """
         # return self is self.__class__.NOT_HANDLED or self is self.__class__.REMOVE_HANDLER_ALLOW_RESPONSE or \
@@ -104,8 +105,10 @@ class InputObject:
         get_arg(1, False) would return ["castle", "of", "rainbow", "unicorns"] note not same as get_arg(0, True)
 
         Note this should be used to get each arg. (Don't do args = #get_arg(0) and then use that. \
-            Use this method multiple times)
+        Use this method multiple times)
+
         Note that this does not change anything to lower case. Beware when comparing
+
         :param index: The index for the arg. Starts at 0. Using a number less than 0 will produce an unexpected result
         :param ignore_unimportant_before Set to True if you want filter out unimportant words before the argument \
                 note that it will never ignore unimportant AFTER the requested index.
@@ -173,6 +176,9 @@ class InputHandle:  # returned and used to indicate when the handle function sho
     def __init__(self, priority: int, handle: Callable[[List[InputHandleType]], InputHandleType],
                  input_handler: InputHandler):
         """
+        Note that 0 and 1 should be reserved for client side and to be safe, you shouldn't use 2 or 3 if what you're \
+                is not client side only
+
         :param priority: determines the order to call things in. Lower called first. Ex: 0 then 2 then 10
         :param handle: A function that should return a InputHandleType and should expect a list of InputHandleType
         """

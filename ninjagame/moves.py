@@ -6,6 +6,7 @@ from textadventure.battling.battle import Battle
 from textadventure.battling.move import Move, Target
 from textadventure.battling.outcome import OutcomePart, UseMoveOutcome
 from textadventure.item.item import Item
+from textadventure.battling.damage import WeaponHPDamage
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler
@@ -13,6 +14,10 @@ if TYPE_CHECKING:
 
 # noinspection PyAbstractClass
 class WeaponMove(Move):  # abstract
+    """
+    The class that should be used for Moves involving items.
+    """
+
     def __init__(self, priority: int, user: Target, targets: List[Target], item: Item):
         super().__init__(str(item), priority, user, targets)
         self.item = item
@@ -27,11 +32,10 @@ class SwordMove(WeaponMove):
         self.name += "'s " + self.move_type.value[0]
 
     def do_move(self, battle: Battle, handler: 'Handler'):
-        from textadventure.battling.damage import WeaponHPDamage
-        r: List[OutcomePart] = [UseMoveOutcome(self)]
+        r: List[OutcomePart] = [UseMoveOutcome(self)]  # all we have done is used this move so far
 
-        hp_change = -self.item.sword_type.value[2]
-        for target in self.targets:
+        hp_change = -self.item.sword_type.value[2]  # subtract the amount of hp the sword_type takes away
+        for target in self.targets:  # attack all the targets (usually just one)
             damage = WeaponHPDamage(self.user, target, hp_change, self.item)
 
             action: DamageAction = DamageAction(self, damage, battle)

@@ -82,7 +82,7 @@ class AttackCommandHandler(SimpleCommandHandler):
         options = user.get_move_options()
         rep = join_list([str(option) for option in options], use_brackets=True, use_indexes=True)
         player.send_message(Message("Options: {}".format(rep), named_variables=options))
-        chooser: SetMoveChooser = user.move_chooser
+        chooser: SetMoveChooser = user.move_chooser  # noinspection PyTypeChecker
         if chooser.chosen_move is not None:
             player.send_message(Message("You have already chosen: {}", named_variables=[chooser.chosen_move]))
         return InputHandleType.HANDLED

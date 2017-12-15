@@ -17,6 +17,7 @@ def get_reference(player: Player, string_args: str) -> Optional[Item]:
     """
     Senses command handler has a good code snippet that shows how you should use this method
     Note: Remember, this can return None.
+
     :param player: the player
     :param string_args: The arguments that the player entered
     :return: The weapon
@@ -33,6 +34,7 @@ def get_reference(player: Player, string_args: str) -> Optional[Item]:
 def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Point]:
     """
     Gets the location using the player, and it's string_args
+
     :param handler: The Handler object
     :param player: The player. Needed for location reference to get location N,E,S,W
     :param string_args: The string arguments
@@ -85,15 +87,30 @@ field, command_handlers. They should be specific to each location to give it con
 
 class SensesCommandHandler(LocationCommandHandler):
     def __init__(self, command_names: List[str], description: str, location: Location):
-        super(SensesCommandHandler, self).__init__(command_names, description, location)
+        super().__init__(command_names, description, location)
 
     @abstractmethod
     def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
-        """Should be overridden and should only call the method from """
+        """
+        Should be overridden and should only call the method from sense_handler. (Should not try to call \
+                can_sense) (It should call sense_handler.<sense_name>(<needed parameters>) no matter what)
+
+        :param sense_handler: The object that the player is trying to use this sense on. Could be a location, item, etc
+        :param handler: The handler object
+        :param player: The player that is trying to use this sense
+        """
         pass
 
     @abstractmethod
     def can_sense(self, item: Item, player: Player) -> CanDo:
+        """
+        Tells you whether or not you are able to perform the sense that this class represents on the item
+
+        :param item: The item that you are trying to perform the sense action on
+        :param player: The player that is trying sense the item
+        :return: A CanDo representing if the player is able to sense the current item. [1] represents a message that\
+                should be sent to the player if [0] is False (Sent if the player isn't able to perform the action)
+        """
         pass
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
@@ -123,7 +140,7 @@ class LookCommandHandler(SensesCommandHandler):
     description = """Allows you to see your surroundings. Aliases: look, see, find\nUsage: look [weapon] """
 
     def __init__(self, location: Location):
-        super(LookCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
+        super().__init__(self.__class__.command_names, self.__class__.description, location)
 
     def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.see(handler, player)
@@ -133,11 +150,11 @@ class LookCommandHandler(SensesCommandHandler):
 
 
 class ListenCommandHandler(SensesCommandHandler):
-    command_names = ["listen", "hear", "escucha", "liste", "isten", "hea"]
+    command_names = ["listen", "hear", "escucha", "liste", "isten", "hea", "listne"]
     description = """Allows you to listen to your surroundings. Aliases: listen, hear\nUsage: feel [weapon]"""
 
     def __init__(self, location: Location):
-        super(ListenCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
+        super().__init__(self.__class__.command_names, self.__class__.description, location)
 
     def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.listen(handler, player)
@@ -151,7 +168,7 @@ class FeelCommandHandler(SensesCommandHandler):
     description = """Allows you to feel your surroundings. Aliases: look, touch\nUsage: feel [weapon]"""
 
     def __init__(self, location: Location):
-        super(FeelCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
+        super().__init__(self.__class__.command_names, self.__class__.description, location)
 
     def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.feel(handler, player)
@@ -165,7 +182,7 @@ class SmellCommandHandler(SensesCommandHandler):
     description = """Allows you to smell your surroundings. Aliases: smell, nose\nUsage: feel [weapon]"""
 
     def __init__(self, location: Location):
-        super(SmellCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
+        super().__init__(self.__class__.command_names, self.__class__.description, location)
 
     def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.smell(handler, player)
@@ -179,7 +196,7 @@ class TasteCommandHandler(SensesCommandHandler):
     description = """Allows you to taste. Aliases: taste, tongue\nUsage: feel [weapon]"""
 
     def __init__(self, location: Location):
-        super(TasteCommandHandler, self).__init__(self.__class__.command_names, self.__class__.description, location)
+        super().__init__(self.__class__.command_names, self.__class__.description, location)
 
     def sense(self, sense_handler: FiveSensesHandler, handler: Handler, player: Player):
         sense_handler.taste(handler, player)
@@ -322,6 +339,8 @@ class YellCommandHandler(SimpleCommandHandler):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
     def can_yell(self, player: Player) -> bool:
+        """A simple abstraction that is used by _handle_command to check if the player is able to yell. However,\
+            this only returns a bool so in the future, we could make it return a CanDo"""
         return True
 
     def _handle_command(self, handler: Handler, player: Player, player_input: InputObject):

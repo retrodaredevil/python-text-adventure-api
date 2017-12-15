@@ -15,19 +15,14 @@ if TYPE_CHECKING:
 class MessageType(Enum):
     """
     An enum that represents how the message will be printed out and how it will be shown
-
-    Attributes:
-        IMMEDIATE The message will be printed immediately
-        TYPED     The message will be typed out at normal speed
-        WAIT      The message will be typed out immediately accept when there's a lew line character,
-                    it will wait before printing that out. Also should be used when sending a wait between messages
-        TYPE_SLOW The message will be typed out slower than the TYPED MessageType
-
     """
 
     IMMEDIATE = auto()
+    """The message will be printed immediately"""
     TYPED = auto()
+    """The message will be typed out at normal speed"""
     TYPE_SLOW = auto()
+    """TYPE_SLOW The message will be typed out slower than the TYPED MessageType"""
 
 
 class MessagePart:
@@ -86,8 +81,6 @@ class Message:
         """
         Since messages can be complicated and getting exactly what you want to print can be difficult, we'll split\
             the message into usable MessageParts
-
-        :return:
         """
         text = self.text
         names: List[str] = []  # noinspection PyTypeChecker
@@ -193,8 +186,8 @@ class PlayerInputGetter(ABC):
     @abstractmethod
     def take_input(self) -> str:
         """
-        :return: a string representing the input or None
         Calling this method should not make the current thread sleep
+        :return: a string representing the input or None
         """
         pass
 

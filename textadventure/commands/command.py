@@ -45,6 +45,7 @@ class CommandHandler(InputHandler):
         """
         The _ means that this method is meant to be "protected" and should only be called within classes and subclasses
         Should not be called outside of CommandHandler
+
         :param handler: The handler object
         :param player:  The player object
         :param player_input: The player's input
@@ -58,6 +59,7 @@ class CommandHandler(InputHandler):
         Overridden by subclasses of CommandHandler and returns whether or not a command should be handled
         Called in on_input
         Should not be called in places other than the CommandHandler class
+
         :param player_input:
         :return: returns True if a command should be handled (even if argsuments are incorrect)
         """
@@ -68,6 +70,7 @@ class CommandHandler(InputHandler):
         Tells whether or not a certain command will have an effect for a player(Normally returns true unless overridden)
         called in on_input
         Called by the CommandHandler class and doesn't ever need to be called on your own. Feel free to override
+
         :param player: The player to check
         :return: A boolean, True if this command should handle a player False otherwise
         """
@@ -79,6 +82,7 @@ class SimpleCommandHandler(CommandHandler):
     def __init__(self, command_names: List[str], description):
         """
         A subclass of CommandHandler that makes using/extending CommandHandler simpler
+
         :param command_names: A list of strings that will trigger this command
         :param description: The help/description string
         """

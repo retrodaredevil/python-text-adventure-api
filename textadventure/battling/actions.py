@@ -12,6 +12,7 @@ if typing.TYPE_CHECKING:
     from textadventure.battling.damage import Damage
     from textadventure.battling.move import Move
     from textadventure.battling.effect import Effect
+    from textadventure.battling.outcome import OutcomePart
 
 
 """
@@ -66,7 +67,7 @@ class DamageAction(Action):  # DONE create a manager where Effects can handle th
         :param cause_object: The object that contains the method that created this. (Almost always a Move or Effect)
         :param damage:
         """
-        from textadventure.battling.outcome import OutcomePart
+
         super().__init__()
         self.cause_object = cause_object
         """The object that contains the method that created this. Depending on the implementation or the code you \
@@ -75,7 +76,7 @@ class DamageAction(Action):  # DONE create a manager where Effects can handle th
         assert damage is not None
         self.battle = battle
 
-        self.outcome_parts: List[OutcomePart] = []  # noinspection PyTypeChecker
+        self.outcome_parts: List['OutcomePart'] = []  # noinspection PyTypeChecker
         """The list of outcome parts that will be appended to when _do_action is called. If a Manager changes \
         something in self.damage, they may want to append an OutcomePart so people know what happened."""
 

@@ -23,6 +23,7 @@ from textadventure.input.inputhandlers import SettingsHandler
 from textadventure.player import Player
 from textadventure.saving.saving import SaveCommandHandler, LoadCommandHandler
 from textadventure.saving.playersavable import PlayerSavable
+from textprint.colors import Color
 from textprint.inithelper import curses_init, std_init, colorama_init
 from textprint.input import InputLineUpdater
 from textprint.section import Section
@@ -82,7 +83,7 @@ def setup():
         colorama_init()
 
         input_section = Section(1)
-        print_section = Section(None)
+        print_section = Section(None, fake_line=(Color.BLUE >> "~"))
         title_section = Section(1)
         printer = TextPrinter([input_section, print_section, title_section])
         printer.update_dimensions()

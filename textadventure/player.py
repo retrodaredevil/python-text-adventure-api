@@ -1,7 +1,13 @@
-from typing import TypeVar, Type, Optional
+from typing import TypeVar, Type, Optional, TYPE_CHECKING
 
 from textadventure.entity import Entity, Health, Living
 from textadventure.message import PlayerOutput, PlayerInputGetter, Message, MessageType
+
+
+if TYPE_CHECKING:
+    from textadventure.handler import Handler
+    from textadventure.item.items import Wallet
+
 
 T = TypeVar("T")
 
@@ -61,27 +67,27 @@ class Player(Entity):
         # TODO sending 100 lines won't be good for some implementations of PlayerOutput, so lets change this sometime
         self.send_line(100)  # do I need to use a constant variable PLTW? I do? No voy hacerlo
 
-    def update(self, handler) -> None:
+    def update(self, handler: 'Handler') -> None:
         """
         A method called in the while True loop inside Handler
         This method will be used mostly to update the handled_objects (as of right now not needed tho)
+
         :param handler: The handler object
-        :type handler: Handler
-        :return:
         """
         pass
 
     def take_input(self) -> str:
         """
-        :return: a string or None if there is no input to take
         Once this method is called, the returned value will not be returned again (unless typed again)
+
+        :return: a string or None if there is no input to take
         """
         return self.player_input.take_input()
 
-    def get_wallet(self):
+    def get_wallet(self) -> 'Wallet':
         """
         This method returns the Wallet weapon. It is here so there aren't any import errors whenever you want to use it.
-        :rtype Wallet
+
         :return: The wallet that's in the player's items or None if there is no Wallet
         """
         from textadventure.item.items import Wallet

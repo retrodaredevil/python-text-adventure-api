@@ -1,5 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from textadventure.player import Player
+    from textadventure.handler import Handler
+
 
 """
 To avoid namespace and type error, this file shouldn't import anything from the textadventure package
@@ -52,29 +58,26 @@ class Savable(ABC):
         return state
 
     @abstractmethod
-    def before_save(self, player, handler):
+    def before_save(self, player: 'Player', handler: 'Handler'):
         """
         Called before the data will be saved. Override to do whatever you want with it.
-        :param player: The player whose data will be saved
-        :type player: Player
-        :param handler: The handler object
-        :type handler: Handler
 
+        :param player: The player whose data will be saved
+        :param handler: The handler object
         # :return: [0] is True if you can save, [0] is False if you can't and [1] will be the reason why
         :return: None
         """
         pass
 
     @abstractmethod
-    def on_load(self, player, handler):
+    def on_load(self, player: 'Player', handler: 'Handler'):
         """
         Called when the object is loaded into the player's handled_object
         this should not be called from __init__ and should and will only be called when unserializing/unpickling data\
-            (that's handled for you)
+        (that's handled for you)
+
         :param player: The player whose data has been loaded
-        :type player: Player
         :param handler: The handler object
-        :type handler: Handler
         :return: None
         """
         pass

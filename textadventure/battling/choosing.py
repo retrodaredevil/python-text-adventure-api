@@ -29,6 +29,7 @@ class TargetingOption:
                  total_number: Optional[int]):
         """
         Creates a TargetingOption representing what you can, should and can't select as targets
+
         :param user: Can you target yourself?
         :param other_teammate: Can you target other people on your team
         :param enemies: Can you target your enemies?
@@ -78,6 +79,7 @@ class MoveOption(ABC):  # like an interface
         """
         Returns a TargetingOption that usually isn't user specific and is type specific (what type of class this is) \
             But it could be user specific if you wanted it to be.
+
         :param user: The user that will use this move along with choosing a set of targets based on
         :return: The TargetingOption that is used for this move and can be changed for a specific user
         """
@@ -87,11 +89,14 @@ class MoveOption(ABC):  # like an interface
     def can_choose_targets(self, user: Target, targets: List[Target]) -> CanDo:
         """
         Similar to can_use_move, however, this is specifically for reporting if the user can target the targets
+
         If you followed the TargetingOption returned and this returned False at [0], then this method was not created \
-            correctly and you should throw an error.
+        correctly and you should throw an error.
+
         Note that if you are handling a player's input and the player's input wants to select targets that don't\
-            follow the TargetingOption returned, you SHOULD call this method so you can send \
-            them the error message at [1]
+        follow the TargetingOption returned, you SHOULD call this method so you can send \
+        them the error message at [1]
+
         :param user: The user that will end up using this Move
         :param targets: The list of targets that the player is trying to target
         :return: A CanDo tuple where [0] is a boolean value that determines whether or not the user can target targets
@@ -102,6 +107,7 @@ class MoveOption(ABC):  # like an interface
     def create_move(self, user: Target, targets: List[Target]) -> Move:
         """
         A method that creates a move the the user as the user and targets as the targets
+
         :param user: The person using the move and what should be in the returned Move's user field
         :param targets: The targets that will be targeted and should be in the returned Move's targets field
         :return: A move that is different for each MoveOption
@@ -121,9 +127,13 @@ class MoveChooser(ABC):
     @abstractmethod
     def get_move(self, battle: 'Battle', user: Target, turn: Turn) -> Optional[Move]:
         """
-        The reason we pass user (A Target) in this method is because we only store the entity in this calss and  \
-            user changes every turn
+        The reason we pass user (A Target) in this method is because we only store the entity in this class and  \
+        user changes every turn
+
+        Once this method returns something that isn't None, this method won't be called again this turn
+
         Remember to check the user's effects to see if the user can_choose_targets that move
+
         :param battle:
         :param turn: The current turn
         :param user: The target that will be using the returned move. user.entity is always equal to this class's entity
@@ -135,12 +145,16 @@ class MoveChooser(ABC):
     def reset_option(self):
         """
         Called once the turn is over and it if this object has state that may affect the outcome of get_move, the \
-            implementation of this should probably reset that.
+        implementation of this should probably reset that. Sometimes, there's nothing to reset
         """
         pass
 
 
 class RandomMoveChooser(MoveChooser):
+    """
+    A simple RandomMoveChooser that entities can use.
+    Later, for more complex AIs, it shouldn't be random
+    """
     def __init__(self, entity: Entity):
         super().__init__(entity)
 

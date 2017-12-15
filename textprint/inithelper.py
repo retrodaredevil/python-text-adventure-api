@@ -3,6 +3,7 @@
 def std_init(stdscr):
     """
     Should be called in order to be able to use the terminal in full screen
+
     :param stdscr: The WindowObject returned from curses.initscr()
     """
     stdscr.clear()

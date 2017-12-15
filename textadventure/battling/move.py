@@ -42,6 +42,7 @@ class Target:
     def __getitem__(self, item: Type[T]) -> Optional[T]:
         """
         T is recommended to be PropertyEffect and using this to get an effect is not recommended
+
         :param item: The type of effect to get in the effects list
         :return: The first effect of the exact type 'item' in the self.effects list. Or None if there is none in list
         """
@@ -53,6 +54,7 @@ class Target:
     def get_move_options(self) -> List['MoveOption']:
         """
         Should only be used by MoveChooser to tell what options there are for moves
+
         :return: A list of MoveOptions that, by default, is based on the items that the Target currently has
         """
         from textadventure.battling.weapon import Weapon
@@ -66,6 +68,7 @@ class Target:
     def create_target_next_turn(self, previous_turn: 'Turn', turn_number: int) -> 'Target':
         """
         Creates a new Target that should be used on the next turn
+
         :return: The Target to use for the next turn
         """
         target = Target(self.entity, self.team, self.move_chooser, turn_number)
@@ -103,6 +106,7 @@ class Turn:
     def start(self, battle: 'Battle'):
         """
         Called when this Turn is being set to the Battle's current turn
+
         :param battle: The battle handling this Turn object
         """
         self.is_started = True
@@ -209,11 +213,3 @@ class Move(ABC):
         :return: A list of OutcomeParts (things that this method did)
         """
         pass
-
-
-def main():
-    print("test")  # used to make sure that there are no "not defined" errors with the types
-
-
-if __name__ == '__main__':
-    main()

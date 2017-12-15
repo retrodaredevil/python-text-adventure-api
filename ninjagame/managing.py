@@ -10,6 +10,6 @@ class NinjaGamePropertyManager(PropertyEffectManager):
         r = []
         entity = target.entity
         if isinstance(entity, NinjaEntity):
-            # print("Added SwordDamageAlter to : {}".format(entity)) works
-            r.append(SwordDamageAlter(entity, (1.2, 0.5, 1)))
+            # Add an effect to all NinjaEntities to alter how effective a sword is depending on the SwordMoveType
+            r.append(SwordDamageAlter(entity, (1.2, 0.5, 1)))  # slashes are effective, slams aren't, and stabs -normal
         return r

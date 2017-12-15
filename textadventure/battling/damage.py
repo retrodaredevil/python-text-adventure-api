@@ -37,6 +37,7 @@ class Damage(ABC):  # like an interface
     def damage(self, battle: Battle) -> OutcomePart:
         """
         The method that should be called to actually DO the damage (or whatever this class does)
+
         :param battle: The Battle object which the damager and target are currently in
         :return: An OutcomePart that will be broadcasted
         """
@@ -47,28 +48,30 @@ class Damage(ABC):  # like an interface
 class WeaponDamage(Damage):  # like an interface
     """
     A funky class that is meant to be an interface like class and should be used in a subclass of Damage when the \
-        thing causing the Damage is a weapon.
+    thing causing the Damage is a weapon.
+
     To call the __init__, you should use WeaponDamage.__init__(self, weapon)
     Note WeaponDamage's init method doesn't call the superclass's init
     """
     def __init__(self, weapon: Weapon):
         """
         Note, if you are creating a new instance of THIS class, you are probably doing something wrong,
-            @see: WeaponHPDamage
+        @see: WeaponHPDamage
         """
         self.weapon = weapon
 
 
 class HPDamage(Damage):
     """
-    The main type of damage. (Taking away hp)
+    The main type of damage. (Taking away hp) Note if you use this class for healing, you might need to change things
     """
     def __init__(self, damager: Target, target: Target, hp_change: int):
         """
         If you are using this, you should probably be using WeaponHPDamage or EffectHPDamage unless you know what\
-            you're doing
+        you're doing
+
         :param hp_change: The integer amount to change the hp by. A positive number will heal while a negative number\
-                            will damage
+                will damage
         """
         Damage.__init__(self, damager, target)
         self.hp_change = hp_change

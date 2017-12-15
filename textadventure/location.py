@@ -1,6 +1,6 @@
 import warnings
 from abc import abstractmethod
-from typing import List, Optional, TypeVar, Type
+from typing import List, Optional, TypeVar, Type, TYPE_CHECKING
 
 from textadventure.entity import EntityAction, Entity
 from textadventure.handler import Handler
@@ -11,6 +11,11 @@ from textadventure.item.item import Item, FiveSensesHandler
 from textadventure.message import Message, MessageType
 from textadventure.player import Player
 from textadventure.utils import Point, MessageConstant, are_mostly_equal, CanDo
+
+
+if TYPE_CHECKING:
+    from textadventure.commands.command import CommandHandler
+
 
 T = TypeVar('T')
 
@@ -35,13 +40,12 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     """
 
     def __init__(self, name, description, point: Point):
-        from textadventure.commands.command import CommandHandler
         super().__init__()
         self.name = name
         self.description = description
         self.point: Point = point  # noinspection PyTypeChecker
 
-        self.command_handlers: List[CommandHandler] = []
+        self.command_handlers: List['CommandHandler'] = []
         self.__add_command_handlers()
 
     def __str__(self):
@@ -50,9 +54,11 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     def __add_command_handlers(self) -> None:
         """
         Should only add to command_handlers using append or extend
+
         When I first made all of these CommandHandlers Location specific I thought I was giving more control to each \
-            location object. But I think if I ever decide to make these act on whatever location the player \
-            is currently at, it would have the exact same effect. I'm leaving like this for now though.
+        location object. But I think if I ever decide to make these act on whatever location the player \
+        is currently at, it would have the exact same effect. I'm leaving like this for now though.
+
         :return: None
         """
         from textadventure.commands.commands import LookCommandHandler, FeelCommandHandler, SmellCommandHandler, \
@@ -63,6 +69,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     def is_reference(self, reference: str) -> bool:
         """
         Returns if the given string is close enough to this locations name
+
         :param reference: The string that is close to the location name
         :return: True if the reference string is close enough to reference this location
         """
@@ -71,8 +78,10 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     def on_take(self, handler: Handler, item: Item) -> None:
         """
         By default, doesn't do anything. Is called after the weapon's change_holder is called and should not be called\
-            inside the weapon's change_holder function
+        inside the weapon's change_holder function
+
         You can use the weapon's holder to see it's new holder and since it was taken, it's previous holder is this loc
+
         :param handler: The handler object
         :param item: The weapon that was taken
         :return: None
@@ -85,6 +94,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         The weapon's holder is already this location. The player is what placed it
 
         Note instead of overriding (or listening) for this method, you can override the @see can_hold method if needed
+
         :param handler: The handler object
         :param item: The weapon placed
         :param player: The player who placed/dropped the weapon
@@ -96,6 +106,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         There is a default player implementation for this
         is_there_response is only meant to be changed by inheriting classes (It shouldn't be changed by YellCommandHa..)
+
         :param handler: The handler object
         :param player: The player
         :param player_input: The player input object
@@ -113,6 +124,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         Should be called by the UseCommandHandler.
         If overridden, it's recommended that you call the super method (this method)
+
         :param handler: The handler object
         :param player: The player object
         :param item: The weapon that is being 'used'
@@ -125,6 +137,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         The default method that should be called by a subclass of Location.
         Because this begins with an _, it is not called except by subclasses of Location
+
         :param player: The player to send the message to
         :return: None
         """
@@ -137,6 +150,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         By default, doesn't do anything unless overridden
         This method should be called on the infinite loop by handler
+
         :param handler: the handler object
         """
         pass
@@ -146,13 +160,13 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         Should be called when the player's location is changed (this method doesn't set the players location)
         If for whatever reason, this method may change the player's location back to the previous (update if becomes t)
+
         When overriding, make sure that even if the player doesn't leave and this method gets called twice for whatever\
-            reason, it doesn't do something like give them a second weapon or make them face an enemy they already faced
+        reason, it doesn't do something like give them a second weapon or make them face an enemy they already faced
+
         :param handler:
         :param player: The player
         :param previous_location: the previous location or None if there is none or it couldn't be found
-        :type previous_location: Location
-        :rtype: None
         """
         pass
 
@@ -181,6 +195,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     def get_entities(self, handler: Handler, entity_type: Type[T] = Entity) -> List[T]:
         """
         Gets the list of entities in this location, including players
+
         :param handler: the handler object
         :param entity_type: The type of the entity you are looking for. Defaults to Entity (gets all types of entities)
         :return: The list of entities in this location
@@ -215,6 +230,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         Tells if the location is lit up. Note that the locations's state affects this and not the player's state
         Note that I am not sure about the way we will eventually handle light, so think of this as deprecated
+
         :return: True if the location is lit up
         """
         return True

@@ -7,7 +7,7 @@ from textadventure.player import Player, Living
 from textadventure.utils import Point, get_type_from_list
 
 if TYPE_CHECKING:
-    from textadventure.input.inputhandling import InputHandler
+    from textadventure.input.inputhandling import InputHandler, InputHandle
     from textadventure.location import Location
 
 T = TypeVar("T")
@@ -16,6 +16,7 @@ T = TypeVar("T")
 def has_only(the_list: List[T], only_list: List[T]):
     """
     Makes sure that all the items in a list are equal to one of the items in only_list
+
     :param the_list: The list to check
     :param only_list: The list of acceptable objects to make sure that every weapon in the list is one of these objects
     :return: True if all the items in the list are equal to only, Also True if there are no items in list.
@@ -60,7 +61,7 @@ class Handler:
                 manager.update(self)
 
     def __do_input(self, player: Player, inp: str):
-        from textadventure.input.inputhandling import InputObject, InputHandleType, InputHandle
+        from textadventure.input.inputhandling import InputObject, InputHandleType
         input_object = InputObject(inp)
         if player.player_output.on_input(self, player, input_object):
             # since the on_input method returned True, it must have done something, so we don't need to send a message
@@ -70,7 +71,7 @@ class Handler:
             player.send_message(
                 "You must enter a command. Normally, pressing enter with a blank line won't trigger this.")
             return
-        input_handles: List[InputHandle] = []
+        input_handles: List['InputHandle'] = []
         for input_handler in self.get_input_handlers():
             handle = input_handler.on_input(self, player, input_object)  # call on_input for each handler
             if handle is not None:
@@ -98,8 +99,10 @@ class Handler:
     def do_action(self, action: Action):
         """
         for each manager in managers call on_action with action
+
         This method just makes sure all of self.managers's on_action methods are called and does NOTHING ELSE\
-            (You must call try_action on your own)
+        (You must call try_action on your own)
+
         :param action: The action to be called
         :return: None, but you the action's state should change if one of the managers acted on it
         """

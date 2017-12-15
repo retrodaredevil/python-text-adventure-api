@@ -178,4 +178,10 @@ class PropertyEffectManager(Manager):
 
     @abstractmethod
     def create_effects(self, target: Target) -> List['Effect']:
+        """
+        Called whenever a battle starts. Should be used whenever you want to add PropertyEffects
+
+        :param target: The target that you will add effects to
+        :return: All of the PropertyEffects (and or Effects) you want to add to target
+        """
         pass

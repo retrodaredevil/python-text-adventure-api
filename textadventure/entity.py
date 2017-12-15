@@ -25,6 +25,7 @@ class Living(ABC):
     def get_used_name(self, viewer: 'Living') -> str:
         """
         By default, returns self.name but can be overridden to create the effect that someone doesn't know this person
+
         :param viewer: The person that the returned name will be showed to
         :return: The string that represents the name the passed 'living' will be shown
         """
@@ -54,6 +55,7 @@ class Living(ABC):
         """
         Converts a MessageConstant to a Message
         Makes sure that the passed message value is returned as a Message object
+
         :param message: The message or string to make sure or change to a Message
         :return: A message object
         """
@@ -76,6 +78,7 @@ class Health:
     def change_by(self, hp_change: int):
         """
         The recommended way to change the current_health
+
         :param hp_change:
         :return:
         """
@@ -124,10 +127,12 @@ class Entity(Living, Holder):
     def can_do_action(self, handler, entity_action: 'EntityActionToEntity') -> CanDo:
         """
         This method should not be called outside of entity.py but may be overridden by any subclass of entity to \
-            listen for Actions that are trying to be executed on this entity hence why only EntityActionAgainstEntitys \
-            are passed
+        listen for Actions that are trying to be executed on this entity hence why only EntityActionAgainstEntitys \
+        are passed
+
         Note this will be called when try_action is called meaning that it will have been called after all the \
-            calls to on_action in each Manager registered in the handler class
+        calls to on_action in each Manager registered in the handler class
+
         :param handler: The Handler object
         :param entity_action: The action that entity is requesting. asked_entity should be equal to self when called.
         :return: A CanDo where if [0] is False, the message at [1] will be sent to entity_action.entity
@@ -148,6 +153,7 @@ class HostileEntity(Entity):  # abstract
     def can_entity_pass(self, entity: Entity) -> CanDo:
         """
         Will be used by the HostileEntityManager
+
         :param entity: The entity that is trying to go to another location
         :return: A CanDo
         """
@@ -169,8 +175,10 @@ class SimpleHostileEntity(HostileEntity):
         """
         Used to be overridden by subclasses where the main implementation is handled in the can_entity_pass method
         By default, this returned self.health.is_fainted()
+
         The message in the returned value at [1] will never be displayed, but take it seriously in case of needed
-            debugging in the future.
+        debugging in the future.
+
         :param entity:
         :return:
         """
@@ -180,7 +188,6 @@ class SimpleHostileEntity(HostileEntity):
 
     def _is_type_target(self, entity: Entity) -> bool:
         """
-
         :param entity: The entity to test its type for
         :return: True if the entity's type is a target based upon self.hostile_to_types
         """

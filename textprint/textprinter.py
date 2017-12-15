@@ -40,6 +40,7 @@ class TextPrinter:
         """
         A simple method used to update all lines. Note that normally, this shouldn't be called at all unless you \
         REALLY need to reset the screen.
+
         :param flush: True if you want to flush the stream. This is True by default unlike most other methods
         """
         for section in self.sections:
@@ -51,6 +52,7 @@ class TextPrinter:
     def calculate_lines_to(self, section: Optional[Section]) -> int:
         """
         Calculates the number of lines until the section (Not including the passed section)
+
         :param section: The section to get the number of lines to. If None, it will get the lines taken from all
         :return: The number of lines until this section
         """
@@ -68,6 +70,7 @@ class TextPrinter:
     def calculate_lines_after(self, section: Section) -> int:
         """
         Calculates the number of lines after a section (Not including the passed section)
+
         :param section: The section that you want to get the number of lines after
         :return: The number of lines after the passed section
         """
@@ -88,6 +91,7 @@ class TextPrinter:
     def goto(self, row: int, column: int, flush: bool = False):
         """
         A simple method that goes to the specified coordinates where 0, 0 is the bottom right
+
         :param row: The row. Note that if 0, it will not be in the upper part of the screen, instead at the very bottom
         :param column: The column
         :param flush: True if you want to flush. By default False.
@@ -101,7 +105,8 @@ class TextPrinter:
     def print(self, text="", flush=False, end=""):
         """
         Allows you to print text to self.output. Normally, you would use unix escapes since that what this library \
-            uses. Normally, you shouldn't call this method because you should let
+        uses. Normally, you shouldn't call this method because you should let
+
         :param text: The text you want to print
         :param flush: Do you want to flush it?
         :param end: The ending, by default and normally an empty string. Since this library handles multiple lines\

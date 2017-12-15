@@ -133,6 +133,7 @@ class InputLineUpdater:
     def keypad_key(self, key, data=()):
         """
         Should be called for keys that aren't actual characters that should be shown. (Special characters and keycodes)
+
         :param key: A key normally one from curses.<KEY_NAME> because that's what the default implementation of \
                 this function
         :param data: The data to go along with the keypress like how much to go. May be useful in the future \

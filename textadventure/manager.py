@@ -22,8 +22,8 @@ class Manager(ABC):
     def update(self, handler: 'Handler'):
         """
         Called each frame by handler
+
         :param handler: The handler object
-        :type handler: Handler
         """
         pass
 
@@ -33,6 +33,7 @@ class Manager(ABC):
         Called when an entity tries to do something that needs to be check to make sure they can do that
         The main point of listening for on_action is to do something when something happens or cancel an action. \
             When this method is called, the action may already be cancelled so you should also check for that.
+
         :param handler: The Handler object
         :param action: The action that contains all the event information and has the necessary information/methods \
                         to cancel it
