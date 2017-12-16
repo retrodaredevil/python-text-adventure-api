@@ -15,17 +15,25 @@ class SettingsHandler(InputHandler):
         self.allowed_player = allowed_player
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-
-        if player != self.allowed_player or player_input.get_command().lower() != "setting" \
-                or type(player.player_output) is not StreamOutput:
+        command = player_input.get_command().lower()
+        if player != self.allowed_player or (command != "setting" and not command.startswith(":")):
+                # or type(player.player_output) is not StreamOutput:
             return None
 
         output = player.player_output
 
         def handle_function(already_handled: List[InputHandleType]) -> InputHandleType:
-            if len(player_input.get_arg(1)) != 0:
-                if player_input.get_arg(0)[0].lower() == "speed":
-                    speed = player_input.get_arg(1)[0].lower()
+            arg_index = 1
+            arg = None
+            if command.startswith(":"):  # the player is typing the argument as the command
+                arg = command.replace(":", "")
+                arg_index = 0
+            elif len(player_input.get_arg(1)) != 0:
+                arg = player_input.get_arg(0)[0].lower()
+
+            if arg is not None:
+                if arg == "speed":
+                    speed = player_input.get_arg(arg_index + 0)[0].lower()  # remember, arg 0 is the second word
                     if speed == "fast":
                         output.wait_multiplier = 0.4
                         player.send_message("Set speed to fast.")
@@ -34,8 +42,6 @@ class SettingsHandler(InputHandler):
                         output.wait_multiplier = 1
                         player.send_message("Set speed to normal")
                         return InputHandleType.HANDLED_AND_DONE
-                    else:
-                        pass  # flow down to send help message
 
             player.send_message(Message("Help for setting command: \n"
                                         "\tspeed: setting speed <fast:normal>", MessageType.IMMEDIATE))

@@ -82,7 +82,7 @@ def setup():
         curses_init()
         colorama_init()
 
-        input_section = Section(1)
+        input_section = Section(None, force_rows=False)  # we want to allow it to go for as many lines it needs
         print_section = Section(None, fake_line=(Color.BLUE >> "~"))
         title_section = Section(1)
         printer = TextPrinter([input_section, print_section, title_section])

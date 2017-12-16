@@ -98,6 +98,12 @@ class InputLineUpdater:
         self.times_initialized = 0
 
     def current_line(self):
+        """
+        Used to get the line that the user is currently editing/typing on.
+        Note that the returned line is not always self._current_line
+
+        :return: The line that the user is currently editing
+        """
         if self._line_index == 0:
             return self._current_line
         assert 0 <= self._line_index <= len(self._editable_lines), "_line_index isn't in range: {}".format(
@@ -106,6 +112,12 @@ class InputLineUpdater:
         return self._editable_lines[len(self._editable_lines) - self._line_index]  # if 1 get most recent printed line
 
     def string_lines(self):
+        """
+        Gets all the lines that the user has 'submitted' or pressed enter on.
+        Notice they are all the original lines, so if the user can't change them.
+
+        :return: Returns a list of strings of all the lines the user has sent.
+        """
         return [line.original for line in self._editable_lines]
 
     def _reset_editable_lines(self):
@@ -113,6 +125,7 @@ class InputLineUpdater:
             line.reset()
 
     def current_line_string(self):
+        """A simple abstraction for getting the before + after or contents of whatever current_line returns"""
         line = self.current_line()
         return line.before + line.after
 
@@ -183,9 +196,9 @@ class InputLineUpdater:
             self.stdscr.refresh()  # stops terminal from clearing
             self.text_printer.update_dimensions()  # this is the place where we actually get the new dimensions
             self.text_printer.update_all_lines()  # This will reload all of the sections and lines (Check overflows)
-        elif key == 8 or key == 519:  # ctrl+backspace or ctrl+delete
+        elif key == 8 or key == 27 or key == 519:  # ctrl+backspace or alt+backspace or ctrl+delete
             # TODO this code doesn't work perfectly like most ctrl+backspaces since it stops when it get to a space
-            backspace = key == 8
+            backspace = key != 519
             amount = -1 if backspace else 1
 
             def get_using():

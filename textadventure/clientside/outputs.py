@@ -138,16 +138,21 @@ class TextPrinterOutput(Manager, PlayerOutput):
         """The current Line object used by __print_parts"""
 
         self.messages = []
+        """Used by __add_messages to add the parts to message_parts"""
 
         self.message_parts: List[List[MessagePart]] = [[]]
         """This is a list of lists of MessageParts where each list inside the list is a line."""
-        self.current_line_parts: Optional[Tuple[List[MessagePart], int]] = None  # noinspection PyTypeChecker
+        self.current_line_parts: Optional[Tuple[List[MessagePart], int]] = None
         """[0] represents the MessageParts that should be on one line. [1] represents the time they started printing"""
 
         self.is_instant = False  # set to True when you want the update method to immediately print current message
+        """A boolean that is True when you want the update method to immediately print current message. This\
+            should only be used on the current message and if you want to print all the messages immediately, \
+            call the update method and set immediate to True"""
         self._last_blank = 0
         """Used in on_input to tell how long it's been since the user pressed enter with no input"""
-        self._reset_is_instant_time = None
+
+        self.wait_multiplier = 1
 
     def send_message(self, message: Message):
         # self.section.print(self.printer, str(["({},{},{}".format(part.print_before, part.main_text, part.print_after)
@@ -157,9 +162,8 @@ class TextPrinterOutput(Manager, PlayerOutput):
     def on_input(self, handler: 'Handler', player: 'Player', player_input: 'InputObject'):
         if player_input.is_empty():
             now = time.time()
-            self.is_instant = True
-            if self._last_blank + 1 > now:
-                self._reset_is_instant_time = now + 0.5
+            # if self._last_blank + 1 > now:
+            self.__print_parts(immediate=True)  # only thing in if statement
             self._last_blank = now
             return True
         current_is_instant = self.is_instant
@@ -168,7 +172,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
         # self.send_message(Message(str([part.main_text for part in self.current_line_parts[0]])))
         self.is_instant = True  # we have regular so all the stuff before it should print immediately
         self.__add_messages()  # add the current message we just printed
-        self.__print_parts(reset_is_instant=False)  # by default, this will change self.is_instant
+        self.__print_parts(immediate=True)  # by default, this will change self.is_instant
         self.is_instant = current_is_instant  # reset is_instant to what is was before
         return False
 
@@ -178,23 +182,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
     def update(self, handler: 'Handler'):
         """If you're reading this, all you have to know is that this calls __add_messages and __print_parts"""
         self.__add_messages()
-
-        force_is_instant = False
-        now = time.time()
-        if self._reset_is_instant_time is not None:
-            if now <= self._reset_is_instant_time:  # if we shouldn't reset it yet
-                force_is_instant = True
-            else:
-                self.is_instant = False
-                self._reset_is_instant_time = None
-
-        if force_is_instant:
-            before = self.is_instant
-            self.is_instant = True
-            self.__print_parts(reset_is_instant=False)
-            self.is_instant = before
-        else:
-            self.__print_parts()
+        self.__print_parts()
 
     def __add_messages(self):
         if len(self.message_parts) == 0:
@@ -221,32 +209,40 @@ class TextPrinterOutput(Manager, PlayerOutput):
                     for i in range(0, new_lines):
                         self.message_parts.append([])
 
-    def __print_parts(self, reset_is_instant: bool = True):
+    def __print_parts(self, immediate=False):
+        """
+        :param immediate: Used throughout this method to tell if everything should be immediate
+        """
         def iterate_parts():  # called below. This was turned into a method because we need to be able to return
             """Returns True at[0] if all of the parts were printed. And returns contents of line at [1]"""
+            add_time = not self.is_instant and not immediate  # used to tell if we should add time to time_count
+
             parts: List[MessagePart] = self.current_line_parts[0]  # noinspection PyTypeChecker
 
-            passed = now - self.current_line_parts[1]
+            passed = now - self.current_line_parts[1]  # since we recalculate the amount of chars each time this\
+            #       is called, we need to know how much time it has taken so far
             time_count = 0  # incremented for each character that has a wait_between another
-            contents = ""
+            contents = ""  # the contents that we will return based on parts
             for part in parts:
+                if add_time and time_count >= passed:  # first check if this message is instant then check time
+                    return False, contents  # we are done printing. Must have been added from wait_after_print
                 contents += part.print_before
-                wait = part.wait_between
+                wait = part.wait_between * self.wait_multiplier
                 if wait == 0:
-                    if time_count >= passed:  # time_count from a previous wait could cause this
-                        return False, contents
                     contents += part.main_text
                 else:
                     for c in part.main_text:
+                        if add_time and time_count >= passed:
+                            return False, contents  # we are done printing for now
                         contents += c
-                        if not self.is_instant:  # we don't want to count time on something that's instant
+                        if add_time:
                             time_count += wait
-                        if time_count >= passed:
-                            return False, contents
+
                 contents += part.print_after
-                time_count += part.wait_after_print  # we are going to move onto next part so make sure we wait
-            if reset_is_instant:
-                self.is_instant = False  # This makes it per line
+                if add_time:
+                    time_count += part.wait_after_print * self.wait_multiplier
+
+            self.is_instant = False  # This makes it per line since normally, when this returns, it's the end of line
             return True, contents
 
         now = time.time()
@@ -264,9 +260,9 @@ class TextPrinterOutput(Manager, PlayerOutput):
             self.current_line.contents = result[1]
             self.current_line.update(self.printer)  # don't flush because whatever's controlling input will
             if not result[0]:
-                return  # return if we still need to print more from the current parts
+                # assert not immediate, "This shouldn't happen"
+                return  # return if we still need to print more from the current parts (Later, not now)
             else:
-
                 self.current_line_parts = None  # we're done printing all available parts
 
 
