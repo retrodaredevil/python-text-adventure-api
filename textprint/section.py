@@ -78,7 +78,10 @@ class Section:
     def print(self, text_printer: 'TextPrinter', message: str, flush: bool = False) -> Line:
         line = Line(message, self, len(self.lines))
         self.lines.append(line)
-        self.update_lines(text_printer, flush=flush)  # write to the line that the newly created Line should occupy,\
+
+        # we will need force_reprint, because we need to redraw all lines in correct places
+        self.update_lines(text_printer, flush=flush, force_reprint=True)
+        # write to the line that the newly created Line should occupy,\
         #       if a new line was needed, it should have been added
         return line
 
@@ -93,21 +96,31 @@ class Section:
         for line in self.lines:
             line.line_number -= amount_removed
 
-    def update_lines(self, text_printer: 'TextPrinter', flush: bool = False):
+    def update_lines(self, text_printer: 'TextPrinter', flush: bool = False, force_reprint=False):
+        """
+        Simple method to update all the lines and make sure they are in the right place
+
+        :param text_printer: The TextPrinter that contains this section
+        :param flush: By default False. Determines whether the stream will be flushed at the end of this method call
+        :param force_reprint: By default False
+        :return:
+        """
         self.__remove_old_lines()
         terminal_width = text_printer.dimensions[1]
 
-        length = len(self.lines)
-        length = 0
+        # length = len(self.lines)
+        length = 0  # calculate length with this for loop
         for line in self.lines:
             length += line.get_rows_taken(terminal_width)
+
         taken = self.get_lines_taken(text_printer)  # how many lines should this section take
         row = 0  # the current row usually incremented by 1 or 2 if a line overflows
         for line in self.lines:  # update all the lines that should be on screen
             if length - row <= taken:
-                line.update(text_printer)
-            row += line.get_rows_taken(terminal_width)  # TODO if the Section#row is only 1 and it overflows, it will glitch
+                line.update(text_printer, reprint=force_reprint)
+            row += line.get_rows_taken(terminal_width)
         assert row == length, "Since this is False, then one of the Line#update isn't doing something right."
+
         if self.fake_line is not None:
             # adding extra lines may look like it affected the speed, but it's because it happens even with regular \
             #       lines when the screen fills up.

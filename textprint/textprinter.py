@@ -45,7 +45,7 @@ class TextPrinter:
         :param flush: True if you want to flush the stream. This is True by default unlike most other methods
         """
         for section in self.sections:
-            section.update_lines(self, False)
+            section.update_lines(self, flush=False, force_reprint=True)
 
         if flush:
             self.flush()

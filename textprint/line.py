@@ -25,7 +25,7 @@ class Line:
                 reason is deleted, the Section handling the lines should change the value accordingly. Note this is \
                 relative to the section, not the whole TextPrinter
         """
-        self._contents = contents
+        self._contents = contents  # has it's own property and setter
         self.section = section
         self.line_number = line_number
 
@@ -38,6 +38,8 @@ class Line:
 
     @contents.setter
     def contents(self, value):
+        if self._contents != value:
+            self._did_contents_change = True
         self._contents = value
 
     def _do_goto(self, text_printer: 'TextPrinter', flush: bool = False, extra_line_number=0):
@@ -90,7 +92,9 @@ class Line:
         """
         if not flush and not reprint and not self._did_contents_change:
             # Don't reprint if we don't need to
+            # assert False, "Hey, we made it"
             return
+        self._did_contents_change = False
         columns = text_printer.dimensions[1]
 
         contents = self.contents
@@ -99,8 +103,8 @@ class Line:
             return
         lines = [""]
         for c in contents:
-            index = len(lines) - 1
-            current = lines[index]
+            index = len(lines) - 1  # define index
+            current = lines[index]  # get the current line from lines
             current += c
             lines[index] = current
             if len(current) >= columns and length_without_ansi(current) >= columns:
@@ -141,9 +145,10 @@ class Line:
         """
         if allowed_columns is None:
             return 1
-        length = len(self.contents) + 1
-        if length >= allowed_columns:  # don't call length_without_ansi until it might be going to the next line
-            length = length_without_ansi(self.contents) + 1
+        length = len(self.contents)
+        if length < allowed_columns:  # don't call length_without_ansi until it might be going to the next line
+            return 1  # If we go about calculating this, it's going to be 1 anyway
+        length = length_without_ansi(self.contents)
         char_count = length + 1  # if we remove + 1, we must account for this being 0
         # assert False, "char_count: {}, allowed_columns: {}".format(char_count, allowed_columns) for debugging
 
