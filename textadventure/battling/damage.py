@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Union, List
+from typing import Union, List, TYPE_CHECKING
 
 from textadventure.battling.battle import Battle
 from textadventure.battling.effect import Effect
 from textadventure.battling.move import Target
 from textadventure.battling.outcome import OutcomePart, HealthChangeOutcome
 from textadventure.battling.weapon import Weapon
+
+if TYPE_CHECKING:
+    from textadventure.entity import Health
 
 
 """
@@ -85,8 +88,7 @@ class HPDamage(Damage):
         return r
 
     def damage(self, battle: Battle):
-        from textadventure.entity import Health
-        health: Health = self.target.entity.health
+        health: 'Health' = self.target.entity.health
         before_health = health.current_health
 
         multiplier = self.calculate_multiplier()

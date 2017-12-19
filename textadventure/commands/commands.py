@@ -413,7 +413,7 @@ class InventoryCommandHandler(SimpleCommandHandler):
             for i in range(0, amount):
                 names.append("{}")
 
-            player.send_message(Message("You  have these items: {}".format(", ".join(names)),
+            player.send_message(Message("You have these items: {}".format(", ".join(names)),
                                         named_variables=player.items))
 
         return InputHandleType.HANDLED

@@ -138,9 +138,8 @@ class Turn:
 
         moves: List[Move] = []
         for target in self.targets:
-            move = self.chosen_moves[target]  # get their chosen move
-            moves.append(move)
-        moves.sort(key=lambda k: k.priority)  # sort by priority
+            moves.append(self.chosen_moves[target])
+        moves.sort(key=lambda m: m.priority + m.calculate_speed())  # sort by priority
 
         for move in moves:  # we will call before_turn
             # in separate for loop than the other one because we want before_turn to be called before all move.do_move
@@ -211,5 +210,13 @@ class Move(ABC):
         :param handler:
         :param battle: The battle that this move is being used in where current_turn is the current turn that is ongoing
         :return: A list of OutcomeParts (things that this method did)
+        """
+        pass
+
+    def calculate_speed(self):
+        """
+        A method that by default, uses the user's speed and nothing else
+
+        :return: Normally a value between -.5 and .5 (And most of the time positive) It represents the number to
         """
         pass

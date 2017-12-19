@@ -281,3 +281,4 @@ class LocationTitleBarManager(Manager):
         self.line.contents = Color.CYAN >> (Color.BOLD >> "{} at x: {}, y: {}, z: {}".format(location,
                                                                                              point.x, point.y, point.z))
         self.line.update(self.printer)  # don't flush it because it will put the cursor in a different spot
+        self.printer.set_title("Trail of Ninjas - " + str(location))

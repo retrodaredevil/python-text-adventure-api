@@ -5,7 +5,6 @@ from typing import List, Callable, Optional, TYPE_CHECKING
 from textadventure.player import Player
 from textadventure.utils import get_unimportant
 
-
 if TYPE_CHECKING:
     from textadventure.handler import Handler
 

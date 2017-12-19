@@ -9,6 +9,10 @@ from textadventure.utils import MessageConstant
 
 
 class Battle:
+    """
+    A class that is used to simulate a turn based battle. The uniqueness of the battle is up to custom effects,\
+    managers, and weapons.
+    """
     def __init__(self, teams: List[Team]):
         self.teams = teams
 

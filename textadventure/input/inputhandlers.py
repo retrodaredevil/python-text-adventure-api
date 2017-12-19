@@ -31,6 +31,7 @@ class SettingsHandler(InputHandler):
             elif len(player_input.get_arg(1)) != 0:
                 arg = player_input.get_arg(0)[0].lower()
 
+            # TODO, fix this code with : and setting and this is terrible
             if arg is not None:
                 if arg == "speed":
                     speed = player_input.get_arg(arg_index + 0)[0].lower()  # remember, arg 0 is the second word

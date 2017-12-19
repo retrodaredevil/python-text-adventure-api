@@ -2,7 +2,6 @@ from typing import List, TYPE_CHECKING
 
 from textadventure.utils import Point
 
-
 if TYPE_CHECKING:
     from textadventure.roomsystem.house import House
 

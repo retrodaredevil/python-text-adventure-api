@@ -33,6 +33,7 @@ class TextPrinter:
 
         self.dimensions = (80, 24)
         """[0] is rows [1] is columns"""
+        self._title = None
         # noinspection PyTypeChecker
         # self.default_position: Optional[Tuple[int, int]] = (0, 0)  # Optional Tuple where [0] is rows and [1] is col
 
@@ -119,6 +120,36 @@ class TextPrinter:
 
     def flush(self):
         self.print(flush=True)
+
+    def set_title(self, title: str, flush=False, reprint=False):
+        """
+        Sets the title of the terminal window
+
+        :param title: The string title that you want to set the title of the terminal window to
+        :param flush: By default False. Set to True if you want to flush the stream
+        :param reprint: By default False. If True, ignores the last call to set_title. When False, this checks to see\
+                if the last passed title is the same as the current passed title. If it is, it won't print anything.
+        :return: The escaped string that was printed to self.output or None if reprint is True and the last passed \
+                string is the same. This doesn't serve much of a purpose unless you want to know if it is None
+        """
+        # I made getter and setter methods because you need to be able to pass default parameters and I feel that\
+        #   getters and setters emphasize that something is being done (printing)
+
+        # used https://stackoverflow.com/questions/2330393/how-to-set-the-program-title-in-python
+        # TODO This won't work on windows. Need to call import os; os.system(title)
+        r = None
+        if not reprint or self.get_title() != title:
+            r = "\x1b]2;" + title + "\x07"
+            self.print(r, flush=flush)
+
+        return r
+
+    def get_title(self):
+        """
+        Gets the string passed to last set_title call or None if set_title hasn't been called or the title isn't known
+        :return: Returns the current known title or None if set_title hasn't been called before
+        """
+        return self._title
 
     def update_dimensions(self):
         """

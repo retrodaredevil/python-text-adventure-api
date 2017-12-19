@@ -127,7 +127,7 @@ class Entity(Living, Holder):
     def can_do_action(self, handler, entity_action: 'EntityActionToEntity') -> CanDo:
         """
         This method should not be called outside of entity.py but may be overridden by any subclass of entity to \
-        listen for Actions that are trying to be executed on this entity hence why only EntityActionAgainstEntitys \
+        listen for Actions that are trying to be executed on this entity hence why only EntityActionToEntity \
         are passed
 
         Note this will be called when try_action is called meaning that it will have been called after all the \

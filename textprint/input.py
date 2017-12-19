@@ -218,12 +218,14 @@ class InputLineUpdater:
     def update(self):
         """
         Should be called in a while True loop in order to update the input
+        Note that it also flushes the stream
         """
-
+        should_update = False
         while True:
             char_int = self.stdscr.getch()
             if char_int == -1:
                 break
+            should_update = True
             character = chr(char_int)
             # assert False, "Hey, we got something!: {}".format(char_int)
             if char_int not in range(32, 127):
@@ -236,4 +238,5 @@ class InputLineUpdater:
         # time.sleep(1)
         # self.times_updated += 1
         # self.current_line().type("hi")
-        self.update_line()
+        if should_update or True:  # just run this for now, change the or True later
+            self.update_line()

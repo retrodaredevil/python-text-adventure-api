@@ -25,11 +25,20 @@ class Line:
                 reason is deleted, the Section handling the lines should change the value accordingly. Note this is \
                 relative to the section, not the whole TextPrinter
         """
-        self.contents = contents
+        self._contents = contents
         self.section = section
         self.line_number = line_number
 
         self._last_length_lines = None  # used by the update method
+        self._did_contents_change = True  # used by the update method. Set to False each time
+
+    @property
+    def contents(self):
+        return self._contents
+
+    @contents.setter
+    def contents(self, value):
+        self._contents = value
 
     def _do_goto(self, text_printer: 'TextPrinter', flush: bool = False, extra_line_number=0):
         """
@@ -67,7 +76,7 @@ class Line:
         columns = 0
         return self.section.goto(text_printer, rows - extra_line_number, columns, flush=flush)
 
-    def update(self, text_printer: 'TextPrinter', flush: bool = False):
+    def update(self, text_printer: 'TextPrinter', flush: bool = False, reprint=False):
         """
         Updates the line with self.contents. Note if contents was changed since the last call, and contents overflows\
         to the next line, this will write on the line above it meaning you will need to update all the lines in this\
@@ -75,10 +84,15 @@ class Line:
 
         :param text_printer: The text printer object
         :param flush: By default false, set to True if you want to flush the stream
+        :param reprint: By default False, when False, makes sure this method only updates if necessary. Set to True,\
+                if you are updating all lines. When calling this in a loop, this should be False. If flush is True,\
+                changing this does nothing.
         """
-        columns = text_printer.dimensions[1]  # TODO I think this is slowing it down
+        if not flush and not reprint and not self._did_contents_change:
+            # Don't reprint if we don't need to
+            return
+        columns = text_printer.dimensions[1]
 
-        # show = Color.RESET + contents[:columns]  # TODO somehow get it to go onto the next line without glitching
         contents = self.contents
         if str(Color.CLEAR_SECTION) in contents:
             self.section.lines.clear()  # clear all lines. Even this line.
@@ -107,7 +121,7 @@ class Line:
         self._last_length_lines = len(lines)
         if last_length is not None and last_length != len(lines):
             # this code is to make sure that if the rows taken by this line changed, other lines are updated so the\
-            #   line directly above this line doesn't get erased
+            #   line directly above this line doesn't get erased (Just like how when we add a new line, we update)
             self.section.update_lines(text_printer, flush=False)
         if flush:
             text_printer.flush()  # we could do print(flush=False) but eventually, we won't use print

@@ -8,6 +8,9 @@ from textadventure.entity import Entity
 
 
 class SwordDamageAlter(PropertyEffect):
+    """
+    Simple PropertyEffect that allows you to add
+    """
     def __init__(self, user: Entity, sword_move_type_effectiveness: Tuple[float, float, float]):
         """
         :param sword_move_type_effectiveness: [Slash multiplier, slam multiplier, stab multiplier]
@@ -20,6 +23,7 @@ class SwordDamageAlter(PropertyEffect):
         target = damage.target
         # print(f"Got on_damage with user.entity: {self.user.entity}, target.entity: {target.entity}")
         if target.entity != self.user:
+            # remember, we need this if statement, because this method gets called on all damages
             return []  # we want the person receiving the damage to be the person that has the effect
 
         if isinstance(damage_action.cause_object, SwordMove) and isinstance(damage, WeaponHPDamage):

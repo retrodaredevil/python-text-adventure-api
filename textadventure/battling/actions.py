@@ -67,7 +67,6 @@ class DamageAction(Action):  # DONE create a manager where Effects can handle th
         :param cause_object: The object that contains the method that created this. (Almost always a Move or Effect)
         :param damage:
         """
-
         super().__init__()
         self.cause_object = cause_object
         """The object that contains the method that created this. Depending on the implementation or the code you \

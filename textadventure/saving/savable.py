@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from textadventure.player import Player
     from textadventure.handler import Handler

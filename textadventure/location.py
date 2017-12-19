@@ -12,7 +12,6 @@ from textadventure.message import Message, MessageType
 from textadventure.player import Player
 from textadventure.utils import Point, MessageConstant, are_mostly_equal, CanDo
 
-
 if TYPE_CHECKING:
     from textadventure.commands.command import CommandHandler
 
