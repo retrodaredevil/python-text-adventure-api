@@ -2,6 +2,8 @@ import os
 from typing import List, Optional
 
 import sys
+
+import time
 from colorama import Cursor
 
 from textprint.section import Section
@@ -36,6 +38,12 @@ class TextPrinter:
         self._title = None
         # noinspection PyTypeChecker
         # self.default_position: Optional[Tuple[int, int]] = (0, 0)  # Optional Tuple where [0] is rows and [1] is col
+        self._known_goto_position = None
+        """Used by the goto and print methods. When None, it means that we are not sure of the specific location\
+                of the cursor meaning that goto should print. If not None, [0] represents rows and [1] represents\
+                columns. (y, x) The goto method should check this if it is not None. Also note that since [0] is used\
+                by goto, it doesn't represent the value of 'row' passed to goto, instead it represents the value\
+                printed to the console."""
 
     def update_all_lines(self, flush: bool = True):
         """
@@ -99,9 +107,14 @@ class TextPrinter:
         :return: None
         """
         # print("\033[{};{}H".format(int(window_rows) - row, column), end="")
-
-        self.print(self.__cursor.POS(column, self.dimensions[0] - row if not self.print_from_top else row + 1),
-                   end="", flush=flush)
+        position = self._known_goto_position
+        used_rows = self.dimensions[0] - row if not self.print_from_top else row + 1
+        if position is not None and position[0] == used_rows and position[1] == column:
+            # notice that this if statement uses used_rows and not rows. Please take note when debugging
+            return
+        self.print(self.__cursor.POS(column, used_rows), end="", flush=flush)
+        self._known_goto_position = used_rows, column  # use used_rows so if resize, if statement above won't fire
+        # print("goto {}".format(self._known_goto_position), file=sys.stderr)
 
     def print(self, text="", flush=False, end=""):
         """
@@ -115,7 +128,11 @@ class TextPrinter:
         """
         # print(text, flush=flush, end=end)
         self.output.write(text + end)
+        if text:  # check if the string isn't empty. If it isn't, set position to None
+            # print("value: {}".format([text]), file=sys.stderr)
+            self._known_goto_position = None
         if flush:
+            # print("flush {}".format(time.time()), file=sys.stderr)
             self.output.flush()
 
     def flush(self):
@@ -138,9 +155,10 @@ class TextPrinter:
         # used https://stackoverflow.com/questions/2330393/how-to-set-the-program-title-in-python
         # TODO This won't work on windows. Need to call import os; os.system(title)
         r = None
-        if not reprint or self.get_title() != title:
+        if reprint or self.get_title() != title:
             r = "\x1b]2;" + title + "\x07"
             self.print(r, flush=flush)
+            self._title = title
 
         return r
 

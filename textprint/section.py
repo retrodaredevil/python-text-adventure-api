@@ -78,7 +78,7 @@ class Section:
     def print(self, text_printer: 'TextPrinter', message: str, flush: bool = False) -> Line:
         line = Line(message, self, len(self.lines))
         self.lines.append(line)
-
+        
         # we will need force_reprint, because we need to redraw all lines in correct places
         self.update_lines(text_printer, flush=flush, force_reprint=True)
         # write to the line that the newly created Line should occupy,\
