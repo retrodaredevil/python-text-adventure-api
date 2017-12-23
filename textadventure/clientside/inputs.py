@@ -80,6 +80,8 @@ class InputLineUpdaterManager(Manager):
     def update(self, handler: 'Handler'):
         # start = time.time()  # tested and seems to have a good speed
         self.updater.update()
+        if self.updater.should_exit:
+            raise KeyboardInterrupt("It seems updater.should_exit is True. Exiting program.")
         # after = time.time()
         # taken = after - start
         # print(Cursor.POS(0, 0) + str(taken) + " seconds. inputs.py out", end="", flush=True)

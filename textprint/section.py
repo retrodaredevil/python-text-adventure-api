@@ -53,7 +53,7 @@ class Section:
             return self.rows  # this is very likely to be returned
         return length
 
-    def goto(self, text_printer: 'TextPrinter', row: int, column: int, flush: bool = False) -> Tuple[int, int]:
+    def goto(self, text_printer: 'TextPrinter', row: int, column: int, flush=False) -> Tuple[int, int]:
         """
         Changes the cursor to the position relative to this section
 
@@ -75,10 +75,10 @@ class Section:
 
         return r, c
 
-    def print(self, text_printer: 'TextPrinter', message: str, flush: bool = False) -> Line:
+    def print(self, text_printer: 'TextPrinter', message: str, flush=False) -> Line:
         line = Line(message, self, len(self.lines))
         self.lines.append(line)
-        
+
         # we will need force_reprint, because we need to redraw all lines in correct places
         self.update_lines(text_printer, flush=flush, force_reprint=True)
         # write to the line that the newly created Line should occupy,\
@@ -96,7 +96,7 @@ class Section:
         for line in self.lines:
             line.line_number -= amount_removed
 
-    def update_lines(self, text_printer: 'TextPrinter', flush: bool = False, force_reprint=False):
+    def update_lines(self, text_printer: 'TextPrinter', flush=False, force_reprint=False):
         """
         Simple method to update all the lines and make sure they are in the right place
 

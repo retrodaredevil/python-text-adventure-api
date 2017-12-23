@@ -27,12 +27,47 @@ class EditableLine:
         self.after = ""
 
     def delete(self, amount_delete_forward: int):
+        """
+        Allows you to delete text forward or backwards depending on the sign of amount_delete_forward
+        :param amount_delete_forward: If negative, deletes that many characters behind the cursor. If positive, deletes\
+                that many characters in front of the cursor
+        """
         if amount_delete_forward == 0:
             return
         elif amount_delete_forward < 0:  # backspace
             self.before = self.before[:amount_delete_forward]  # delete from back of string
         else:  # delete key
             self.after = self.after[amount_delete_forward:]
+
+    def go_until_space(self, amount_back=-1) -> bool:
+        """
+        Returns a bool representing if the next character that you would change or alter or go passed (depending on \
+        the sign of amount_back) would warrant stopping. (This can be used for things like CTRL+backspace and \
+        CTRL+<arrow>)
+
+        Note that unless you altered something with self.before or self.after, this will return the\
+        same thing each time. It is recommended to put this in a while loop and keep a counter
+
+        :param amount_back: The amount of characters to skip backwards. Note that if the abs of this is greater\
+                than 1, it will skip characters in between.
+        :return: A boolean representing if the next character warrants a stop in whatever you are doing (examples above)
+        """
+        assert amount_back != 0, "What are you trying to do? Get us all killed in a while True? Don't pass 0 to this."
+        backwards = amount_back < 0
+
+        def get_using():
+            """Gets the current string that we will delete from based on if the user pressed backspace or delete"""
+            return self.before if backwards else self.after
+        return len(get_using()) != 0 and get_using()[-1 if backwards else 0] != " "
+
+    def delete_word(self, backspace=True):
+        amount = -1 if backspace else 1
+
+        i = 0  # this while loop gets the string we are going to use, then checks if the character we will delete\
+        #       is a space, if it is and we've already deleted stuff, then stop deleting
+        while self.go_until_space(amount_back=amount) or i == 0:
+            self.delete(amount)
+            i += 1
 
     def home(self):
         """
@@ -65,6 +100,14 @@ class EditableLine:
         move = self.after[:amount_forward]  # delete the whole string except for first char(s)
         self.before += move  # add the stuff removed from after to before
         self.after = after
+
+    def move_word(self, backwards=True):
+        amount = -1 if backwards else 1
+
+        i = 0
+        while self.go_until_space(amount) or i == 0:
+            self.move(amount)
+            i += 1
 
 
 class InputLineUpdater:
@@ -155,9 +198,9 @@ class InputLineUpdater:
         """
         current = self.current_line()  # current line that may not actually be self._current_line
         if key == 10 or key == curses.KEY_ENTER:
-            current.end()  # move the cursor to end
+            current.end()  # move the cursor to end, this allows us to use current.before on next line
             self._editable_lines.append(EditableLine(current.before))  # create a new line and add it
-            self._current_line = EditableLine("")  # even though current may not be this, we want to reset this
+            self._current_line = EditableLine("")  # even though current may not be self._current_line, reset it
             self._line_index = 0  # set the line back to _current_line
             self._reset_editable_lines()  # reset all the EditableLines back to their original
         elif key == curses.KEY_BACKSPACE:
@@ -170,6 +213,10 @@ class InputLineUpdater:
             current.move(-1)
         elif key == curses.KEY_RIGHT:
             current.move(1)
+        elif key == 545:  # CTRL+LEFT
+            current.move_word(True)
+        elif key == 560:  # CTRL+RIGHT
+            current.move_word(False)
         elif key == curses.KEY_UP or key == curses.KEY_DOWN:
 
             def go_direction():
@@ -199,16 +246,7 @@ class InputLineUpdater:
         elif key == 8 or key == 27 or key == 519:  # ctrl+backspace or alt+backspace or ctrl+delete
             # TODO this code doesn't work perfectly like most ctrl+backspaces since it stops when it get to a space
             backspace = key != 519
-            amount = -1 if backspace else 1
-
-            def get_using():
-                """Gets the current string that we will delete from based on if the user pressed backspace or delete"""
-                return current.before if backspace else current.after
-            i = 0  # this while loop gets the string we are going to use, then checks if the character we will delete\
-            #       is a space, if it is and we've already deleted stuff, then stop deleting
-            while len(get_using()) != 0 and (get_using()[-1 if backspace else 0] != " " or i == 0):
-                current.delete(amount)
-                i += 1
+            current.delete_word(backspace)
         else:
             current.type("[{} ord: {}]".format(curses.keyname(key).decode("utf-8"), key))
 

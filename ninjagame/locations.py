@@ -184,6 +184,7 @@ class InsideEntrance(Location):
 
     def see(self, handler: Handler, player: Player):
         player.send_message("You see double doors behind you and openings all around you.")
+        player.send_message("The ground is grassy and you see trees around.")
 
     def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
@@ -425,16 +426,25 @@ class EntranceSpiderWebForest(Location):
 
     def on_item_use(self, handler: Handler, player: Player, item: Item):
         if isinstance(item, Sword):
-            self.do_player_clear(player)
+            can_use = item.can_use(player)
+            if not can_use[0]:
+                player.send_message(can_use[1])
+                return
+            
+            result = item.use_item(handler, player, does_custom_action=True)
+            if result[0]:
+                self.do_player_clear(player)
+            else:
+                player.send_message(result[1])
         else:
             super().on_item_use(handler, player, item)
 
     @staticmethod
     def do_player_clear(player: Player):
         if player[EventsObject].has_cleared_spider_webs_at_entrance:
-            player.send_message("You've already cleared the spider webs")
+            player.send_message("You've already cleared the spider webs.")
         else:
-            player.send_message("You used your sword to clear the spider webs")
+            player.send_message("You cleared the spider webs.")
             player[EventsObject].has_cleared_spider_webs_at_entrance = True
 
     def on_input(self, handler: Handler, player: Player, player_input: InputObject):

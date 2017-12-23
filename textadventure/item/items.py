@@ -63,9 +63,6 @@ class Coin(Item):
     def listen(self, handler: Handler, player: Player):
         raise NotImplementedError("You can't listen to a coin")
 
-    def use_item(self, handler: Handler, player: Player):
-        raise NotImplementedError("You can't 'use' a coin")
-
     def can_smell(self, player: Player):
         return True, "You can smell this"
 
@@ -122,5 +119,3 @@ class Wallet(Item, Holder):
     def listen(self, handler: Handler, player: Player):
         raise NotImplementedError("Can't listen to wallet")
 
-    def use_item(self, handler: Handler, player: Player):
-        raise NotImplementedError("You can't use a wallet")

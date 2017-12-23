@@ -45,7 +45,7 @@ class TextPrinter:
                 by goto, it doesn't represent the value of 'row' passed to goto, instead it represents the value\
                 printed to the console."""
 
-    def update_all_lines(self, flush: bool = True):
+    def update_all_lines(self, flush=True):
         """
         A simple method used to update all lines. Note that normally, this shouldn't be called at all unless you \
         REALLY need to reset the screen.
@@ -97,7 +97,7 @@ class TextPrinter:
             raise ValueError("The passed section needs to be in self.sections")
         return lines
 
-    def goto(self, row: int, column: int, flush: bool = False):
+    def goto(self, row: int, column: int, flush=False):
         """
         A simple method that goes to the specified coordinates where 0, 0 is the bottom right
 
@@ -127,9 +127,10 @@ class TextPrinter:
                 with Line objects, normally you wouldn't and shouldn't change this.
         """
         # print(text, flush=flush, end=end)
-        self.output.write(text + end)
-        if text:  # check if the string isn't empty. If it isn't, set position to None
+        to_write = text + end
+        if to_write:  # check if the string isn't empty. If it isn't, actually do something
             # print("value: {}".format([text]), file=sys.stderr)
+            self.output.write(to_write)
             self._known_goto_position = None
         if flush:
             # print("flush {}".format(time.time()), file=sys.stderr)

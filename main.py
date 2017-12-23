@@ -24,7 +24,7 @@ from textadventure.player import Player
 from textadventure.saving.saving import SaveCommandHandler, LoadCommandHandler
 from textadventure.saving.playersavable import PlayerSavable
 from textprint.colors import Color
-from textprint.inithelper import curses_init, std_init, colorama_init
+from textprint.inithelper import curses_init, std_init, colorama_init, curses_end, add_interrupt_handler
 from textprint.input import InputLineUpdater
 from textprint.section import Section
 from textprint.textprinter import TextPrinter
@@ -70,7 +70,7 @@ def after_player(handler: Handler, player: Player):
 
 
 def setup():
-    handler: Handler = Handler()
+    handler: Handler = Handler()  # if error at this line, use Python3.6!!!
 
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 
@@ -78,8 +78,8 @@ def setup():
         # stream_output = StreamOutput()
         # stream_output.is_unix = "y" in input("Is your terminal unix based? (y/n) (No if you don't know) > ").lower()
         # player = Player(KeyboardInput(stream_output), stream_output, None)
-        std_init(stdscr)
         curses_init()
+        std_init(stdscr)
         colorama_init()
 
         input_section = Section(None, force_rows=False)  # we want to allow it to go for as many lines it needs
@@ -93,6 +93,8 @@ def setup():
         player_input = TextPrinterInputGetter(updater)
         input_manager = InputLineUpdaterManager(updater)  # calls updater's update
         handler.managers.append(input_manager)
+        def hand(): updater.should_exit = True
+        add_interrupt_handler(hand)
 
         output = TextPrinterOutput(printer, print_section)
         # output.daemon = True
@@ -109,8 +111,13 @@ def setup():
 
         after_player(handler, player)
 
-    curses.wrapper(start)
+    # curses.wrapper(start)
     # player[PlayerFriend] = PlayerFriend("Friend")
+    try:
+        scanner = curses.initscr()
+        start(scanner)
+    finally:
+        curses_end()
 
 
 def main():

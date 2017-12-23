@@ -3,14 +3,8 @@ from typing import Tuple
 
 from textadventure.battling.weapon import Weapon
 from textadventure.handler import Handler
-from textadventure.item.items import Item
 from textadventure.message import Message
 from textadventure.player import Player
-from textadventure.utils import MessageConstant
-
-
-def create_use_message(item: Item) -> MessageConstant:
-    return Message("You used {}.", named_variables=[item])
 
 
 @unique
@@ -77,10 +71,6 @@ class Sword(Weapon):
     def can_use(self, player: Player):
         return True, "You can use this as long as you're in the right place"
 
-    def use_item(self, handler: Handler, player: Player):
-        player.send_message(create_use_message(self))
-        return True
-
     def listen(self, handler: Handler, player: Player):
-        raise NotImplementedError("Cannot listen to a sword")
+        raise Exception("Cannot listen to a sword")
 

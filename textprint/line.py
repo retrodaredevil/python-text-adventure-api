@@ -42,7 +42,7 @@ class Line:
             self._did_contents_change = True
         self._contents = value
 
-    def _do_goto(self, text_printer: 'TextPrinter', flush: bool = False, extra_line_number=0):
+    def _do_goto(self, text_printer: 'TextPrinter', flush=False, extra_line_number=0):
         """
         Goes to this line
 
@@ -78,7 +78,7 @@ class Line:
         columns = 0
         return self.section.goto(text_printer, rows - extra_line_number, columns, flush=flush)
 
-    def update(self, text_printer: 'TextPrinter', flush: bool = False, reprint=False):
+    def update(self, text_printer: 'TextPrinter', flush=False, reprint=False):
         """
         Updates the line with self.contents. Note if contents was changed since the last call, and contents overflows\
         to the next line, this will write on the line above it meaning you will need to update all the lines in this\
@@ -126,7 +126,7 @@ class Line:
         if last_length is not None and last_length != len(lines):
             # this code is to make sure that if the rows taken by this line changed, other lines are updated so the\
             #   line directly above this line doesn't get erased (Just like how when we add a new line, we update)
-            self.section.update_lines(text_printer, flush=False)
+            self.section.update_lines(text_printer, flush=False, force_reprint=True)
         if flush:
             text_printer.flush()  # we could do print(flush=False) but eventually, we won't use print
         # if len(lines) > 1:
