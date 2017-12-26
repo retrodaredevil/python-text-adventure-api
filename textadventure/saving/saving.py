@@ -12,7 +12,7 @@ from textadventure.player import Player
 from textadventure.saving.savable import Savable
 from textadventure.utils import CanDo
 
-DEFAULT_PATH: Path = Path("./save.data")
+DEFAULT_PATH = Path("./save.data")
 
 
 def is_path_valid(path: Path):

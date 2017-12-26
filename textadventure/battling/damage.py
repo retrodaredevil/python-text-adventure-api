@@ -78,8 +78,8 @@ class HPDamage(Damage):
         """
         Damage.__init__(self, damager, target)
         self.hp_change = hp_change
-        self.multiplier_list: List[float] = []  # noinspection PyTypeChecker
-        """Should be appended to when wanting to multiply the damage of hp_change"""
+        self.multiplier_list = []
+        """A list of floats. Should be appended to when wanting to multiply the damage of hp_change"""
 
     def calculate_multiplier(self):
         r = 1
@@ -88,7 +88,7 @@ class HPDamage(Damage):
         return r
 
     def damage(self, battle: Battle):
-        health: 'Health' = self.target.entity.health
+        health = self.target.entity.health
         before_health = health.current_health
 
         multiplier = self.calculate_multiplier()

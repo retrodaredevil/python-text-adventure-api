@@ -31,14 +31,14 @@ class SwordMove(WeaponMove):
 
         self.name += "'s " + self.move_type.value[0]
 
-    def do_move(self, battle: Battle, handler: 'Handler'):
-        r: List[OutcomePart] = [UseMoveOutcome(self)]  # all we have done is used this move so far
+    def do_move(self, battle: Battle, handler: 'Handler') -> List[OutcomePart]:
+        r = [UseMoveOutcome(self)]  # all we have done is used this move so far
 
         hp_change = -self.item.sword_type.value[2]  # subtract the amount of hp the sword_type takes away
         for target in self.targets:  # attack all the targets (usually just one)
             damage = WeaponHPDamage(self.user, target, hp_change, self.item)
 
-            action: DamageAction = DamageAction(self, damage, battle)
+            action = DamageAction(self, damage, battle)
             handler.do_action(action)
             action.try_action(handler)
             r.extend(action.outcome_parts)

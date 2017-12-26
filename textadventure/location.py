@@ -12,15 +12,12 @@ from textadventure.message import Message, MessageType
 from textadventure.player import Player
 from textadventure.utils import Point, MessageConstant, are_mostly_equal, CanDo
 
-if TYPE_CHECKING:
-    from textadventure.commands.command import CommandHandler
-
 
 T = TypeVar('T')
 
 
 class Location(Holder, InputHandler, FiveSensesHandler):
-    NO_YELL_RESPONSE: MessageConstant = "There was no response."
+    NO_YELL_RESPONSE = "There was no response."
 
     """
     The Location is an abstract base class used for all Locations. Many of the methods aren't meant to be called \
@@ -42,9 +39,9 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         super().__init__()
         self.name = name
         self.description = description
-        self.point: Point = point  # noinspection PyTypeChecker
+        self.point = point
 
-        self.command_handlers: List['CommandHandler'] = []
+        self.command_handlers = []
         self.__add_command_handlers()
 
     def __str__(self):
@@ -89,6 +86,8 @@ class Location(Holder, InputHandler, FiveSensesHandler):
 
     def on_place(self, handler: Handler, item: Item, player: Player) -> None:
         """
+        Could be called on_drop if you want to think about it like that
+
         Just like on_take , it's called after weapon's change_holder and is not called by that method
         The weapon's holder is already this location. The player is what placed it
 
@@ -109,8 +108,8 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         :param handler: The handler object
         :param player: The player
         :param player_input: The player input object
-        :param is_there_response: By default,False. If set to true, the default implementation won't
-                                        say no one responded
+        :param is_there_response: By default, False. If set to True, the default implementation won't
+                send a message saying no one responded.
         :return: None
         """
         first_arg = player_input.get_arg(0, False)
@@ -124,13 +123,21 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         Should be called by the UseCommandHandler.
         If overridden, it's recommended that you call the super method (this method)
 
+        Note that this method should automatically check can_use, however, you should check item.can_reference\
+        before you call this method
+
         :param handler: The handler object
         :param player: The player object
         :param item: The weapon that is being 'used'
         :return: None because the this Location should choose how it wants to handle the using of this weapon
         """
-        player.send_message("You can't use that weapon here.")
-        # ONEDAY here, we will eventually handle simple things that all locations should be able to handle
+        can_use = item.can_use(player)
+        if not can_use[0]:
+            player.send_message(can_use[1])
+            return
+        result = item.use_item(handler, player, does_custom_action=False)
+        if not result[0]:
+            player.send_message(result[1])  # send the player a message if they failed in some way
 
     def _send_welcome(self, player: Player):
         """

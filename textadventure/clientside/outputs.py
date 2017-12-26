@@ -73,7 +73,7 @@ class StreamOutput(Thread, PlayerOutput):  # extending thread so we can let mess
                     time.sleep(message.wait_in_seconds * before_multiplier)
                     to_print = message.text + message.end
 
-                    names: List[str] = []  # noinspection PyTypeChecker
+                    names = []
                     for named in message.named_variables:
                         if isinstance(named, List):
                             names.append(join_list(list(map(str, named))))
@@ -140,9 +140,9 @@ class TextPrinterOutput(Manager, PlayerOutput):
         self.messages = []
         """Used by __add_messages to add the parts to message_parts"""
 
-        self.message_parts: List[List[MessagePart]] = [[]]
+        self.message_parts = [[]]  # type List[List[MessagePart]]
         """This is a list of lists of MessageParts where each list inside the list is a line."""
-        self.current_line_parts: Optional[Tuple[List[MessagePart], int]] = None
+        self.current_line_parts = None  # type Optional[Tuple[List[MessagePart], int]]
         """[0] represents the MessageParts that should be on one line. [1] represents the time they started printing"""
 
         self.is_instant = False  # set to True when you want the update method to immediately print current message
@@ -196,7 +196,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
             for message in current_messages:
                 # self.section.print(self.printer, message.text, flush=True)
                 # continue
-                parts: List[MessagePart] = message.create_parts()  # noinspection PyTypeChecker
+                parts = message.create_parts()
                 # since we called message.create_parts, we can change them if we would like
 
                 for part in parts:
@@ -217,7 +217,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
             """Returns True at[0] if all of the parts were printed. And returns contents of line at [1]"""
             add_time = not self.is_instant and not immediate  # used to tell if we should add time to time_count
 
-            parts: List[MessagePart] = self.current_line_parts[0]  # noinspection PyTypeChecker
+            parts = self.current_line_parts[0]  # type List[MessagePart]
 
             passed = now - self.current_line_parts[1]  # since we recalculate the amount of chars each time this\
             #       is called, we need to know how much time it has taken so far

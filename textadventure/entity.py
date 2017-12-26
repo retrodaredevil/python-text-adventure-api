@@ -104,10 +104,9 @@ class Health:
 class Entity(Living, Holder):
     def __init__(self, name: str, health: Health, location):
         super().__init__(name)
-        from textadventure.location import Location
         self.health = health
 
-        self.location: Location = location
+        self.location = location
         """
         The location of the entity. Unless, initializing for the first time, you almost should never set this
         By yourself because you probably want to do it with GoAction or something similar that abstracts a few 
@@ -144,7 +143,7 @@ class Entity(Living, Holder):
 
 class HostileEntity(Entity):  # abstract
 
-    CANNOT_PASS_STRING: str = "You can't pass because {} wants to eat you."
+    CANNOT_PASS_STRING = "You can't pass because {} wants to eat you."
 
     def __init__(self, name: str, health: Health, location):
         super().__init__(name, health, location)
@@ -168,8 +167,7 @@ class SimpleHostileEntity(HostileEntity):
         self.hostile_to_types = hostile_to_types
 
         self.hostile_now = True
-        self.can_not_pass: CanDo = (False, Message(self.__class__.CANNOT_PASS_STRING, named_variables=[self])
-                                    )  # noinspection PyTypeCheckeri
+        self.can_not_pass = False, Message(self.__class__.CANNOT_PASS_STRING, named_variables=[self])
 
     def _can_pass(self, entity: Entity) -> CanDo:
         """
@@ -218,8 +216,8 @@ class CommunityHostileEntity(SimpleHostileEntity):
 
     def __init__(self, name: str, health: Health, location, hostile_to_types: List[Type[Entity]]):
         super().__init__(name, health, location, hostile_to_types)
-        self.entities_lost_to: List[Entity] = []  # noinspection PyTypeChecker
-        self.entities_won_against: List[Entity] = []  # noinspection PyTypeChecker
+        self.entities_lost_to = []
+        self.entities_won_against = []
 
     def _can_pass(self, entity: Entity):
         # We aren't going to call super because even if this entity is dead, we want them to fight the entity if\

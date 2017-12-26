@@ -26,7 +26,7 @@ class BattleStart(Action):
     """
     def __init__(self, battle: 'Battle'):
         super().__init__()
-        self.battle = battle  # noinspection PyTypeChecker
+        self.battle = battle
 
     def _do_action(self, handler):
         self.battle.has_started = True
@@ -39,7 +39,7 @@ class BattleEnd(Action):
     """
     def __init__(self, battle: 'Battle', winning_team: Team):
         super().__init__()
-        self.battle = battle  # noinspection PyTypeChecker
+        self.battle = battle
         self.winning_team = winning_team
 
     def _do_action(self, handler):
@@ -55,7 +55,7 @@ class EntityChallengeAction(EntityActionToEntity):
     def _do_action(self, handler):
         from textadventure.battling.battle import Battle
         battle = Battle([Team([self.entity]), Team([self.asked_entity])])
-        manager: BattleManager = handler.get_managers(BattleManager, 1)[0]
+        manager = handler.get_managers(BattleManager, 1)[0]
         manager.add_battle(battle)
         battle.start(handler)
         return self.can_do
@@ -75,7 +75,7 @@ class DamageAction(Action):  # DONE create a manager where Effects can handle th
         assert damage is not None
         self.battle = battle
 
-        self.outcome_parts: List['OutcomePart'] = []  # noinspection PyTypeChecker
+        self.outcome_parts = []
         """The list of outcome parts that will be appended to when _do_action is called. If a Manager changes \
         something in self.damage, they may want to append an OutcomePart so people know what happened."""
 

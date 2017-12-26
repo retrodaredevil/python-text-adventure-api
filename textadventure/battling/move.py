@@ -36,7 +36,7 @@ class Target:
         self.turn_number = turn_number  # turn object not passed to avoid import errors and avoid passing a reference\
         #  of self somehow to the Turn object
 
-        self.effects: List['Effect'] = []
+        self.effects = []
         """Right now, you should just append to this list since we don't have a special method to add effects."""
 
     def __getitem__(self, item: Type[T]) -> Optional[T]:
@@ -58,7 +58,7 @@ class Target:
         :return: A list of MoveOptions that, by default, is based on the items that the Target currently has
         """
         from textadventure.battling.weapon import Weapon
-        r: List['MoveOption'] = []
+        r = []
         for item in self.entity.items:
             if isinstance(item, Weapon):
                 r.extend(item.move_options)
@@ -93,8 +93,9 @@ class Turn:
         self.is_doing = False
         self.is_done = False
 
-        self.chosen_moves: Dict[Target, Move] = {}  # noinspection PyTypeChecker# note that this has nothing to do \
-        # with move options. Let MoveChooser handle that stuff
+        self.chosen_moves = {}
+        """Note has nothing to do with move options. This a a Dict[Target, Move] where the key is the target and \
+        the value is the move that the target chose"""
 
     def get_target(self, entity: Entity) -> Optional[Target]:
         for target in self.targets:
@@ -136,7 +137,7 @@ class Turn:
     def _do_turn(self, battle: 'Battle', handler: 'Handler'):
         self.is_doing = True  # set to True because turn is actually going on now
 
-        moves: List[Move] = []
+        moves = []
         for target in self.targets:
             moves.append(self.chosen_moves[target])
         moves.sort(key=lambda m: m.priority + m.calculate_speed())  # sort by priority
@@ -149,7 +150,7 @@ class Turn:
 
         for move in moves:  # now we will call do_move
 
-            can_move: CanDo = (True, "By default, you can move. An effect might say otherwise")
+            can_move = (True, "By default, you can move. An effect might say otherwise")  # type CanDo
             for effect in move.user.effects:
                 can_move = effect.can_move(move)
                 if not can_move[0]:
@@ -219,4 +220,5 @@ class Move(ABC):
 
         :return: Normally a value between -.5 and .5 (And most of the time positive) It represents the number to
         """
-        pass
+        # TODO, is this implemented correctly?
+        return 0

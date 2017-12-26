@@ -21,11 +21,16 @@ SwordTypeValue = Tuple[str, MaterialType, int]
 
 @unique
 class SwordType(Enum):
-    WOODEN: SwordTypeValue = ("wooden", MaterialType.WOOD, 5)
-    IRON: SwordTypeValue = ("iron", MaterialType.IRON, 8)
-    STEEL: SwordTypeValue = ("steel", MaterialType.STEEL, 10)
-    SHINY_STEEL: SwordTypeValue = ("shiny steel", MaterialType.SHINY_STEEL, 12)
-    CHINESE_STEEL: SwordTypeValue = ("chinese steel", MaterialType.CHINESE_STEEL, 12)  # idk why I added this one
+    """
+    A simple enum where all the members are of the type SwordTypeValue
+
+    The items in this enum represent the different materials a sword is made out of
+    """
+    WOODEN = ("wooden", MaterialType.WOOD, 5)
+    IRON = ("iron", MaterialType.IRON, 8)
+    STEEL = ("steel", MaterialType.STEEL, 10)
+    SHINY_STEEL = ("shiny steel", MaterialType.SHINY_STEEL, 12)
+    CHINESE_STEEL = ("chinese steel", MaterialType.CHINESE_STEEL, 12)  # idk why I added this one
 
 
 SwordMoveTypeValue = Tuple[str, int]
@@ -35,9 +40,14 @@ SwordMoveTypeValue = Tuple[str, int]
 
 @unique
 class SwordMoveType(Enum):
-    SLASH: SwordMoveTypeValue = ("slash", 0)
-    SLAM: SwordMoveTypeValue = ("slam", 1)
-    STAB: SwordMoveTypeValue = ("stab", 2)
+    """
+    A simple enum where all the members are of the type SwordTypeValue
+
+    The items in this enum represent the different move types available when attacking with a normal sword
+    """
+    SLASH = ("slash", 0)
+    SLAM = ("slam", 1)
+    STAB = ("stab", 2)
 
 
 class Sword(Weapon):

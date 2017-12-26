@@ -14,10 +14,9 @@ class PlayerSavable(Savable):
     """
 
     def __init__(self):
-        from textadventure.item.item import Item
         super().__init__()
         self.point = Point(0, 0)
-        self.items: List[Item] = []  # noinspection PyTypeChecker
+        self.items = []
         self.name = None
 
     def __str__(self):

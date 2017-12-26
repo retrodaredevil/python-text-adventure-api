@@ -7,17 +7,18 @@ import curses
 
 from ninjagame.data import EventsObject
 from ninjagame.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
-from ninjagame.locations import Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance, \
-    EntranceSpiderWebForest, CenterSpiderWebForest, EastCenterSpiderWebForest
+from ninjagame.locations import (Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance,
+                                 EntranceSpiderWebForest, CenterSpiderWebForest, EastCenterSpiderWebForest)
 from ninjagame.managing import NinjaGamePropertyManager
 from textadventure.actions import EntityActionToEntityManager
 from textadventure.battling.commands import AttackCommandHandler
 from textadventure.battling.managing import HostileEntityManager, BattleManager, DamageActionManager
 from textadventure.clientside.inputs import TextPrinterInputGetter, InputLineUpdaterManager
 from textadventure.clientside.outputs import TextPrinterOutput, LocationTitleBarManager
-from textadventure.commands.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, YellCommandHandler, \
-    UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler, \
-    HelpCommandHandler
+from textadventure.commands.commands import (GoCommandHandler, TakeCommandHandler, PlaceCommandHandler,
+                                             YellCommandHandler, UseCommandHandler, NameCommandHandler,
+                                             InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler,
+                                             HelpCommandHandler)
 from textadventure.handler import Handler
 from textadventure.input.inputhandlers import SettingsHandler
 from textadventure.player import Player
@@ -70,7 +71,7 @@ def after_player(handler: Handler, player: Player):
 
 
 def setup():
-    handler: Handler = Handler()  # if error at this line, use Python3.6!!!
+    handler = Handler()  # if error at this line, use Python3.6!!!
 
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 
@@ -93,7 +94,9 @@ def setup():
         player_input = TextPrinterInputGetter(updater)
         input_manager = InputLineUpdaterManager(updater)  # calls updater's update
         handler.managers.append(input_manager)
-        def hand(): updater.should_exit = True
+
+        def hand(): updater.current_line().clear()
+
         add_interrupt_handler(hand)
 
         output = TextPrinterOutput(printer, print_section)

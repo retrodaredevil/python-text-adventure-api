@@ -5,15 +5,14 @@ from ninjagame.moves import SwordMove, SwordMoveType
 from textadventure.battling.choosing import MoveOption, TargetingOption, Targetability
 from textadventure.battling.move import Target
 from textadventure.battling.weapon import Weapon
-from textadventure.utils import CanDo
 
 
 # noinspection PyAbstractClass
 class SimpleMoveOption(MoveOption):
-    CAN_CHOOSE_TARGETS: CanDo = (True, "You are able to choose all of these targets.")
-    CANT_TARGET_SELF: CanDo = (False, "You can't target yourself!")
-    CANT_TARGET_TEAM: CanDo = (False, "You can't target your teammates!")
-    CANT_TARGET_ENEMIES: CanDo = (False, "You can't target enemies with this move.")
+    CAN_CHOOSE_TARGETS = (True, "You are able to choose all of these targets.")
+    CANT_TARGET_SELF = (False, "You can't target yourself!")
+    CANT_TARGET_TEAM = (False, "You can't target your teammates!")
+    CANT_TARGET_ENEMIES = (False, "You can't target enemies with this move.")
 
     def __init__(self, targeting_option: TargetingOption):
         super().__init__()

@@ -18,7 +18,7 @@ class House(Location):
     def __init__(self, name, description, point, rooms: List['Room']):
         super().__init__(name, description, point)
 
-        self.rooms: List['Room'] = rooms  # noinspection PyTypeChecker
+        self.rooms = rooms
 
     def go_to_other_location(self, handler: Handler, new_location: Location, direction: Point, player: Player):
         pass

@@ -28,7 +28,7 @@ class Weapon(Item):
         super().__init__(name, True)
         if move_options is None:
             move_options = []
-        self.move_options: List[MoveOption] = move_options  # noinspection PyTypeChecker
+        self.move_options = move_options
 
     def can_take(self, player: Player):
         return True, "You can take this"

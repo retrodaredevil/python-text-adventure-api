@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from textadventure.battling.team import Team
     from textadventure.battling.effect import Effect
 
-
 """
 We can import all this stuff because none of it should be referencing anything from the battle package \
     except battle.py but that won't reference this file anyway
@@ -29,14 +28,15 @@ class BattleManager(Manager):
 
     Note: You must also add HostileEntityManager as a manager or it will not stop players from passing if there are HEs
     """
+
     def __init__(self):
         super().__init__()
-        self.active_battles: List[Battle] = []  # noinspection PyTypeChecker
+        self.active_battles = []
 
-        self.stop_entities_from_leaving_location: Tuple[bool, bool] = (True, True)  # PyCharm isn't mad at this
-        """A tuple where [0] represents whether or not entities changing locations should be stopped and [1] \
-        is only used if [0] is True. [1] is True when the entity should be stopped even if the battle hasn't started.
-        By default, both are True."""
+        self.stop_entities_from_leaving_location = (True, True)
+        """Of the type: Tuple[bool, bool] where [0] represents whether or not entities changing locations should\ 
+        be stopped and [1] is only used if [0] is True. [1] is True when the entity should be stopped even if the\ 
+        battle hasn't started. By default, both are True."""
 
     def update(self, handler: Handler):
         for battle in list(self.active_battles):
@@ -86,6 +86,7 @@ class HostileEntityManager(Manager):
     """
     A Manager that stops players from passing if there's a Hostile Entity in their way.
     """
+
     def __init__(self):
         pass
 
@@ -111,7 +112,7 @@ class HostileEntityManager(Manager):
             # print("BattleEnd called")
             battle = action.battle
             winning_team = action.winning_team
-            community_hostiles: List[Tuple[CommunityHostileEntity, 'Team']] = []  # noinspection PyTypeChecker
+            community_hostiles = []  # type List[Tuple[CommunityHostileEntity, 'Team']]
             for team in battle.teams:
                 for entity in team.members:
                     if isinstance(entity, CommunityHostileEntity):
@@ -146,7 +147,7 @@ class DamageActionManager(Manager):
         from textadventure.battling.actions import DamageAction
         if isinstance(action, DamageAction):
             damage = action.damage
-            to_alert: List[Target] = [damage.target]  # noinspection PyTypeChecker
+            to_alert = [damage.target]
             if isinstance(damage.damager, Target):
                 to_alert.append(damage.damager)
 
@@ -163,6 +164,7 @@ class PropertyEffectManager(Manager):
     An abstract class that should be inherited by a custom class where its create_effects method adds different\
         PropertyEffects to customize the gameplay
     """
+
     def update(self, handler: 'Handler'):
         pass
 

@@ -25,14 +25,15 @@ DONT_SMELL = "You don't smell anything."
 DONT_TASTE = "You don't taste anything."
 
 # These should not be compared to returned values because these are meant to be more private and constant
-CAN_GO_TO_LOCATION: CanDo = (True, "The player was able to change locations.")
+# Also remember, that these are all CanDos.
+CAN_GO_TO_LOCATION = (True, "The player was able to change locations.")
 
-CANT_JUMP_LOCATION: CanDo = (False, "You can't jump locations.")
-CANT_MOVE_DIRECTION: CanDo = (False, "There's no noticeable opening in this direction.")
+CANT_JUMP_LOCATION = (False, "You can't jump locations.")
+CANT_MOVE_DIRECTION = (False, "There's no noticeable opening in this direction.")
 # we don't have a CANT_MOVE_NOW because many locations will want to give custom reasons
-CANT_PASS: CanDo = (False, "You cannot pass.")
+CANT_PASS = (False, "You cannot pass.")
 
-LEAVING_LOCATION: str = "You are leaving '{}'."
+LEAVING_LOCATION = "You are leaving '{}'."
 
 
 def create_leave_message(location: Location) -> Message:

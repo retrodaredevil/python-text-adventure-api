@@ -23,8 +23,8 @@ class Effect(ABC):
     """
     # TODO add a method that helps with forcefully removing an effect (A way for recovery moves to remove effects)
 
-    CAN_CHOOSE: CanDo = (True, "This effect does not affect the options you are allowed to choose")
-    CAN_MOVE: CanDo = (True, "This effect does not affect the outcome of at attack")
+    CAN_CHOOSE = (True, "This effect does not affect the options you are allowed to choose")
+    CAN_MOVE = (True, "This effect does not affect the outcome of at attack")
 
     def __init__(self, user: Entity, name: str):
         """

@@ -11,7 +11,7 @@ class Holder:  # kind of like an interface
     """
     def __init__(self):
         super().__init__()  # for multiple inheritance
-        self.items: List['Item'] = []  # noinspection PyTypeChecker
+        self.items = []
         """Should almost never be appended to directly. You should use the item's change_holder method"""
 
     def can_hold(self, item):

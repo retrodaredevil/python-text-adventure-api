@@ -37,8 +37,8 @@ class Savable(ABC):
 
     def __init__(self):
         super().__init__()  # for multiple inheritance
-        self.non_serialized: List[str] = []  # noinspection PyTypeChecker
-        """Appending to this list allows you to stop pickler from saving a field"""
+        self.non_serialized = []
+        """A list of strings. Appending to this list allows you to stop pickler from saving a field"""
 
     # def __getattribute__(self, weapon):  # this is funny. I tried getting it to work with pickle. Don't try this
     #     # print("requested {} from type: {}".format(weapon, type(self)))

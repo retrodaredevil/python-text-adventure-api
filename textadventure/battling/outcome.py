@@ -38,7 +38,7 @@ class MoveOutcome:
         """
         self.can_move = can_move
 
-        self.parts: List[OutcomePart] = []  # noinspection PyTypeChecker
+        self.parts = []
 
     def broadcast(self, battle: 'Battle'):
         if not self.can_move[0]:

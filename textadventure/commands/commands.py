@@ -45,7 +45,7 @@ def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Po
             return location.point
     # now we'll check if it's a direction
     string_args = string_args.lower()
-    add: Point = None
+    # add = None  we don't need declaration because it does it in if clauses that are needed
     if "nor" in string_args:
         add = NORTH
     elif "eas" in string_args:  # or "ast" in string_args can't cuz taste <:  # can't put est here because of west
@@ -234,8 +234,7 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
             player.send_message("You're already in that location!")
             return InputHandleType.HANDLED
 
-        result: CanDo = player.location.go_to_other_location(handler, new_location, point - player.location.point,
-                                                             player)
+        result = player.location.go_to_other_location(handler, new_location, point - player.location.point, player)
         if not result[0]:
             player.send_message(result[1])
         return InputHandleType.HANDLED
@@ -369,15 +368,11 @@ class UseCommandHandler(SimpleCommandHandler):
             self.send_help(player)
             return InputHandleType.HANDLED
         item = get_reference(player, " ".join(first_arg))
-        can_ref = Item.CANNOT_SEE
+        can_ref = Item.CANNOT_SEE  # by default, make it so they can't see the item
         if item is not None:
-            can_ref = item.can_reference(player)
+            can_ref = item.can_reference(player)  # check if they can reference/see the item
         if can_ref[0] is False:
             player.send_message(can_ref[1])
-            return InputHandleType.HANDLED
-        can_use = item.can_use(player)
-        if can_use[0] is False:
-            player.send_message(can_use[1])
             return InputHandleType.HANDLED
         player.location.on_item_use(handler, player, item)
         return InputHandleType.HANDLED

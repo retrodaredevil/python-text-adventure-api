@@ -26,6 +26,10 @@ class EditableLine:
         self.before = self.original
         self.after = ""
 
+    def clear(self):
+        self.before = ""
+        self.after = ""
+
     def delete(self, amount_delete_forward: int):
         """
         Allows you to delete text forward or backwards depending on the sign of amount_delete_forward
@@ -126,10 +130,10 @@ class InputLineUpdater:
         self.text_printer = text_printer
         self.line_object = line
         self.stdscr = stdscr
-        # noinspection PyTypeChecker
+
         # self.lines: List[str] = []  # once a string is appended, it should not be altered on this list
         # self._current_line = ""
-        self._editable_lines: List[EditableLine] = []  # noinspection PyTypeChecker
+        self._editable_lines = []
         self._current_line = EditableLine("")  # remember most of the time you should call current_line()
         """An EditableLine object that is used to keep track of what the player typed an the cursor position. When\
                 the player presses enter, this resets and the object that was here before the enter pressed has \

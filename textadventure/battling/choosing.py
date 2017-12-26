@@ -1,7 +1,7 @@
 import random
 import typing
 from abc import ABC, abstractmethod
-from enum import unique, Enum, auto
+from enum import unique, Enum
 from typing import List, Optional
 
 from textadventure.battling.move import Target, Move, Turn  # needed
@@ -16,9 +16,9 @@ if typing.TYPE_CHECKING:
 
 @unique
 class Targetability(Enum):  # this is now one word. Deal with it. I think it describes the class pretty well, though
-    RECOMMENDED = auto()
-    NOT_RECOMMENDED = auto()
-    NOT_ABLE = auto()
+    RECOMMENDED = 1
+    NOT_RECOMMENDED = 2
+    NOT_ABLE = 3
 
 
 class TargetingOption:
@@ -42,7 +42,7 @@ class TargetingOption:
 
     def get_recommended_targets(self, turn: Turn, user: Target, teams: List[Team]) -> List[Target]:
         # importing Team could cause import errors later. Maybe not though
-        r: List[Target] = []
+        r = []
         for team in teams:
             for entity in team.members:
                 if len(r) >= self.total_number:
@@ -178,7 +178,7 @@ class RandomMoveChooser(MoveChooser):
         options = user.get_move_options()
         assert len(options) > 0, "I wasn't prepared for this. We need to create a struggle like move."
 
-        move: Move = None
+        move = None
         while move is None:  # this could be made as a recursive function but I'll keep it like this
             move = self.__try_choose(battle, user, random.choice(options))
 
@@ -196,7 +196,7 @@ class SetMoveChooser(MoveChooser):
     def __init__(self, entity: Entity):
         super().__init__(entity)
 
-        self.chosen_move: Optional[Move] = None  # noinspection PyTypeChecker
+        self.chosen_move = None
 
     def set_option(self, user: Target, option: MoveOption, targets: List[Target]) -> CanDo:
         """

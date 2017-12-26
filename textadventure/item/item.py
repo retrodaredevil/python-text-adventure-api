@@ -42,18 +42,20 @@ class FiveSensesHandler(ABC):
 
 class Item(Savable, FiveSensesHandler):
     # doesn't have implementation for any methods of FiveSensesHandler so it's abstract
-    CANNOT_SEE: CanDo = (False, "You can't see that")  # can_reference may also return this # used in some commands
-    CANNOT_LISTEN: CanDo = (False, "You can't listen to this")
-    CANNOT_FEEL: CanDo = (False, "You can't feel this")
-    CANNOT_SMELL: CanDo = (False, "You can't smell this")
-    CANNOT_TASTE: CanDo = (False, "You can't taste this")
-    # CANNOT_USE: CanDo = (False, "You can't use this")
-    CANNOT_USE_DO_NOT_HAVE: CanDo = (False, "You don't have this item")
-    CANNOT_USE_HERE: CanDo = (False, "You cannot use this here")
-    CANNOT_TAKE: CanDo = (False, "You can't take this")
-    CANNOT_TAKE_ON_PERSON: CanDo = (False, "You already have this")
-    CANNOT_PUT: CanDo = (False, "You can't place this")
-    CANNOT_PUT_IN_LOCATION: CanDo = (False, "It's already placed")  # may be returned from can_put
+
+    # Note that all of these declarations in this chunk are of the type CanDo
+    CANNOT_SEE = (False, "You can't see that")  # can_reference may also return this # used in some commands
+    CANNOT_LISTEN = (False, "You can't listen to this")
+    CANNOT_FEEL = (False, "You can't feel this")
+    CANNOT_SMELL = (False, "You can't smell this")
+    CANNOT_TASTE = (False, "You can't taste this")
+    # CANNOT_USE = (False, "You can't use this")
+    CANNOT_USE_DO_NOT_HAVE = (False, "You don't have this item")
+    CANNOT_USE_HERE = (False, "You cannot use this here")
+    CANNOT_TAKE = (False, "You can't take this")
+    CANNOT_TAKE_ON_PERSON = (False, "You already have this")
+    CANNOT_PUT = (False, "You can't place this")
+    CANNOT_PUT_IN_LOCATION = (False, "It's already placed")  # may be returned from can_put
 
     non_serialized = ["holder"]
     """
@@ -81,7 +83,9 @@ class Item(Savable, FiveSensesHandler):
         """
         super().__init__()  # for multiple inheritance
         self.name = name
-        self.holder: Optional[Holder] = None  # noinspection PyTypeChecker # can be player, location etc
+        self.holder = None  # can be player, location etc
+        """This object represents whatever is holding the item. It could be None if nothing is holding the item.\
+        If that's the case, then this shouldn't be interacting with anything"""
         self.non_serialized = self.__class__.non_serialized
         self.__needs_light = needs_light_to_see
 

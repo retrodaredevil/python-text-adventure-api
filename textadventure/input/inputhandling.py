@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from enum import Enum, unique, auto
+from enum import Enum, unique
 from typing import List, Callable, Optional, TYPE_CHECKING
 
 from textadventure.player import Player
@@ -16,23 +16,23 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
         HANDLE_AND_DONE    Represents when a response has been handled and should never be responded to again \
                                (Normally use HANDLED) (It won't allow anything to respond at all after this is returned)
     """
-    NOT_HANDLED = auto()
+    NOT_HANDLED = 1
     """Used to represent when there was no action taken"""
-    HANDLED = auto()
+    HANDLED = 2
     """Used to represent when there was a noticeable action taken (don't act unless needed after)"""
-    PARTIALLY_HANDLED = auto()
+    PARTIALLY_HANDLED = 3
     """Used to represent when there was an action taken, but not something too important"""
-    UNNOTICEABLE = auto()
+    UNNOTICEABLE = 4
     """Used to represent when there was action taken but barely noticeable (should respond to) if returned, \
             and no other responses, it should say Command not recognized."""
-    REMOVE_HANDLER = auto()
+    REMOVE_HANDLER = 5
     """Used to tell the caller of the event to remove the handler(indicates a noticeable action too)"""
-    REMOVE_HANDLER_ALLOW_RESPONSE = auto()
+    REMOVE_HANDLER_ALLOW_RESPONSE = 6
     """same as REMOVE_HANDLER but you can respond if you would like (no notic action)"""
 
-    INCORRECT_RESPONSE = auto()
+    INCORRECT_RESPONSE = 7
     """Represents when a response was incorrect and the handler doesn't want you to try to use input"""
-    HANDLED_AND_DONE = auto()
+    HANDLED_AND_DONE = 8
     """Represents when a response has been handled and should never be responded to again (Normally use HANDLED) \
             (It won't allow anything to respond at all after this is returned)"""
 
@@ -110,25 +110,28 @@ class InputObject:
 
         :param index: The index for the arg. Starts at 0. Using a number less than 0 will produce an unexpected result
         :param ignore_unimportant_before Set to True if you want filter out unimportant words before the argument \
-                note that it will never ignore unimportant AFTER the requested index.
+                note that it will ALWAYS ignore unimportant AFTER the requested index.
         :return: A list of the requested argument and all arguments after it. (Requested arg is in [0])
         """
-        split = self.get_split()
-        unimportant: List[int] = []
+        split = self.get_split()  # get the command args into split parts
+        unimportant = []  # a list of ints representing the unimportant words in a string
         if ignore_unimportant_before:
             unimportant = get_unimportant(split)
 
         start_comparing = self.get_command_index()  # not adding one because once set to True, i will be incremented
+        #       note that the value above is normally 0 because that's where the command is
 
         ignored = index
         appending = False  # set to True once ready to start adding to list
-        r: List[str] = []
+        r = []
         for i, s in enumerate(split):
             if appending:
                 r.append(s)
             else:
                 if start_comparing + ignored == i:  # the next one is the request argument
                     if i + 1 in unimportant or s.isspace():  # if the next one is unimportant
+                        # basically what this does, if we are ignoring this arg, add 1 to ignored so we will get \
+                        #       the arg 1 more to the left (ignoring s)
                         ignored += 1  # Needed to execute if first if statement again
                     else:  # the next one must be important
                         appending = True

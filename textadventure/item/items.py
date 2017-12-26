@@ -11,16 +11,19 @@ CoinTuple = Tuple[int, str]
 
 @unique
 class CoinType(Enum):
-    PENNY: CoinTuple = (1, "penny")
-    DIME: CoinTuple = (10, "dime")
-    QUARTER: CoinTuple = (25, "quarter")
-    DOLLAR: CoinTuple = (100, "dollar")
+    """
+    All values in this Enum are of the type CoinTuple
+    """
+    PENNY = (1, "penny")
+    DIME = (10, "dime")
+    QUARTER = (25, "quarter")
+    DOLLAR = (100, "dollar")
 
 
 class Coin(Item):
     def __init__(self, coin_type: CoinType):
         super().__init__(coin_type.value[1], True)
-        self.coin_type: CoinType = coin_type  # noinspection PyTypeChecker
+        self.coin_type = coin_type
 
     def change_holder(self, previous_holder: Optional[Holder], new_holder: Holder) -> bool:
         if isinstance(new_holder, Player):
@@ -34,7 +37,7 @@ class Coin(Item):
         return True, "You can feel this"
 
     def feel(self, handler: Handler, player: Player):
-        name: str = self.coin_type.value[1]  # noinspection PyTypeChecker
+        name = self.coin_type.value[1]
         if self.coin_type is CoinType.DOLLAR:
             player.send_message("You feel a nice GOLDEN coin. It's worth a lot! It's a {}!".format(name))
         else:

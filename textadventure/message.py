@@ -1,6 +1,6 @@
 import warnings
 from abc import ABC, abstractmethod
-from enum import Enum, auto
+from enum import Enum
 from typing import List, TYPE_CHECKING
 
 from textadventure.utils import join_list
@@ -17,11 +17,11 @@ class MessageType(Enum):
     An enum that represents how the message will be printed out and how it will be shown
     """
 
-    IMMEDIATE = auto()
+    IMMEDIATE = 1
     """The message will be printed immediately"""
-    TYPED = auto()
+    TYPED = 2
     """The message will be typed out at normal speed"""
-    TYPE_SLOW = auto()
+    TYPE_SLOW = 3
     """TYPE_SLOW The message will be typed out slower than the TYPED MessageType"""
 
 
@@ -79,7 +79,7 @@ class Message:
         self.wait_in_seconds = wait_in_seconds
         if named_variables is None:
             named_variables = []
-        self.named_variables: List = named_variables
+        self.named_variables = named_variables
 
     def create_parts(self) -> List[MessagePart]:
         """
@@ -87,7 +87,7 @@ class Message:
             the message into usable MessageParts
         """
         text = self.text
-        names: List[str] = []  # noinspection PyTypeChecker
+        names = []
         # create the names list (will be similar to self.named_variables)
         for named in self.named_variables:
             if isinstance(named, List):
@@ -108,7 +108,7 @@ class Message:
         text += self.end
 
         # variable text is now nicely formatted with self.named_variables
-        parts: List[MessagePart] = []
+        parts = []  # a list of MessageParts
         if self.wait_in_seconds != 0:
             parts.append(MessagePart("", wait_after_print=self.wait_in_seconds))
         wait_between = MessagePart.DEFAULT_WAIT_BETWEEN

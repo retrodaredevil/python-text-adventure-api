@@ -20,7 +20,7 @@ class Battle:
         self.has_started = False
         self.has_ended = False
 
-        self.current_turn: Turn = None  # noinspection PyTypeChecker
+        self.current_turn = None
 
     def is_going_on(self):
         """

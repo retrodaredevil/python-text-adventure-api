@@ -36,7 +36,7 @@ class TextPrinter:
         self.dimensions = (80, 24)
         """[0] is rows [1] is columns"""
         self._title = None
-        # noinspection PyTypeChecker
+
         # self.default_position: Optional[Tuple[int, int]] = (0, 0)  # Optional Tuple where [0] is rows and [1] is col
         self._known_goto_position = None
         """Used by the goto and print methods. When None, it means that we are not sure of the specific location\

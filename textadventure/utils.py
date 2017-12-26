@@ -99,14 +99,16 @@ def join_list(to_join: List[str], use_brackets: bool = False, use_indexes: bool 
 T = TypeVar('T')
 
 
-def get_type_from_list(the_list, allowed_types: Union[Type[T], List[T]], expected_amount: Optional[int] = None,
+def get_type_from_list(the_list, allowed_types: Type[T], expected_amount: Optional[int] = None,
                        is_exact_type: bool = False) -> List[T]:
     """
     Helps you get object(s) from a list that are of a certain type along with providing an expected return length of \
     the list to be returned
 
     :param the_list: The list that you want to grab object(s) from
-    :param allowed_types: The type(s) allowed to be returned
+    :param allowed_types: The type(s) allowed to be returned. Note that this can be a list of types, or just a single\
+            type that isn't in a list and is just, well, a type. To keep compatibility, the list type wasn't annotated\
+            since putting Type[T] in a Union caused a type error
     :param expected_amount: The expected amount of items in the list that will be returned or None if any length will \
                             be tolerated
     :param is_exact_type: By default False, if True, types will be compared using type(object) == an_allowed_type, \
@@ -143,7 +145,7 @@ def get_unimportant(to_change: List[str], unimportant_list=NOT_IMPORTANT) -> Lis
     :return: A list of ints where each int corresponds to an index in the to_change list that is unimportant
     """
 
-    r: List[int] = []
+    r = []
     for index, s in enumerate(to_change):
         test = s
         test = test.lower()

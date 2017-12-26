@@ -37,11 +37,11 @@ class Handler:
     """
 
     def __init__(self):
-        self.entities: List[Entity] = []
-        self.locations: List['Location'] = []
-        self.input_handlers: List['InputHandler'] = []
-        self.managers: List[Manager] = []
-        self.living_things: List[Living] = []
+        self.entities = []
+        self.locations = []
+        self.input_handlers = []
+        self.managers = []
+        self.living_things = []
 
     def start(self):
         """
@@ -71,14 +71,14 @@ class Handler:
             player.send_message(
                 "You must enter a command. Normally, pressing enter with a blank line won't trigger this.")
             return
-        input_handles: List['InputHandle'] = []
+        input_handles = []  # Note this is a list of InputHandles
         for input_handler in self.get_input_handlers():
             handle = input_handler.on_input(self, player, input_object)  # call on_input for each handler
             if handle is not None:
                 input_handles.append(handle)
 
         input_handles.sort(key=lambda k: k.priority)  # sort by priority
-        already_handled: List[InputHandleType] = []
+        already_handled = []
         for input_handle in list(input_handles):  # copy list so we can delete stuff
             handle_type = input_handle.handle(already_handled)  # note not method # let it decide to take
             assert handle_type is not None, "An InputHandle's handle callable cannot return None. {} broke this rule" \
@@ -134,12 +134,14 @@ class Handler:
                 r.append(entity)
         return r
 
-    def get_managers(self, manager_types: Union[List[Manager], Type[Manager]], expected_amount: Optional[int] = None) \
+    def get_managers(self, manager_types: Type[Manager], expected_amount: Optional[int] = None) \
             -> List[Manager]:
+        """Quick note, manager_types can be a single type or a list of types. See docs for get_type_from_list"""
         return get_type_from_list(self.managers, manager_types, expected_amount)
 
-    def get_livings(self, living_types: Union[List[Living], Type[Living]], expected_amount: Optional[int] = None) \
+    def get_livings(self, living_types: Type[Living], expected_amount: Optional[int] = None) \
             -> List[Living]:
+        """Quick note, living_types can be a single type or a list of types. See docs for get_type_from_list"""
         return get_type_from_list(self.living_things, living_types, expected_amount)
 
     def get_point_location(self, point: Point):

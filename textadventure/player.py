@@ -27,7 +27,7 @@ class Player(Entity):
         # self.__getitem__(EventsObject): 'EventsObject' = data_object
 
     def __getitem__(self, item: Type[T]) -> Optional[T]:
-        if not isinstance(item, Type):
+        if not isinstance(item, type):
             raise ValueError()
         for handled_object in self.handled_objects:
             if type(handled_object) == item:
@@ -35,7 +35,7 @@ class Player(Entity):
         return None
 
     def __setitem__(self, key: Type[T], value: T):
-        if not isinstance(key, Type):
+        if not isinstance(key, type):  # if we replace type with Type, python 3.5 will be mad
             raise ValueError()
 
         for index, handled_object in enumerate(list(self.handled_objects)):

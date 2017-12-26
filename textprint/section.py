@@ -25,7 +25,8 @@ class Section:
         self.force_rows = force_rows
         self.fake_line = fake_line
 
-        self.lines: List[Line] = []  # noinspection PyTypeChecker
+        self.lines = []
+        """A list of all the lines in this section"""
 
     def get_lines_taken(self, printer: 'TextPrinter', include_extra_rows=True):
         terminal_width = printer.dimensions[1]
