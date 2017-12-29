@@ -6,8 +6,8 @@ from textadventure.handler import Handler
 from textadventure.input.inputhandling import InputObject, InputHandleType, InputHandler, InputHandle
 from textadventure.item.item import FiveSensesHandler, Item
 from textadventure.location import Location
-from textadventure.message import Message, MessageType
 from textadventure.player import Player
+from textadventure.sending.message import Message, MessageType
 from textadventure.utils import Point, NORTH, EAST, SOUTH, WEST, UP, DOWN, ZERO, CanDo
 
 """This file holds some nice commands and util methods that help out with it. Most of the commands are essential."""

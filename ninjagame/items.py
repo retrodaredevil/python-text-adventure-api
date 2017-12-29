@@ -3,8 +3,8 @@ from typing import Tuple
 
 from textadventure.battling.weapon import Weapon
 from textadventure.handler import Handler
-from textadventure.message import Message
 from textadventure.player import Player
+from textadventure.sending.message import Message
 
 
 @unique

@@ -1,5 +1,4 @@
 import warnings
-from abc import ABC, abstractmethod
 from enum import Enum
 from typing import List, TYPE_CHECKING
 
@@ -7,9 +6,7 @@ from textadventure.utils import join_list
 from textprint.colors import Color
 
 if TYPE_CHECKING:
-    from textadventure.player import Player
-    from textadventure.handler import Handler
-    from textadventure.input.inputhandling import InputObject
+    pass
 
 
 class MessageType(Enum):
@@ -189,47 +186,3 @@ class Message:
         return parts
 
 
-class PlayerInputGetter(ABC):
-    @abstractmethod
-    def take_input(self) -> str:
-        """
-        Calling this method should not make the current thread sleep
-        :return: a string representing the input or None
-        """
-        pass
-
-        # @abstractmethod  Commented out because it's not really used at all
-        # def set_input_prompt(self, message: str):
-        #     """
-        #     Sets the input prompt
-        #     :param message: The string to set the input prompt to
-        #     :return: None
-        #     """
-        #     pass
-
-
-class PlayerOutput(ABC):
-    @abstractmethod
-    def send_message(self, message: Message):
-        """
-        :param message: the message to send
-        """
-        pass
-
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: 'InputObject') -> bool:
-        """
-        By default, this method returns False the string is empty. Subclasses of PlayerOutput may change this.
-        And if they do change the implementation, they should check if player_input.is_empty() or call super.
-
-        Note that if this method returns False, no message is sent to the player so you should send a message to the \
-        player or do something like speeding up text. (Different implementations can handle this differently)
-
-        :param handler: The Handler object
-        :param player: The player that this PlayerOutput is attached to
-        :param player_input: The input that the player typed. Notice that the method is_empty() could return True
-        :return: True if you want to cancel the handling/sending of the input. False otherwise (Normally False)
-        """
-        if player_input.is_empty():
-            player.send_message("You entered an empty line.")
-            return True
-        return False

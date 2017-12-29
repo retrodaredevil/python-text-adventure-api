@@ -3,9 +3,9 @@ from typing import Optional
 
 from textadventure.handler import Handler
 from textadventure.item.holder import Holder
-from textadventure.message import Message
 from textadventure.player import Player
 from textadventure.saving.savable import Savable
+from textadventure.sending.message import Message
 from textadventure.utils import are_mostly_equal, CanDo, MessageConstant
 
 

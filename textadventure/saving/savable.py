@@ -10,8 +10,6 @@ if TYPE_CHECKING:
 To avoid namespace and type error, this file shouldn't import anything from the textadventure package
 """
 
-is_saving = False  # as of right now, I don't think this is checked anywhere in the code, just set
-
 
 class Savable(ABC):
     """

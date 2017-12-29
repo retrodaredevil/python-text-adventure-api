@@ -2,9 +2,8 @@ import typing
 from abc import abstractmethod, ABC
 from typing import List, Optional
 
-from textadventure.message import Message
+from textadventure.sending.message import Message
 from textadventure.utils import CanDo, MessageConstant
-
 
 if typing.TYPE_CHECKING:
     from textadventure.battling.battle import Battle

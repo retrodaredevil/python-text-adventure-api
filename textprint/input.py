@@ -1,7 +1,5 @@
 import curses
-from typing import List, TYPE_CHECKING
-
-import time
+from typing import TYPE_CHECKING
 
 from textprint.line import Line
 

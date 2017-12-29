@@ -1,6 +1,6 @@
 import warnings
 from abc import abstractmethod
-from typing import List, Optional, TypeVar, Type, TYPE_CHECKING
+from typing import List, Optional, TypeVar, Type
 
 from textadventure.entity import EntityAction, Entity
 from textadventure.handler import Handler
@@ -8,10 +8,9 @@ from textadventure.input.inputhandling import InputHandler
 from textadventure.input.inputhandling import InputObject
 from textadventure.item.holder import Holder
 from textadventure.item.item import Item, FiveSensesHandler
-from textadventure.message import Message, MessageType
 from textadventure.player import Player
+from textadventure.sending.message import Message, MessageType
 from textadventure.utils import Point, MessageConstant, are_mostly_equal, CanDo
-
 
 T = TypeVar('T')
 
@@ -24,15 +23,12 @@ class Location(Holder, InputHandler, FiveSensesHandler):
     randomly outside of a specific set of classes that handle those methods. Most of the methods in here should never\
     be called randomly unless it's something like get_players or is_lit_up.
     
-    Also note one of the primary features of this class is that it is also an input handler but you have to call \
-        _should_take_input to make sure that the player is in this location.
+    Also note one of the primary features of this class is that it is also an input handler but implementations have 
+    to call _should_take_input to make sure that the player is in this location.
         
     Note that with the inherited methods from FiveSensesHandler, usually, player.location will be self, but you\
-        should program each method carefully and prepare if the player smelling, looking from another location. \
-        Note that you shouldn't throw assert errors because that would defeat the whole point.  
-    Attributes:
-        command_handlers: Keeps a list of command_handlers. After __init__ is called, Handler should call these \
-                          when location is getting its on_input called
+    should program each method carefully and prepare if the player smelling, looking from another location. \
+    Note that you shouldn't throw assert errors because that would defeat the whole point.  
     """
 
     def __init__(self, name, description, point: Point):
@@ -42,6 +38,8 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         self.point = point
 
         self.command_handlers = []
+        """Keeps a list of command_handlers. After __init__ is called, Handler should call these when location is \ 
+        getting its on_input called. (Like extra input handlers that's per location)"""
         self.__add_command_handlers()
 
     def __str__(self):

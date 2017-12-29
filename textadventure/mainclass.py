@@ -1,22 +1,19 @@
-from typing import List, Callable
+from typing import List
 
+from textadventure.customgame import CustomGame
 from textadventure.handler import Handler
 from textadventure.player import Player
 
 
 class Main:
     """
-    A Main class to help with the initiation of a game. Note that subclasses aren't meant to be used to customize\
-    the game. Instead, they should be used to change what players start in the game, how a player is sent messages.
+    Used to initialize a CustomGame object along with constructing a Handler object making initializing a game\
+    a lot simpler and more abstract
     """
-    def __init__(self, on_player_start: Callable[[Handler, Player], None],
-                 on_player_end: Callable[[Handler, Player], None]):
+    def __init__(self, game: CustomGame):
         """
-        :param on_player_start: A function that is passed a Handler and a Player that should be customized by the\
-                game being played to make sure each player ends up in the correct spot when they first start the game
         """
-        self.on_player_start = on_player_start
-        self.on_player_end = on_player_end
+        self.game = game
 
         self.handler = None
         """Member that is initialized when start is called"""
@@ -66,6 +63,3 @@ class Main:
         """
         pass
         # TODO replace this with on_player_end idk
-
-
-

@@ -1,19 +1,17 @@
 import typing
-from typing import Union, List, Any
+from typing import Union, Any
 
 from textadventure.action import Action
 from textadventure.battling.managing import BattleManager
 from textadventure.battling.team import Team
 from textadventure.entity import EntityActionToEntity, Entity
-from textadventure.message import Message
+from textadventure.sending.message import Message
 
 if typing.TYPE_CHECKING:
     from textadventure.battling.battle import Battle
     from textadventure.battling.damage import Damage
     from textadventure.battling.move import Move
     from textadventure.battling.effect import Effect
-    from textadventure.battling.outcome import OutcomePart
-
 
 """
 A file dedicated to define implementations of the Action class related to the battling api

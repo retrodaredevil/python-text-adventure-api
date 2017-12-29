@@ -1,14 +1,12 @@
-from typing import List, Optional, TypeVar, Type, Union, TYPE_CHECKING
+from typing import List, Optional, TypeVar, Type, TYPE_CHECKING
 
 from textadventure.action import Action
-from textadventure.entity import Entity
 from textadventure.manager import Manager
 from textadventure.player import Player, Living
 from textadventure.utils import Point, get_type_from_list
 
 if TYPE_CHECKING:
-    from textadventure.input.inputhandling import InputHandler, InputHandle
-    from textadventure.location import Location
+    from textadventure.input.inputhandling import InputHandler
 
 T = TypeVar("T")
 
@@ -43,6 +41,9 @@ class Handler:
         self.managers = []
         self.living_things = []
 
+        self.savables = []
+        """A Dictionary of savables where the key is something that """
+
     def start(self):
         """
          Starts the infinite loop for the ninjagame
@@ -63,7 +64,7 @@ class Handler:
     def __do_input(self, player: Player, inp: str):
         from textadventure.input.inputhandling import InputObject, InputHandleType
         input_object = InputObject(inp)
-        if player.player_output.on_input(self, player, input_object):
+        if player.player_output.on_input(player, input_object):
             # since the on_input method returned True, it must have done something, so we don't need to send a message
             return
         if input_object.is_empty():

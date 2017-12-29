@@ -3,7 +3,8 @@ from typing import Type, List
 
 from textadventure.action import Action
 from textadventure.item.holder import Holder
-from textadventure.message import Message
+from textadventure.sending.commandsender import CommandSender
+from textadventure.sending.message import Message
 from textadventure.utils import MessageConstant, CanDo, are_mostly_equal
 
 
@@ -19,29 +20,23 @@ class Living(ABC):
     """
 
     def __init__(self, name):
-        super().__init__()  # notice that this calls the object init, but it helps with multiple inheritance
         self.name = name
 
-    def get_used_name(self, viewer: 'Living') -> str:
+    def get_used_name(self, sender: CommandSender) -> str:
         """
         By default, returns self.name but can be overridden to create the effect that someone doesn't know this person
 
-        :param viewer: The person that the returned name will be showed to
+        :param sender: The person that the returned name will be showed to
         :return: The string that represents the name the passed 'living' will be shown
         """
         return self.name
 
-    @abstractmethod
-    def send_message(self, message):
-        """Sends a message to this. Usually a string or Message object"""
-        pass
-
-    def tell(self, living: 'Living', message: MessageConstant):
-        message = self.get_message(message)
+    def tell(self, sender: CommandSender, message: MessageConstant):
+        message = CommandSender.get_message(message)
         # if we change the way we do this, like doing this at a later time.
         #   Things could get messed up on the correct name
-        message.text = "|" + self.get_used_name(living) + ":| " + message.text
-        living.send_message(message)
+        message.text = "|" + self.get_used_name(sender) + ":| " + message.text
+        sender.send_message(message)
 
     def is_reference(self, reference: str) -> bool:
         return are_mostly_equal(reference, self.name)
@@ -49,22 +44,6 @@ class Living(ABC):
     def __str__(self):
         """Should be used in Message to replace named_variables with"""
         return self.name
-
-    @staticmethod
-    def get_message(message: MessageConstant) -> Message:
-        """
-        Converts a MessageConstant to a Message
-        Makes sure that the passed message value is returned as a Message object
-
-        :param message: The message or string to make sure or change to a Message
-        :return: A message object
-        """
-
-        if type(message) is str:
-            message = Message(message)
-        if type(message) is not Message:
-            raise TypeError("The type: " + str(type(message)) + " is not supported")
-        return message
 
 
 class Health:
@@ -104,12 +83,14 @@ class Health:
 class Entity(Living, Holder):
     def __init__(self, name: str, health: Health, location):
         super().__init__(name)
+        Holder.__init__(self)
+
         self.health = health
 
         self.location = location
         """
-        The location of the entity. Unless, initializing for the first time, you almost should never set this
-        By yourself because you probably want to do it with GoAction or something similar that abstracts a few 
+        The location of the entity. Unless initializing for the first time, you almost should never set this
+        by yourself because you probably want to do it with GoAction or something similar that abstracts a few 
         details away.
         """
 
@@ -161,7 +142,6 @@ class HostileEntity(Entity):  # abstract
 
 
 class SimpleHostileEntity(HostileEntity):
-
     def __init__(self, name: str, health: Health, location, hostile_to_types: List[Type[Entity]]):
         super().__init__(name, health, location)
         self.hostile_to_types = hostile_to_types
@@ -213,7 +193,6 @@ class SimpleHostileEntity(HostileEntity):
 
 
 class CommunityHostileEntity(SimpleHostileEntity):
-
     def __init__(self, name: str, health: Health, location, hostile_to_types: List[Type[Entity]]):
         super().__init__(name, health, location, hostile_to_types)
         self.entities_lost_to = []
@@ -236,6 +215,7 @@ class EntityAction(Action):  # abstract
         is the one that caused it, usually being the Player (There is no PlayerAction this is it)
     Note that the overridden try_action method sends the entity a message if the returned can_do[0] will be False
     """
+
     def __init__(self, entity: Entity, send_on_can_not: bool = True):
         """
         :param entity: The main entity involved and the one that is basically requesting to do this action
@@ -265,12 +245,12 @@ class EntityActionToEntity(EntityAction):  # abstract
         super().__init__(entity)
         self.asked_entity = asked_entity
 
-    # def try_action(self, handler):  # overridden
-    # commented out because it would be a lot easier and more maintainable to create a class and inherit Manager
-    #     if not self.can_do[0]:
-    #         return super().try_action(handler)  # this is to avoid sending multiple messages.
-    #     can_do = self.asked_entity.can_do_action(handler, self)
-    #     if not can_do[0]:
-    #         self.entity.send_message(can_do[1])
-    #         return can_do  # returns it because we don't actually want to do the action if the asked_entity stopped it
-    #     return super().try_action(handler)  # the asked_entity didn't stop it so we'll let the superclass handle it
+        # def try_action(self, handler):  # overridden
+        # commented out because it would be a lot easier and more maintainable to create a class and inherit Manager
+        #     if not self.can_do[0]:
+        #         return super().try_action(handler)  # this is to avoid sending multiple messages.
+        #     can_do = self.asked_entity.can_do_action(handler, self)
+        #     if not can_do[0]:
+        #         self.entity.send_message(can_do[1])
+        #         return can_do  # returns it because we don't actually want to do the action if the asked_entity stopped it
+        #     return super().try_action(handler)  # the asked_entity didn't stop it so we'll let the superclass handle it

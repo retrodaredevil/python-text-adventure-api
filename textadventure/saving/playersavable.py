@@ -8,7 +8,7 @@ from textadventure.utils import Point
 class PlayerSavable(Savable):
     """
     Note that this class does not represent the player's data accurately. It just makes sure that the important data \
-        is saved/loaded when it's before_save and on_load methods are called
+    is saved/loaded when it's before_save and on_load methods are called
 
     This class is not meant to be extended; make your own Savable class. It's not that hard
     """

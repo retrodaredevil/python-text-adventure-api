@@ -1,7 +1,8 @@
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING
+
 
 if TYPE_CHECKING:
-    from textadventure.item import Item
+    from textadventure.item.item import Item
 
 
 class Holder:  # kind of like an interface
@@ -10,15 +11,13 @@ class Holder:  # kind of like an interface
     Item picking up/dropping is handled by the weapon that is being dropped/picked up using change_holder
     """
     def __init__(self):
-        super().__init__()  # for multiple inheritance
         self.items = []
         """Should almost never be appended to directly. You should use the item's change_holder method"""
 
-    def can_hold(self, item):
+    def can_hold(self, item: Item):
         """
         Returns whether or not this holder can hold this weapon. Usually True and usually only reacts to the weapon type
         :param item: The weapon
-        :type item: Item
         :return: True if it can hold the weapon False otherwise
         """
         return True

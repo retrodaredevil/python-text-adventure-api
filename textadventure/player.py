@@ -1,8 +1,7 @@
 from typing import TypeVar, Type, Optional, TYPE_CHECKING
 
 from textadventure.entity import Entity, Health, Living
-from textadventure.message import PlayerOutput, PlayerInputGetter, Message, MessageType
-from textprint.colors import Color
+from textadventure.sending.commandsender import PlayerInputGetter, PlayerOutput, CommandSender
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler
@@ -12,7 +11,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-class Player(Entity):
+class Player(Entity, CommandSender):
     def __init__(self, player_input: PlayerInputGetter, player_output: PlayerOutput, name: Optional[str]):
         """
         :param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
@@ -20,10 +19,10 @@ class Player(Entity):
                     the name of an important entity
         """
         super().__init__(name, Health(30, 30), None)  # TODO max_health, current_health, location
-        self.player_input = player_input
-        self.player_output = player_output
+        CommandSender.__init__(self, player_input, player_output)
         # self.__getitem__(PlayerFriend): Living = None
         self.handled_objects = []
+        """A list of objects which will be saved if they inherit Savable"""
         # self.__getitem__(EventsObject): 'EventsObject' = data_object
 
     def __getitem__(self, item: Type[T]) -> Optional[T]:
@@ -42,29 +41,14 @@ class Player(Entity):
             if type(handled_object) == key:
                 self.handled_objects[index] = value
                 return
+
+        # append the value to handled_objects if there isn't already a value for that type
         self.handled_objects.append(value)
 
     def get_used_name(self, living: Living):
         if living == self:
             return "You"
         return super().get_used_name(living)
-
-    def send_message(self, message):
-        self.player_output.send_message(self.get_message(message))
-
-    def send_wait(self, seconds):
-        self.player_output.send_message(Message("", end="", wait_in_seconds=seconds))
-
-    def send_line(self, amount: int = 1):
-        ending = Message.DEFAULT_ENDING
-        if amount != 1:
-            ending = ""
-            for i in range(0, amount):
-                ending += Message.DEFAULT_ENDING
-        self.send_message(Message("", MessageType.IMMEDIATE, end=ending))
-
-    def clear_screen(self):
-        self.send_message(str(Color.CLEAR_SECTION))
 
     def update(self, handler: 'Handler') -> None:
         """

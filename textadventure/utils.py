@@ -157,13 +157,15 @@ def get_unimportant(to_change: List[str], unimportant_list=NOT_IMPORTANT) -> Lis
     return r
 
 
-def are_mostly_equal(a: str, b: str) -> bool:
+def are_mostly_equal(a: str, b: str, percent_equal=.8) -> bool:
     """
     Checks to see if the provided strings are mostly equal.
     Converts both to lowercase and removes words from the unimportant list so a: "my the bike" b: "bike" will be True
 
     :param a: First string
     :param b: Second string
+    :param percent_equal: A number from 0 to 1 representing the minimum value of SequenceMatcher#ratio() to return True\
+            By default: .8
     :return: True if the strings are mostly equal
     """
     def remove_for(change: str):
@@ -180,7 +182,7 @@ def are_mostly_equal(a: str, b: str) -> bool:
     b = remove_for(b).lower()
 
     ratio = SequenceMatcher(a=a, b=b).ratio()
-    return ratio >= .95
+    return ratio >= percent_equal
 
 
 class Point:

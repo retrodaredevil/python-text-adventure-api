@@ -137,6 +137,12 @@ class HostileEntityManager(Manager):
 
 
 class DamageActionManager(Manager):
+    """
+    Simple manager that is used to do different things when something damages something else.
+
+    By default, it calls on_damage for each effect that was involved in damaging or being damaged. (It won't call\
+    the effects for a teammate if the teammate didn't do anything
+    """
     def __init__(self):
         pass
 
@@ -147,7 +153,8 @@ class DamageActionManager(Manager):
         from textadventure.battling.actions import DamageAction
         if isinstance(action, DamageAction):
             damage = action.damage
-            to_alert = [damage.target]
+            to_alert = [damage.target]  # TODO If we have multiple entities on a team, we may need to change the \
+            #       implementation of creating this list
             if isinstance(damage.damager, Target):
                 to_alert.append(damage.damager)
 

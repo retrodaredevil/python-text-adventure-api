@@ -5,6 +5,8 @@
 # above was used for when main.py was not inside the root of the project
 import curses
 
+import sys
+
 from ninjagame.data import EventsObject
 from ninjagame.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
 from ninjagame.locations import (Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance,
@@ -32,7 +34,10 @@ from textprint.textprinter import TextPrinter
 
 """
 This file is an example game for my text adventure api using the ninjagame package
+
+This file is not meant to be imported which is why it is not in any package right now
 """
+assert sys.version_info >= (3, 5), "Must use python 3.5 or greater. Many of the files use the typing module."
 
 
 def default_load(player: Player, handler: Handler):
@@ -65,7 +70,7 @@ def after_player(handler: Handler, player: Player):
 
     default_load(player, handler)
 
-    player.location.on_enter(player, previous_location=None, handler=handler)
+    player.location.on_enter(player, None, handler)
 
     handler.start()  # takes over this thread with infinite loop
 

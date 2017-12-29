@@ -2,13 +2,14 @@ import sys
 import time
 import warnings
 from threading import Thread
-from typing import List, TYPE_CHECKING, Tuple, Optional
+from typing import List, TYPE_CHECKING
 
 from textadventure.action import Action
 from textadventure.handler import Handler
 from textadventure.manager import Manager
-from textadventure.message import PlayerOutput, Message, MessageType, MessagePart
 from textadventure.player import Player
+from textadventure.sending.message import Message, MessageType
+from textadventure.sending.commandsender import PlayerOutput
 from textadventure.utils import join_list
 from textprint.colors import Color
 from textprint.line import Line
@@ -159,7 +160,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
         #                                       for part in message.create_parts()]), flush=True)
         self.messages.append(message)
 
-    def on_input(self, handler: 'Handler', player: 'Player', player_input: 'InputObject'):
+    def on_input(self, player: 'Player', player_input: 'InputObject'):
         if player_input.is_empty():
             now = time.time()
             # if self._last_blank + 1 > now:

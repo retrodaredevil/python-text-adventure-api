@@ -10,8 +10,8 @@ from textadventure.input.inputhandling import InputObject, InputHandle, InputHan
 from textadventure.item.item import Item
 from textadventure.item.items import Wallet, Coin, CoinType
 from textadventure.location import Location, GoAction
-from textadventure.message import Message, MessageType
 from textadventure.player import Player
+from textadventure.sending.message import Message, MessageType
 from textadventure.utils import is_string_true, Point, SOUTH, EAST, WEST, NORTH, UP, DOWN, DIRECTIONS, CanDo
 
 """

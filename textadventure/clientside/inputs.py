@@ -1,15 +1,10 @@
 from threading import Thread
-from typing import List
-
-import time
-
-from colorama import Cursor
 
 from textadventure.action import Action
 from textadventure.clientside.outputs import StreamOutput
 from textadventure.handler import Handler
 from textadventure.manager import Manager
-from textadventure.message import PlayerInputGetter
+from textadventure.sending.commandsender import PlayerInputGetter
 from textprint.input import InputLineUpdater
 
 

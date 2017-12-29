@@ -3,8 +3,8 @@ from typing import List, Optional
 from textadventure.battling.move import Turn, Target
 from textadventure.battling.team import Team
 from textadventure.handler import Handler
-from textadventure.message import Message
 from textadventure.player import Player, Entity
+from textadventure.sending.message import Message
 from textadventure.utils import MessageConstant
 
 
