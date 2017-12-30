@@ -80,6 +80,7 @@ class Wallet(Item, Holder):
 
     def __init__(self):
         super().__init__("wallet", True)
+        Holder.__init__(self)
 
     def before_save(self, player, handler):
         super().before_save(player, handler)

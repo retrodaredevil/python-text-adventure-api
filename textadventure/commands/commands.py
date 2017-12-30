@@ -3,7 +3,8 @@ from typing import List, Optional
 
 from textadventure.commands.command import LocationCommandHandler, SimpleCommandHandler
 from textadventure.handler import Handler
-from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler, InputHandle
+from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler, InputHandle, \
+    PlayerInputHandler
 from textadventure.item.item import FiveSensesHandler, Item
 from textadventure.location import Location
 from textadventure.player import Player
@@ -240,7 +241,7 @@ class GoCommandHandler(SimpleCommandHandler):  # written on friday with a footba
         return InputHandleType.HANDLED
 
 
-class DirectionInputHandler(InputHandler):
+class DirectionInputHandler(PlayerInputHandler):
     """
     This class just checks to see if the player typed a single word and if that word matches a direction or location,
         treat the command just like the go command by called GoCommandHandler.player_go
@@ -249,7 +250,7 @@ class DirectionInputHandler(InputHandler):
     def __init__(self):
         super().__init__()
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput):
         def handle_function(already_handled: List[InputHandleType]) -> InputHandleType:
             if not self._should_handle_input(already_handled):
                 return InputHandleType.NOT_HANDLED

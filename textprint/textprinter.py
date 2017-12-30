@@ -14,7 +14,7 @@ class TextPrinter:
     This class is used to clear the whole screen and write to it using sections to make a awesome looking text \
         interface using curses
     """
-    def __init__(self, sections: List[Section], output=sys.stdout, print_from_top=False):
+    def __init__(self, sections: List[Section], output=sys.stdout, print_from_top=False, stdscr=None):
         """
         Creates a TextPrinter object that will be used by the Sections
 
@@ -30,6 +30,8 @@ class TextPrinter:
         self.sections = sections
         self.output = output
         self.print_from_top = print_from_top
+        self.stdscr = stdscr
+        """If you are using curses (very likely) You should pass the WindowObject created with initscr."""
 
         self.__cursor = Cursor  # note that this isn't creating an object, it's an object already made
 
@@ -175,5 +177,15 @@ class TextPrinter:
         Updates self.dimensions.
         Note that calling this repeatedly will slow down your program A LOT
         """
-        rows, columns = os.popen('stty size', 'r').read().split()
-        self.dimensions = (int(rows), int(columns))
+        if self.stdscr is not None:
+            irows, icolumns = self.stdscr.getmaxyx()
+        else:
+            rows, columns = os.popen('stty size', 'r').read().split()
+            irows = int(rows)
+            icolumns = int(columns)
+            if irows == 0:
+                irows = 80
+            if icolumns == 0:
+                icolumns = None
+
+        self.dimensions = (irows, icolumns)

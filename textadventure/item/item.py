@@ -81,7 +81,7 @@ class Item(Savable, FiveSensesHandler):
         :param name: The name of the object
         :param needs_light_to_see: Should almost always be true
         """
-        super().__init__()  # for multiple inheritance
+        super().__init__()
         self.name = name
         self.holder = None  # can be player, location etc
         """This object represents whatever is holding the item. It could be None if nothing is holding the item.\

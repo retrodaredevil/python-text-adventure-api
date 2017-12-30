@@ -2,11 +2,13 @@ from ninjagame.data import EventsObject
 from textadventure.entity import Living, CommunityHostileEntity
 from textadventure.player import Player
 from textadventure.saving.savable import Savable
+from textadventure.sending.commandsender import CommandSender
 
 
 class PlayerFriend(Living, Savable):
     def __init__(self, name):
         super().__init__(name)
+        Savable.__init__(self)
 
     def send_message(self, message):
         raise NotImplementedError("You cannot chat with a PlayerFriend")
@@ -30,10 +32,10 @@ class LauraPerson(Living):
     def __init__(self):
         super().__init__("Laura")
 
-    def get_used_name(self, living: Living):
-        if isinstance(living, Player) and not living[EventsObject].knows_laura:
+    def get_used_name(self, sender: CommandSender):
+        if isinstance(sender, Player) and not sender[EventsObject].knows_laura:
             return self.__class__.UNKNOWN_LIVING_NAME  # this makes it so if the player hasn't met, name will be "???"
-        return super().get_used_name(living)
+        return super().get_used_name(sender)
 
     def send_message(self, message):
         raise NotImplementedError("You cannot chat with Laura. She doesn't like to talk.")

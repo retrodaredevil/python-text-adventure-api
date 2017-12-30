@@ -7,6 +7,7 @@ from textadventure.sending.message import Message, MessageType
 
 
 class SettingsHandler(InputHandler):
+    # TODO fix class (todo below) and maybe implement PlayerInputHandler instead
     def __init__(self, allowed_player: Player):
         """
         :param allowed_player: The only player that this will react to

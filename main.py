@@ -76,7 +76,7 @@ def after_player(handler: Handler, player: Player):
 
 
 def setup():
-    handler = Handler()  # if error at this line, use Python3.6!!!
+    handler = Handler()
 
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 
@@ -86,12 +86,12 @@ def setup():
         # player = Player(KeyboardInput(stream_output), stream_output, None)
         curses_init()
         std_init(stdscr)
-        colorama_init()
+        # colorama_init()
 
         input_section = Section(None, force_rows=False)  # we want to allow it to go for as many lines it needs
         print_section = Section(None, fake_line=(Color.BLUE >> "~"))
         title_section = Section(1)
-        printer = TextPrinter([input_section, print_section, title_section])
+        printer = TextPrinter([input_section, print_section, title_section], stdscr=stdscr)
         printer.update_dimensions()
         # print_section.fake_line = "|" + (" " * (printer.dimensions[1] - 4)) + "|"
 

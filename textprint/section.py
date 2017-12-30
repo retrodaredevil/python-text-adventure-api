@@ -19,7 +19,6 @@ class Section:
                 fake_lines are placed in all the lines that the section occupies except for the ones that have already\
                 been printed.
         """
-        super().__init__()  # for multiple inheritance
         self.rows = rows
         self.columns = columns
         self.force_rows = force_rows

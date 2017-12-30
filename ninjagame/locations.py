@@ -5,8 +5,8 @@ from ninjagame.entites import OtherPerson, LauraPerson, NinjaDude, PlayerFriend,
 from ninjagame.items import Sword, SwordType
 from textadventure.entity import Health
 from textadventure.handler import Handler
-from textadventure.input.inputhandling import InputHandler
 from textadventure.input.inputhandling import CommandInput, InputHandle, InputHandleType
+from textadventure.input.inputhandling import PlayerInputHandler
 from textadventure.item.item import Item
 from textadventure.item.items import Wallet, Coin, CoinType
 from textadventure.location import Location, GoAction
@@ -40,7 +40,7 @@ def create_leave_message(location: Location) -> Message:
     return Message(LEAVING_LOCATION, named_variables=[location])
 
 
-class NameTaker(InputHandler):
+class NameTaker(PlayerInputHandler):
     def __init__(self, player: Player):
         self.current_name = None
         self.current_friend_name = None
@@ -49,7 +49,7 @@ class NameTaker(InputHandler):
         player[PlayerFriend].tell(player, "Oh hey! You've just accepted to start your journey too! "
                                           "I just did too. Wait, what's your name again?")
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput) -> Optional[InputHandle]:
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput) -> Optional[InputHandle]:
         if player != self.player:
             return None
 
@@ -112,7 +112,7 @@ class Entrance(Location):  # players should only be in this location when starti
             player.send_wait(0.3)
             player.send_message("Would you like to start your journey on this trail?")
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput):
         if not self._should_take_input(handler, player, command_input):
             return None
 
@@ -174,7 +174,7 @@ class InsideEntrance(Location):
             "You now see a very long trail ahead of you. You see forests on both sides and double doors behind you.")
         player.send_line()
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
     def feel(self, handler: Handler, player: Player):
@@ -309,7 +309,7 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
     def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
 
@@ -357,7 +357,7 @@ class WestInsideEntrance(Location):  # introduce Laura
     def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput) -> Optional[InputHandle]:
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput) -> Optional[InputHandle]:
         return None
 
     def on_yell(self, handler: Handler, player: Player, command_input: CommandInput, is_there_response=False):
@@ -448,7 +448,7 @@ class EntranceSpiderWebForest(Location):
             player.send_message("You cleared the spider webs.")
             player[EventsObject].has_cleared_spider_webs_at_entrance = True
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
     def see(self, handler: Handler, player: Player):
@@ -503,7 +503,7 @@ class CenterSpiderWebForest(Location):
     def taste(self, handler: Handler, player: Player):
         player.send_message(DONT_TASTE)
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
     def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player):
@@ -547,7 +547,7 @@ class EastCenterSpiderWebForest(Location):
 
         self.ninja = ninja
 
-    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+    def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
     def listen(self, handler: Handler, player: Player):

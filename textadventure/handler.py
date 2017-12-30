@@ -1,13 +1,13 @@
 from typing import List, Optional, TypeVar, Type, TYPE_CHECKING
 
 from textadventure.action import Action
+from textadventure.entity import Entity
 from textadventure.manager import Manager
 from textadventure.player import Player, Living
 from textadventure.sending.commandsender import CommandSender
 from textadventure.utils import Point, get_type_from_list
+from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler
 
-if TYPE_CHECKING:
-    from textadventure.input.inputhandling import InputHandler, CommandInput, InputHandleType
 
 T = TypeVar("T")
 
@@ -109,7 +109,7 @@ class Handler:
         for manager in self.managers:
             manager.on_action(self, action)
 
-    def get_input_handlers(self) -> List['InputHandler']:
+    def get_input_handlers(self) -> List[InputHandler]:
         r = []
         for location in self.locations:
             r.append(location)
@@ -133,6 +133,9 @@ class Handler:
             if isinstance(entity, Player):
                 r.append(entity)
         return r
+
+    def get_entities(self) -> List[Entity]:
+        return get_type_from_list(self.identifiables, Entity, None)
 
     def get_command_senders(self) -> List[CommandSender]:
         return get_type_from_list(self.identifiables, CommandSender, None)

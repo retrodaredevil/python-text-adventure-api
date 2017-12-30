@@ -4,8 +4,8 @@ from typing import List, Optional, TypeVar, Type
 
 from textadventure.entity import EntityAction, Entity
 from textadventure.handler import Handler
-from textadventure.input.inputhandling import InputHandler
 from textadventure.input.inputhandling import CommandInput
+from textadventure.input.inputhandling import PlayerInputHandler
 from textadventure.item.holder import Holder
 from textadventure.item.item import Item, FiveSensesHandler
 from textadventure.player import Player
@@ -15,7 +15,7 @@ from textadventure.utils import Point, MessageConstant, are_mostly_equal, CanDo
 T = TypeVar('T')
 
 
-class Location(Holder, InputHandler, FiveSensesHandler):
+class Location(Holder, PlayerInputHandler, FiveSensesHandler):
     NO_YELL_RESPONSE = "There was no response."
 
     """
@@ -205,7 +205,7 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         :return: The list of entities in this location
         """
         r = []
-        for entity in handler.entities:
+        for entity in handler.get_entities():
             if entity.location == self and isinstance(entity, entity_type):
                 r.append(entity)
 

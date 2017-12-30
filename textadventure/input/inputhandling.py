@@ -189,7 +189,13 @@ class InputHandler(ABC):
 
 class PlayerInputHandler(InputHandler):
     def on_input(self, handler: 'Handler', sender: CommandSender, command_input: CommandInput):
-        pass
+        """
+        By default, checks if the sender variable is an instance of a Player, if it is, call and return \
+        on_player_input. Otherwise, return None
+        """
+        if isinstance(sender, Player):
+            return self.on_player_input(handler, sender, command_input)
+        return None
 
     @abstractmethod
     def on_player_input(self, handler: 'Handler', player: Player, command_input: CommandInput) -> \

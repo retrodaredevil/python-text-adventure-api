@@ -45,10 +45,10 @@ class Player(Entity, CommandSender):
         # append the value to handled_objects if there isn't already a value for that type
         self.handled_objects.append(value)
 
-    def get_used_name(self, living: Living):
-        if living == self:
+    def get_used_name(self, sender: CommandSender):
+        if sender == self:
             return "You"
-        return super().get_used_name(living)
+        return super().get_used_name(sender)
 
     def update(self, handler: 'Handler') -> None:
         """
