@@ -6,7 +6,7 @@ from pickle import UnpicklingError
 from typing import Iterable, Optional, TYPE_CHECKING
 
 from textadventure.commands.command import SimpleCommandHandler
-from textadventure.input.inputhandling import InputObject, InputHandleType
+from textadventure.input.inputhandling import CommandInput, InputHandleType
 from textadventure.player import Player
 from textadventure.saving.savable import Savable
 from textadventure.utils import CanDo
@@ -93,18 +93,18 @@ def load(handler, player: Player, path: Path = DEFAULT_PATH) -> CanDo:
         return False, "The contents of the file were in the wrong format: {}".format(type(content))
 
 
-def get_path(player_input: InputObject) -> Optional[Path]:
+def get_path(command_input: CommandInput) -> Optional[Path]:
     """
     This method assumes that the input should only have one argument that is at index 0 while calling get_arg and\
     doesn't ignore unimportant
 
-    :param player_input:
+    :param command_input:
     :return:
     """
     path = DEFAULT_PATH
-    if len(player_input.get_arg(1, False)) != 0:  # they should only have one argument
+    if len(command_input.get_arg(1, False)) != 0:  # they should only have one argument
         return None
-    first_arg = player_input.get_arg(0)
+    first_arg = command_input.get_arg(0)
     if len(first_arg) != 0:
         path = Path(first_arg[0])
     return path.absolute()
@@ -139,8 +139,8 @@ class SaveCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: Player, player_input: InputObject) -> InputHandleType:
-        path = get_path(player_input)
+    def _handle_command(self, handler: 'Handler', player: Player, command_input: CommandInput) -> InputHandleType:
+        path = get_path(command_input)
         if path is None:
             self.send_help(player)
             return InputHandleType.HANDLED
@@ -164,8 +164,8 @@ class LoadCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: Player, player_input: InputObject):
-        path = get_path(player_input)
+    def _handle_command(self, handler: 'Handler', player: Player, command_input: CommandInput):
+        path = get_path(command_input)
         if path is None:
             self.send_help(player)
             return InputHandleType.HANDLED

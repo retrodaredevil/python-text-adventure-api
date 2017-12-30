@@ -6,7 +6,7 @@ from ninjagame.items import Sword, SwordType
 from textadventure.entity import Health
 from textadventure.handler import Handler
 from textadventure.input.inputhandling import InputHandler
-from textadventure.input.inputhandling import InputObject, InputHandle, InputHandleType
+from textadventure.input.inputhandling import CommandInput, InputHandle, InputHandleType
 from textadventure.item.item import Item
 from textadventure.item.items import Wallet, Coin, CoinType
 from textadventure.location import Location, GoAction
@@ -49,14 +49,14 @@ class NameTaker(InputHandler):
         player[PlayerFriend].tell(player, "Oh hey! You've just accepted to start your journey too! "
                                           "I just did too. Wait, what's your name again?")
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject) -> Optional[InputHandle]:
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput) -> Optional[InputHandle]:
         if player != self.player:
             return None
 
         def handle_function(already_handled: List[InputHandleType]):
             if not self._should_handle_input(already_handled):
                 raise Exception("NameTaker is the number one priority! What happened?")
-            split = player_input.get_split()
+            split = command_input.get_split()
             if len(split) > 1:
                 player[PlayerFriend].tell(player, "Hey, I can't remember that many words!")
                 return InputHandleType.INCORRECT_RESPONSE
@@ -112,15 +112,15 @@ class Entrance(Location):  # players should only be in this location when starti
             player.send_wait(0.3)
             player.send_message("Would you like to start your journey on this trail?")
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-        if not self._should_take_input(handler, player, player_input):
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+        if not self._should_take_input(handler, player, command_input):
             return None
 
         def handle_function(already_handled: List[InputHandleType]):
             if not self._should_handle_input(already_handled):
                 return InputHandleType.NOT_HANDLED
             # if ["hi", "ho", "he"] any/all/only 1 in "hello there how are you"
-            if "n" in player_input.string_input:
+            if "n" in command_input.string_input:
                 player.send_message("What? Are you sure?")
             else:
                 player.send_message("OK, that's great")
@@ -174,7 +174,7 @@ class InsideEntrance(Location):
             "You now see a very long trail ahead of you. You see forests on both sides and double doors behind you.")
         player.send_line()
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
     def feel(self, handler: Handler, player: Player):
@@ -309,7 +309,7 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
     def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
 
@@ -357,14 +357,14 @@ class WestInsideEntrance(Location):  # introduce Laura
     def smell(self, handler: Handler, player: Player):
         player.send_message(DONT_SMELL)
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject) -> Optional[InputHandle]:
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput) -> Optional[InputHandle]:
         return None
 
-    def on_yell(self, handler: Handler, player: Player, player_input: InputObject, is_there_response=False):
+    def on_yell(self, handler: Handler, player: Player, command_input: CommandInput, is_there_response=False):
         if player[EventsObject].knows_laura:
-            super().on_yell(handler, player, player_input, False)
+            super().on_yell(handler, player, command_input, False)
         else:
-            super().on_yell(handler, player, player_input, True)
+            super().on_yell(handler, player, command_input, True)
             player.send_message("You feel a hand go over your mouth.")
             player.send_message("You see a rock coming at your fa-")
             player.clear_screen()
@@ -448,7 +448,7 @@ class EntranceSpiderWebForest(Location):
             player.send_message("You cleared the spider webs.")
             player[EventsObject].has_cleared_spider_webs_at_entrance = True
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
     def see(self, handler: Handler, player: Player):
@@ -503,7 +503,7 @@ class CenterSpiderWebForest(Location):
     def taste(self, handler: Handler, player: Player):
         player.send_message(DONT_TASTE)
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
     def go_to_other_location(self, handler: Handler, new_location, direction: Point, player: Player):
@@ -543,11 +543,11 @@ class EastCenterSpiderWebForest(Location):
         ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self)
         sword = Sword(SwordType.WOODEN)
         sword.change_holder(None, ninja)
-        handler.entities.append(ninja)
+        handler.identifiables.append(ninja)
 
         self.ninja = ninja
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None
 
     def listen(self, handler: Handler, player: Player):

@@ -6,10 +6,10 @@ from textadventure.utils import MessageConstant
 from textprint.colors import Color
 
 if TYPE_CHECKING:
-    from textadventure.input.inputhandling import InputObject
+    from textadventure.input.inputhandling import CommandInput
 
 
-class PlayerInputGetter(ABC):
+class InputGetter(ABC):
     @abstractmethod
     def take_input(self) -> str:
         """
@@ -28,7 +28,7 @@ class PlayerInputGetter(ABC):
         #     pass
 
 
-class PlayerOutput(ABC):
+class OutputSender(ABC):
     @abstractmethod
     def send_message(self, message: Message):
         """
@@ -36,19 +36,19 @@ class PlayerOutput(ABC):
         """
         pass
 
-    def on_input(self, sender: 'CommandSender', player_input: 'InputObject') -> bool:
+    def on_input(self, sender: 'CommandSender', command_input: 'CommandInput') -> bool:
         """
-        By default, this method returns False the string is empty. Subclasses of PlayerOutput may change this.
-        And if they do change the implementation, they should check if player_input.is_empty() or call super.
+        By default, this method returns False the string is empty. Subclasses of OutputSender may change this.
+        And if they do change the implementation, they should check if command_input.is_empty() or call super.
 
         Note that if this method returns False, no message is sent to the player so you should send a message to the \
         player or do something like speeding up text. (Different implementations can handle this differently)
 
-        :param sender: The CommandSender that this PlayerOutput is attached to
-        :param player_input: The input that the player typed. Notice that the method is_empty() could return True
+        :param sender: The CommandSender that this OutputSender is attached to
+        :param command_input: The input that the player typed. Notice that the method is_empty() could return True
         :return: True if you want to cancel the handling/sending of the input. False otherwise (Normally False)
         """
-        if player_input.is_empty():
+        if command_input.is_empty():
             sender.send_message("You entered an empty line.")
             return True
         return False
@@ -56,8 +56,8 @@ class PlayerOutput(ABC):
 
 class CommandSender:
 
-    def __init__(self, player_input: PlayerInputGetter, player_output: PlayerOutput):
-        self.player_input = player_input
+    def __init__(self, command_input: InputGetter, player_output: OutputSender):
+        self.command_input = command_input
         self.player_output = player_output
 
     def send_message(self, message):
@@ -76,6 +76,14 @@ class CommandSender:
 
     def clear_screen(self):
         self.send_message(str(Color.CLEAR_SECTION))
+
+    def take_input(self) -> str:
+        """
+        Once this method is called, the returned value will not be returned again (unless typed again)
+
+        :return: a string or None if there is no input to take
+        """
+        return self.command_input.take_input()
 
     @staticmethod
     def get_message(message: MessageConstant) -> Message:

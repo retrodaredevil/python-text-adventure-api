@@ -1,7 +1,7 @@
 from typing import TypeVar, Type, Optional, TYPE_CHECKING
 
 from textadventure.entity import Entity, Health, Living
-from textadventure.sending.commandsender import PlayerInputGetter, PlayerOutput, CommandSender
+from textadventure.sending.commandsender import InputGetter, OutputSender, CommandSender
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler
@@ -12,14 +12,14 @@ T = TypeVar("T")
 
 
 class Player(Entity, CommandSender):
-    def __init__(self, player_input: PlayerInputGetter, player_output: PlayerOutput, name: Optional[str]):
+    def __init__(self, command_input: InputGetter, player_output: OutputSender, name: Optional[str]):
         """
         :param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
                     that players' names are one word while other entities are multiple so no one can name themselves\
                     the name of an important entity
         """
         super().__init__(name, Health(30, 30), None)  # TODO max_health, current_health, location
-        CommandSender.__init__(self, player_input, player_output)
+        CommandSender.__init__(self, command_input, player_output)
         # self.__getitem__(PlayerFriend): Living = None
         self.handled_objects = []
         """A list of objects which will be saved if they inherit Savable"""
@@ -59,13 +59,6 @@ class Player(Entity, CommandSender):
         """
         pass
 
-    def take_input(self) -> str:
-        """
-        Once this method is called, the returned value will not be returned again (unless typed again)
-
-        :return: a string or None if there is no input to take
-        """
-        return self.player_input.take_input()
 
     def get_wallet(self) -> 'Wallet':
         """

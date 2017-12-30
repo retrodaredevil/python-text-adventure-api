@@ -1,7 +1,7 @@
 from typing import List
 
 from textadventure.handler import Handler
-from textadventure.input.inputhandling import InputHandler, InputObject, InputHandleType, InputHandle
+from textadventure.input.inputhandling import InputHandler, CommandInput, InputHandleType, InputHandle
 from textadventure.player import Player
 from textadventure.sending.message import Message, MessageType
 
@@ -13,8 +13,8 @@ class SettingsHandler(InputHandler):
         """
         self.allowed_player = allowed_player
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-        command = player_input.get_command().lower()
+    def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
+        command = command_input.get_command().lower()
         if player != self.allowed_player or (command != "setting" and not command.startswith(":")):
                 # or type(player.player_output) is not StreamOutput:
             return None
@@ -27,13 +27,13 @@ class SettingsHandler(InputHandler):
             if command.startswith(":"):  # the player is typing the argument as the command
                 arg = command.replace(":", "")
                 arg_index = 0
-            elif len(player_input.get_arg(1)) != 0:
-                arg = player_input.get_arg(0)[0].lower()
+            elif len(command_input.get_arg(1)) != 0:
+                arg = command_input.get_arg(0)[0].lower()
 
             # TODO, fix this code with : and setting and this is terrible
             if arg is not None:
                 if arg == "speed":
-                    speed = player_input.get_arg(arg_index + 0)[0].lower()  # remember, arg 0 is the second word
+                    speed = command_input.get_arg(arg_index + 0)[0].lower()  # remember, arg 0 is the second word
                     if speed == "fast":
                         output.wait_multiplier = 0.4
                         player.send_message("Set speed to fast.")

@@ -6,7 +6,7 @@ from textadventure.battling.managing import BattleManager
 from textadventure.battling.move import Target
 from textadventure.commands.command import SimpleCommandHandler
 from textadventure.handler import Handler
-from textadventure.input.inputhandling import InputObject, InputHandleType
+from textadventure.input.inputhandling import CommandInput, InputHandleType
 from textadventure.player import Player
 from textadventure.sending.message import Message
 from textadventure.utils import join_list
@@ -24,7 +24,7 @@ class AttackCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
+    def _handle_command(self, handler: Handler, player: Player, command_input: CommandInput) -> InputHandleType:
         # from textadventure.battling.managing import BattleManager importing non-locally now
         manager = handler.get_managers(BattleManager, 1)[0]  # get the BattleManager, there should be 1
         battles = manager.get_battles(player)
@@ -35,7 +35,7 @@ class AttackCommandHandler(SimpleCommandHandler):
         # now we have the battle that the player is currently in which could be None
 
         if battle is None:  # the player isn't in a battle
-            first_arg = player_input.get_arg(0, False)  # remember this is a list containing the first arg at [0]
+            first_arg = command_input.get_arg(0, False)  # remember this is a list containing the first arg at [0]
             # ignore_unimportant_before is False (^)because we want to get everything the player typed after the command
 
             if not first_arg:  # there isn't a first argument
@@ -62,7 +62,7 @@ class AttackCommandHandler(SimpleCommandHandler):
         user = turn.get_target(player)
         assert isinstance(user.move_chooser, SetMoveChooser), "We need the player's MoveChooser to be a SetMoveChooser."
 
-        first_arg = player_input.get_arg(0)
+        first_arg = command_input.get_arg(0)
         if not first_arg:
             return self.__class__.send_options(player, user)
         try:

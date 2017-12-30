@@ -5,7 +5,7 @@ from typing import List, Optional, TypeVar, Type
 from textadventure.entity import EntityAction, Entity
 from textadventure.handler import Handler
 from textadventure.input.inputhandling import InputHandler
-from textadventure.input.inputhandling import InputObject
+from textadventure.input.inputhandling import CommandInput
 from textadventure.item.holder import Holder
 from textadventure.item.item import Item, FiveSensesHandler
 from textadventure.player import Player
@@ -98,19 +98,19 @@ class Location(Holder, InputHandler, FiveSensesHandler):
         """
         pass
 
-    def on_yell(self, handler: Handler, player: Player, player_input: InputObject, is_there_response=False) -> None:
+    def on_yell(self, handler: Handler, player: Player, command_input: CommandInput, is_there_response=False) -> None:
         """
         There is a default player implementation for this
         is_there_response is only meant to be changed by inheriting classes (It shouldn't be changed by YellCommandHa..)
 
         :param handler: The handler object
         :param player: The player
-        :param player_input: The player input object
+        :param command_input: The player input object
         :param is_there_response: By default, False. If set to True, the default implementation won't
                 send a message saying no one responded.
         :return: None
         """
-        first_arg = player_input.get_arg(0, False)
+        first_arg = command_input.get_arg(0, False)
         player.send_message(Message("You (Yelling): {}".format(" ".join(first_arg)), MessageType.IMMEDIATE))
         player.send_message(Message("....", message_type=MessageType.TYPE_SLOW))
         if not is_there_response:
@@ -211,11 +211,11 @@ class Location(Holder, InputHandler, FiveSensesHandler):
 
         return r
 
-    def _should_take_input(self, handler: Handler, player: Player, player_input: InputObject):
+    def _should_take_input(self, handler: Handler, player: Player, command_input: CommandInput):
         """
         A method that is called by a subclass of Location usually when handling input.
         The default implementation (That probably shouldn't be changed) checks to see if the player's location is self
-        In the default implementation, handler and player_input are not used
+        In the default implementation, handler and command_input are not used
 
         When handling input in an implementation of Location, this should almost always be called first to make sure\
             the player is at this location.

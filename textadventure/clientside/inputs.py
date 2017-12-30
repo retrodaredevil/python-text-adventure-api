@@ -4,17 +4,17 @@ from textadventure.action import Action
 from textadventure.clientside.outputs import StreamOutput
 from textadventure.handler import Handler
 from textadventure.manager import Manager
-from textadventure.sending.commandsender import PlayerInputGetter
+from textadventure.sending.commandsender import InputGetter
 from textprint.input import InputLineUpdater
 
 
-class KeyboardInputGetter(PlayerInputGetter, Thread):
+class KeyboardInputGetter(InputGetter, Thread):
     DEFAULT_INPUT_PROMPT = ""  # because it doesn't look how we want it to
 
     def __init__(self, stream_output: StreamOutput):
         """
 
-        :param stream_output: The stream output or None if the PlayerOutput object isn't a StreamOutput
+        :param stream_output: The stream output or None if the OutputSender object isn't a StreamOutput
         """
         super().__init__()
         self.inputs = []
@@ -83,7 +83,7 @@ class InputLineUpdaterManager(Manager):
         # time.sleep(1)
 
 
-class TextPrinterInputGetter(PlayerInputGetter):
+class TextPrinterInputGetter(InputGetter):
     """
     Note that you should also probably add an instance of InputLineUpdaterManager to the list of managers in \
         the Handler to show smoother input

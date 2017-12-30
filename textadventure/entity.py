@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Type, List
+from typing import Type, List, TYPE_CHECKING
+from uuid import UUID, uuid4
 
 from textadventure.action import Action
 from textadventure.item.holder import Holder
@@ -7,8 +8,18 @@ from textadventure.sending.commandsender import CommandSender
 from textadventure.sending.message import Message
 from textadventure.utils import MessageConstant, CanDo, are_mostly_equal
 
+if TYPE_CHECKING:
+    from textadventure.location import Location
 
-class Living(ABC):
+
+class Identifiable:
+    def __init__(self, uuid: UUID = None):
+        if uuid is None:
+            uuid = uuid4()
+        self.uuid = uuid
+
+
+class Living:
     UNKNOWN_LIVING_NAME = "???"
 
     """
@@ -80,10 +91,22 @@ class Health:
 
 
 # noinspection PyAbstractClass
-class Entity(Living, Holder):
-    def __init__(self, name: str, health: Health, location):
+class Entity(Living, Holder, Identifiable):
+    """
+    Represents something that has a location and has health
+    """
+    def __init__(self, name: str, health: Health, location: 'Location', uuid: UUID = None):
+        """
+        Creates an Entity the the given parameters
+
+        :param name: The name of the entity
+        :param health: The health of the entity
+        :param location: The location of the entity.
+        :param uuid: The id of the entity or None if you want to create a new id
+        """
         super().__init__(name)
         Holder.__init__(self)
+        Identifiable.__init__(self, uuid)
 
         self.health = health
 
@@ -93,6 +116,11 @@ class Entity(Living, Holder):
         by yourself because you probably want to do it with GoAction or something similar that abstracts a few 
         details away.
         """
+        if uuid is None:
+            uuid = uuid4()
+        self.uuid = uuid
+        """The id of the entity. You should use this to compare entities but you should assume that an entity\
+        created in a custom location may not always have the same id in every instance of a game."""
 
     # def can_entity_pass(self, entity: 'Entity') -> CanDo:
     #     """ Not going to use this - define in HostileEntity
@@ -229,28 +257,23 @@ class EntityAction(Action):  # abstract
 
     def try_action(self, handler):  # overridden
         can_do = super().try_action(handler)
-        if not can_do[0] and self.send_on_can_not:
+        if not can_do[0] and self.send_on_can_not and isinstance(self.entity, CommandSender):
             self.entity.send_message(can_do[1])
         return can_do
 
 
 # noinspection PyAbstractClass
 class EntityActionToEntity(EntityAction):  # abstract
+    """
+    A class that isn't commonly used and only has a few uses in the current textadventure api
+
+    Obviously, this class isn't used by itself, it needs subclasses
+    """
 
     def __init__(self, entity: Entity, asked_entity: Entity):
         """
-        :param entity: The main entity causing this action to occur. (The entity that is asking/action on asked_entity
+        :param entity: The main entity causing this action to occur. (The entity that is asking/action on asked_entity)
         :param asked_entity: The entity that entity is asked, challenged, requested of, depending on the action
         """
         super().__init__(entity)
         self.asked_entity = asked_entity
-
-        # def try_action(self, handler):  # overridden
-        # commented out because it would be a lot easier and more maintainable to create a class and inherit Manager
-        #     if not self.can_do[0]:
-        #         return super().try_action(handler)  # this is to avoid sending multiple messages.
-        #     can_do = self.asked_entity.can_do_action(handler, self)
-        #     if not can_do[0]:
-        #         self.entity.send_message(can_do[1])
-        #         return can_do  # returns it because we don't actually want to do the action if the asked_entity stopped it
-        #     return super().try_action(handler)  # the asked_entity didn't stop it so we'll let the superclass handle it

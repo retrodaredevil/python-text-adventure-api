@@ -3,6 +3,7 @@ from enum import Enum, unique
 from typing import List, Callable, Optional, TYPE_CHECKING
 
 from textadventure.player import Player
+from textadventure.sending.commandsender import CommandSender
 from textadventure.utils import get_unimportant
 
 if TYPE_CHECKING:
@@ -48,13 +49,13 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
                         self.__class__.UNNOTICEABLE]
 
 
-class InputObject:
+class CommandInput:
     """
     This object contains a string_input which is the unchanged string that was inputted
     This object also contains the string split up (split_input) which is an array
 
-    Not to be mistaken for PlayerInput, there may be instances in the code where I can an InputObject variable \
-        player_input but it's really an InputObject
+    Not to be mistaken for PlayerInput, there may be instances in the code where I can call a CommandInput variable \
+    command_input but it's really an CommandInput
     """
 
     def __init__(self, string_input: str):
@@ -64,11 +65,11 @@ class InputObject:
 
     def is_empty(self):
         """
-        Will almost always return False unless you are handling this InputObject in something like a PlayerOutput\
+        Will almost always return False unless you are handling this CommandInput in something like a OutputSender\
         because this object should not be passed to methods that are not prepared to handle this.
         Note that you shouldn't try to check this unless you plan to do something if the input is actually empty.
 
-        The implementation of handler doesn't pass this InputObject to InputHandlers if this object returns True,\
+        The implementation of handler doesn't pass this CommandInput to InputHandlers if this object returns True,\
         so you won't have to check for this.
 
         :return: True if the string is empty, False otherwise. (Normally False)
@@ -114,7 +115,7 @@ class InputObject:
         :return: A list of the requested argument and all arguments after it. (Requested arg is in [0])
         """
         split = self.get_split()  # get the command args into split parts
-        unimportant = []  # a list of ints representing the unimportant words in a string
+        unimportant = []  # a list of ints representing the unimportant words in a string where each is an index
         if ignore_unimportant_before:
             unimportant = get_unimportant(split)
 
@@ -147,15 +148,16 @@ class InputObject:
 
 class InputHandler(ABC):
     @abstractmethod
-    def on_input(self, handler: 'Handler', player: Player, player_input: InputObject) -> Optional['InputHandle']:
+    def on_input(self, handler: 'Handler', sender: CommandSender, command_input: CommandInput) -> \
+            Optional['InputHandle']:
         """
         The reason this doesn't handle the input is because we want all the input handlers to be able to give\
         us their priority and depending on that, we'll call the lower priority number first\
         (lower number higher priority. Explained in InputHandle)
 
         :param handler: The handler object
-        :param player: the player object that gave the input
-        :param player_input: The InputObject that contains the string input and other useful data
+        :param sender: the CommandSender object that gave the input
+        :param command_input: The CommandInput that contains the string input and other useful data
         :return: An InputHandle that handles the inputs or None if it won't handle the input
         """
         pass
@@ -165,6 +167,17 @@ class InputHandler(ABC):
         Should not be called outside of InputHandler or its subclasses
         (should not and is not called in Handler (you must call this on your own in a handle function or not at all))
 
+        Just to be clear, this is only called in subclasses of InputHandler making this a 'protected' method
+
+        The reason that that method is optional to call, is that the default method just checks to see if \
+        any of the InputHandleTypes in already_handled return False indicating that someone doesn't want you to try\
+        to handle the input since they already did it. This method just checks that and you may want to handle the \
+        command still.
+
+        Since you don't have the already_handled list when on_input is called, you call this when the function you\
+        passed to InputHandle is called. (One of the arguments of that includes already_handled which you should then\
+        pass to this method)
+
         :param already_handled: The InputHandleTypes that are already handled
         :return: True if input should be handled in a handle function
         """
@@ -172,6 +185,19 @@ class InputHandler(ABC):
             if not handle_type.should_give_response():
                 return False
         return True
+
+
+class PlayerInputHandler(InputHandler):
+    def on_input(self, handler: 'Handler', sender: CommandSender, command_input: CommandInput):
+        pass
+
+    @abstractmethod
+    def on_player_input(self, handler: 'Handler', player: Player, command_input: CommandInput) -> \
+            Optional['InputHandle']:
+        """
+        Does the same thing as :func:`~inputhandling.InputHandler.on_input`
+        """
+        pass
 
 
 class InputHandle:  # returned and used to indicate when the handle function should be called

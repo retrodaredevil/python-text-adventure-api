@@ -63,7 +63,7 @@ def after_player(handler: Handler, player: Player):
     handler.input_handlers.extend([DirectionInputHandler()])
     handler.living_things.extend([OtherPerson(), LauraPerson(), NinjaDude()])
 
-    handler.entities.append(player)
+    handler.identifiables.append(player)
     handler.input_handlers.append(SettingsHandler(player))
     handler.managers.extend([HostileEntityManager(), EntityActionToEntityManager(), BattleManager(),
                              DamageActionManager(), NinjaGamePropertyManager()])

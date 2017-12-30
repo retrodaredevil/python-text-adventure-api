@@ -3,10 +3,11 @@ from typing import List, Optional, TypeVar, Type, TYPE_CHECKING
 from textadventure.action import Action
 from textadventure.manager import Manager
 from textadventure.player import Player, Living
+from textadventure.sending.commandsender import CommandSender
 from textadventure.utils import Point, get_type_from_list
 
 if TYPE_CHECKING:
-    from textadventure.input.inputhandling import InputHandler
+    from textadventure.input.inputhandling import InputHandler, CommandInput, InputHandleType
 
 T = TypeVar("T")
 
@@ -26,23 +27,20 @@ def has_only(the_list: List[T], only_list: List[T]):
 
 
 class Handler:
-    """
-    Attributes:
-        input_handlers    Input handlers that do not include locations
-        living_things     A list of livings that normally should never change. It's used to keep track of Living \
-                                objects which make them easy to retrieve without using a static variable in the class\
-                                of the living
-    """
 
     def __init__(self):
-        self.entities = []
+        # self.entities = []
+        self.identifiables = []
         self.locations = []
         self.input_handlers = []
+        """A list of InputHandlers that do not include Locations"""
         self.managers = []
         self.living_things = []
+        """A list of livings that normally should never change. It's used to keep track of Living \
+        objects which make them easy to retrieve without using a static variable in the class of the living"""
 
         self.savables = []
-        """A Dictionary of savables where the key is something that """
+        """A Dictionary of savables where the key is something that - this is not completed"""  # TODO
 
     def start(self):
         """
@@ -51,9 +49,11 @@ class Handler:
         while True:
             for player in self.get_players():
                 player.update(self)
-                inp = player.take_input()  # this does not pause the thread
+
+            for sender in self.get_command_senders():
+                inp = sender.take_input()  # this does not pause the thread
                 if inp is not None:  # since taking input doesn't pause the thread this could be null
-                    self.__do_input(player, inp)
+                    self.__do_input(sender, inp)
 
             for location in self.locations:
                 location.update(self)
@@ -61,20 +61,19 @@ class Handler:
             for manager in self.managers:
                 manager.update(self)
 
-    def __do_input(self, player: Player, inp: str):
-        from textadventure.input.inputhandling import InputObject, InputHandleType
-        input_object = InputObject(inp)
-        if player.player_output.on_input(player, input_object):
+    def __do_input(self, sender: CommandSender, inp: str):
+        input_object = CommandInput(inp)
+        if sender.player_output.on_input(sender, input_object):
             # since the on_input method returned True, it must have done something, so we don't need to send a message
             return
         if input_object.is_empty():
-            # since the player's PlayerOutput didn't handle this, we should do it
-            player.send_message(
+            # since the player's OutputSender didn't handle this, we should do it
+            sender.send_message(
                 "You must enter a command. Normally, pressing enter with a blank line won't trigger this.")
             return
         input_handles = []  # Note this is a list of InputHandles
         for input_handler in self.get_input_handlers():
-            handle = input_handler.on_input(self, player, input_object)  # call on_input for each handler
+            handle = input_handler.on_input(self, sender, input_object)  # call on_input for each handler
             if handle is not None:
                 input_handles.append(handle)
 
@@ -95,7 +94,7 @@ class Handler:
         # player.send_line()  # for the debug
         if len(already_handled) == 0 or has_only(already_handled,
                                                  [InputHandleType.NOT_HANDLED, InputHandleType.UNNOTICEABLE]):
-            player.send_message("Command: \"" + input_object.get_command() + "\" not recognized.")
+            sender.send_message("Command: \"" + input_object.get_command() + "\" not recognized.")
 
     def do_action(self, action: Action):
         """
@@ -130,10 +129,13 @@ class Handler:
 
     def get_players(self) -> List[Player]:
         r = []
-        for entity in self.entities:
+        for entity in self.identifiables:
             if isinstance(entity, Player):
                 r.append(entity)
         return r
+
+    def get_command_senders(self) -> List[CommandSender]:
+        return get_type_from_list(self.identifiables, CommandSender, None)
 
     def get_managers(self, manager_types: Type[Manager], expected_amount: Optional[int] = None) \
             -> List[Manager]:

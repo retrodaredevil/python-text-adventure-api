@@ -14,10 +14,10 @@ class Holder:  # kind of like an interface
         self.items = []
         """Should almost never be appended to directly. You should use the item's change_holder method"""
 
-    def can_hold(self, item: Item):
+    def can_hold(self, item: 'Item'):
         """
-        Returns whether or not this holder can hold this weapon. Usually True and usually only reacts to the weapon type
-        :param item: The weapon
+        Returns whether or not this holder can hold this item. Usually True and usually only reacts to the weapon type
+        :param item: The item
         :return: True if it can hold the weapon False otherwise
         """
         return True

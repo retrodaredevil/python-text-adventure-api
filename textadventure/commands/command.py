@@ -2,9 +2,10 @@ from abc import abstractmethod
 from typing import List
 
 from textadventure.handler import Handler
-from textadventure.input.inputhandling import InputHandler, InputObject, InputHandle, InputHandleType
+from textadventure.input.inputhandling import InputHandler, CommandInput, InputHandle, InputHandleType
 from textadventure.location import Location
 from textadventure.player import Player
+from textadventure.sending.commandsender import CommandSender
 
 
 class CommandHandler(InputHandler):
@@ -16,23 +17,23 @@ class CommandHandler(InputHandler):
     def __init__(self):
         pass
 
-    def on_input(self, handler: Handler, player: Player, player_input: InputObject):
-        if not self._should_handle_player(player) or not self._should_handle_command(player_input):
+    def on_input(self, handler: Handler, sender: CommandSender, command_input: CommandInput):
+        if not self._should_handle_player(sender) or not self._should_handle_command(command_input):
             return None
 
         def handle_function(already_handled: List[InputHandleType]):
             if not self._should_handle_input(already_handled):
                 return InputHandleType.NOT_HANDLED
-            first_arg = player_input.get_arg(0, False)
+            first_arg = command_input.get_arg(0, False)
             if len(first_arg) != 0 and first_arg[0].lower() == "help":
-                self.send_help(player)
+                self.send_help(sender)
                 return InputHandleType.HANDLED
-            return self._handle_command(handler, player, player_input)
+            return self._handle_command(handler, sender, command_input)
 
         return InputHandle(8, handle_function, self)  # 8 because most locations should return 10
 
     @abstractmethod
-    def send_help(self, player: Player):
+    def send_help(self, sender: CommandSender):
         """
         Called inside from the handle_function in on_input and passed through the InputHandle returned by on_input
         By default, the on_input method will call this method if the first argument of the command is equal to "help"\
@@ -41,37 +42,39 @@ class CommandHandler(InputHandler):
         pass
 
     @abstractmethod
-    def _handle_command(self, handler: Handler, player: Player, player_input: InputObject) -> InputHandleType:
+    def _handle_command(self, handler: Handler, sender: CommandSender, command_input: CommandInput) -> InputHandleType:
         """
         The _ means that this method is meant to be "protected" and should only be called within classes and subclasses
         Should not be called outside of CommandHandler
 
+        Obviously, since this is abstract, it should be overridden by subclasses
+
         :param handler: The handler object
-        :param player:  The player object
-        :param player_input: The player's input
+        :param sender:  The player object
+        :param command_input: The player's input
         :return: An InputHandleType that will be returned by the handle Callable in InputHandle
         """
         pass
 
     @abstractmethod
-    def _should_handle_command(self, player_input: InputObject) -> bool:
+    def _should_handle_command(self, command_input: CommandInput) -> bool:
         """
         Overridden by subclasses of CommandHandler and returns whether or not a command should be handled
         Called in on_input
         Should not be called in places other than the CommandHandler class
 
-        :param player_input:
+        :param command_input:
         :return: returns True if a command should be handled (even if argsuments are incorrect)
         """
         pass
 
-    def _should_handle_player(self, player: Player) -> bool:
+    def _should_handle_player(self, sender: CommandSender) -> bool:
         """
-        Tells whether or not a certain command will have an effect for a player(Normally returns true unless overridden)
+        Tells whether or not a certain command will have an effect for a sender(Normally returns true unless overridden)
         called in on_input
         Called by the CommandHandler class and doesn't ever need to be called on your own. Feel free to override
 
-        :param player: The player to check
+        :param sender: The sender to check
         :return: A boolean, True if this command should handle a player False otherwise
         """
         return True
@@ -90,8 +93,8 @@ class SimpleCommandHandler(CommandHandler):
         self.command_names = command_names
         self.description = description
 
-    def _should_handle_command(self, player_input: InputObject):
-        return player_input.get_command().lower() in self.command_names
+    def _should_handle_command(self, command_input: CommandInput):
+        return command_input.get_command().lower() in self.command_names
 
     def send_help(self, player: Player):
         player.send_message(self.description)

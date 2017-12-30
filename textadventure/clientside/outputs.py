@@ -9,7 +9,7 @@ from textadventure.handler import Handler
 from textadventure.manager import Manager
 from textadventure.player import Player
 from textadventure.sending.message import Message, MessageType
-from textadventure.sending.commandsender import PlayerOutput
+from textadventure.sending.commandsender import OutputSender
 from textadventure.utils import join_list
 from textprint.colors import Color
 from textprint.line import Line
@@ -17,16 +17,16 @@ from textprint.section import Section
 from textprint.textprinter import TextPrinter
 
 if TYPE_CHECKING:
-    from textadventure.input.inputhandling import InputObject
+    from textadventure.input.inputhandling import CommandInput
 
 
 # deprecated
-class StreamOutput(Thread, PlayerOutput):  # extending thread so we can let messages pile up and print them out easily
+class StreamOutput(Thread, OutputSender):  # extending thread so we can let messages pile up and print them out easily
 
     """
     Deprecated because it's not updated (it doesn't use MessageParts) and the code is very ugly and unreadable
 
-    This class is a PlayerOutput class that outputs the console by default or another stream if chosen.
+    This class is a OutputSender class that outputs the console by default or another stream if chosen.
     The run method along with the while True loop and everything inside it is pretty much just thrown together\
         with a lot of painful if statements. Of course, if you stare at it long enough, you might be convinced that you\
         have it down. However, there could be side effects of using different things and hopefully this is the only \
@@ -126,7 +126,7 @@ class StreamOutput(Thread, PlayerOutput):  # extending thread so we can let mess
                     self.stream.flush()
 
 
-class TextPrinterOutput(Manager, PlayerOutput):
+class TextPrinterOutput(Manager, OutputSender):
     def __init__(self, printer: TextPrinter, section: Section):
         """
         Creates a TextPrinterOutput but does not start the Thread
@@ -160,8 +160,8 @@ class TextPrinterOutput(Manager, PlayerOutput):
         #                                       for part in message.create_parts()]), flush=True)
         self.messages.append(message)
 
-    def on_input(self, player: 'Player', player_input: 'InputObject'):
-        if player_input.is_empty():
+    def on_input(self, player: 'Player', command_input: 'CommandInput'):
+        if command_input.is_empty():
             now = time.time()
             # if self._last_blank + 1 > now:
             self.__print_parts(immediate=True)  # only thing in if statement
@@ -169,7 +169,7 @@ class TextPrinterOutput(Manager, PlayerOutput):
             return True
         current_is_instant = self.is_instant
 
-        self.send_message(Message(Color.YELLOW >> player_input.string_input, message_type=MessageType.IMMEDIATE))
+        self.send_message(Message(Color.YELLOW >> command_input.string_input, message_type=MessageType.IMMEDIATE))
         # self.send_message(Message(str([part.main_text for part in self.current_line_parts[0]])))
         self.is_instant = True  # we have regular so all the stuff before it should print immediately
         self.__add_messages()  # add the current message we just printed
