@@ -1,11 +1,13 @@
+"""
+A file that stores a necessary class for Locations and imports most of everything from the textadventure package
+"""
 import warnings
 from abc import abstractmethod
 from typing import List, Optional, TypeVar, Type
 
 from textadventure.entity import EntityAction, Entity
 from textadventure.handler import Handler
-from textadventure.input.inputhandling import CommandInput
-from textadventure.input.inputhandling import PlayerInputHandler
+from textadventure.input.inputhandling import CommandInput, PlayerInputHandler
 from textadventure.item.holder import Holder
 from textadventure.item.item import Item, FiveSensesHandler
 from textadventure.player import Player
@@ -16,8 +18,6 @@ T = TypeVar('T')
 
 
 class Location(Holder, PlayerInputHandler, FiveSensesHandler):
-    NO_YELL_RESPONSE = "There was no response."
-
     """
     The Location is an abstract base class used for all Locations. Many of the methods aren't meant to be called \
     randomly outside of a specific set of classes that handle those methods. Most of the methods in here should never\
@@ -31,12 +31,16 @@ class Location(Holder, PlayerInputHandler, FiveSensesHandler):
     Note that you shouldn't throw assert errors because that would defeat the whole point.  
     """
 
+    NO_YELL_RESPONSE = "There was no response."
+
     def __init__(self, name, description, point: Point):
         super().__init__()
         self.name = name
         self.description = description
         self.point = point
 
+        self.initializers = []
+        """A list of HandlerInitialize. Each called by the handler on the start of a new game or loading an old one"""
         self.command_handlers = []
         """Keeps a list of command_handlers. After __init__ is called, Handler should call these when location is \ 
         getting its on_input called. (Like extra input handlers that's per location)"""
@@ -181,6 +185,9 @@ class Location(Holder, PlayerInputHandler, FiveSensesHandler):
         loc Note that when overriding this method, try not use use the type reference to other locations as the \
         compiler won't like you
         This method will call on_enter, change the player's location etc if it is a success
+
+        If you want to, think of the returned value like a CanDid. Since this method returns whether or not it was\
+        successful
 
         :param handler:
         :param player: The player that is trying to go to the new_location

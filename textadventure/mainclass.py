@@ -33,7 +33,7 @@ class Main:
 
     def init_player(self, player: Player):
         """
-        A method that is used for each player that joins no matter if they are new or not.
+        A method that is used for each player that joins no matter if they are new or not and no matter when they join.
 
         Note that this should NOT be overridden. Since this calls self.on_player_start. You can change that when\
         creating this object
@@ -41,7 +41,7 @@ class Main:
         :param player: The player that has just joined
         """
         # TODO make another method that makes sure all of the player's data is loaded if the player isn't new
-        self.on_player_start(self.handler, player)
+        pass
 
     def start(self):
         assert self.handler is None, "If self.handler isn't None, then start must have been called before this."

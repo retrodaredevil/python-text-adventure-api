@@ -1,9 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import Type, List, TYPE_CHECKING
+from abc import abstractmethod, ABC
+from typing import Type, List, TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 
 from textadventure.action import Action
 from textadventure.item.holder import Holder
+from textadventure.saving.savable import HasSavable, Savable
 from textadventure.sending.commandsender import CommandSender
 from textadventure.sending.message import Message
 from textadventure.utils import MessageConstant, CanDo, are_mostly_equal
@@ -13,7 +14,14 @@ if TYPE_CHECKING:
 
 
 class Identifiable:
+    """
+    An object with a uuid.
+    """
+
     def __init__(self, uuid: UUID = None):
+        """
+        :param uuid: The uuid that will not change and will stay the same even if it was saved and loaded
+        """
         if uuid is None:
             uuid = uuid4()
         self.uuid = uuid
@@ -91,22 +99,29 @@ class Health:
 
 
 # noinspection PyAbstractClass
-class Entity(Living, Holder, Identifiable):
+class Entity(Living, Holder, Identifiable, HasSavable):
     """
     Represents something that has a location and has health
     """
-    def __init__(self, name: str, health: Health, location: 'Location', uuid: UUID = None):
+    def __init__(self, name: str, health: Health, location: 'Location', uuid: UUID = None,
+                 savable: Optional[Savable] = None):
         """
         Creates an Entity the the given parameters
+
+        Note on parameter savable: Remember, this won't do anything unless it is added to handler.savables which
+        doesn't happen here
 
         :param name: The name of the entity
         :param health: The health of the entity
         :param location: The location of the entity.
         :param uuid: The id of the entity or None if you want to create a new id
+        :param savable: The Savable object that was loaded or None if it doesn't apply to this class or it doesn't
+                exist. (If None, HasSavable should call _create_savable)
         """
         super().__init__(name)
         Holder.__init__(self)
         Identifiable.__init__(self, uuid)
+        HasSavable.__init__(self, savable)
 
         self.health = health
 
@@ -116,11 +131,6 @@ class Entity(Living, Holder, Identifiable):
         by yourself because you probably want to do it with GoAction or something similar that abstracts a few 
         details away.
         """
-        if uuid is None:
-            uuid = uuid4()
-        self.uuid = uuid
-        """The id of the entity. You should use this to compare entities but you should assume that an entity\
-        created in a custom location may not always have the same id in every instance of a game."""
 
     # def can_entity_pass(self, entity: 'Entity') -> CanDo:
     #     """ Not going to use this - define in HostileEntity
@@ -131,6 +141,14 @@ class Entity(Living, Holder, Identifiable):
     #                 [1] is the reason why the entity can't pass. (It will be displayed)
     #     """
     #     return True, "You can pass, a hostile entity might say otherwise, though."
+
+    def _create_savable(self):
+        """
+        By default, this returns None. This is because by default, an Entity cannot be saved and if there was an
+        implementation here, it would become pointless because it would return a Savable that may not be
+        able to save fields from subclasses of entities.
+        """
+        return None
 
     def can_do_action(self, handler, entity_action: 'EntityActionToEntity') -> CanDo:
         """

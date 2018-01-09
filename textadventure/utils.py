@@ -1,6 +1,6 @@
 import sys
 from difflib import SequenceMatcher
-from typing import Union, List, Tuple, TypeVar, Type, Optional
+from typing import Union, List, Tuple, TypeVar, Type, Optional, Collection, Iterator
 
 # if TYPE_CHECKING:
 #     from textadventure.message import Message
@@ -231,3 +231,71 @@ ZERO = Point(0, 0, 0)
 DIRECTIONS = [NORTH, EAST, SOUTH, WEST, UP, DOWN]
 """Note that the directions should never be compared with 'is' even though they are declared here, you shouldn't\
 be doing that"""
+
+
+T = TypeVar('T')
+
+
+class TypeCollection(Collection[T]):
+    def __init__(self, the_list: List, types_list: List[Type], use_isinstance=True):
+        """
+        :param the_list: The list of elements that you want to use. Note that changing this list won't affect the one
+                in self.the_list because it was initialized using self.the_list = list(the_list)
+        :param types_list: The list of types where each time is an acceptable type this is in this Collection
+        :param use_isinstance: By default True. If set to False, this will compare types_list using type() instead of
+                isinstance()
+        """
+        self.the_list = list(the_list)
+        self.types_list = types_list
+        self.use_isinstance = use_isinstance
+
+        self._known_length = None  # simple cache for the __len__ function
+
+    def can_have(self, element):
+        for t in self.types_list:
+            can = isinstance(element, t) if self.use_isinstance else type(element) == t
+            if can:
+                return True
+
+        return False
+
+    def __len__(self):
+        if self._known_length is not None:
+            return self._known_length
+        r = 0
+        for e in self.the_list:
+            if self.can_have(e):
+                r += 1
+        self._known_length = r
+        return self._known_length
+
+    def __contains__(self, x):
+        return self.can_have(x) and x in self.the_list
+
+    def __iter__(self):
+        return TypeSequenceIterable(self)
+
+
+class TypeSequenceIterable(Iterator):
+    def __init__(self, type_sequence: TypeCollection):
+        self.type_sequence = type_sequence
+        self.iterator = self.type_sequence.the_list.__iter__()
+
+    def __next__(self):
+        n = self.iterator.__next__()
+        while not self.type_sequence.can_have(n):
+            n = self.iterator.__next__()
+        return n
+
+
+def main():
+    my_list = [1., 3, 8, "hello", "cool", 9.0, "c", False, 8]
+    seq = TypeCollection(my_list, [str, float, bool])
+    for item in my_list:
+        print("item: {} is {} in seq".format(item, item in seq))
+
+    print(len(seq))
+
+
+if __name__ == '__main__':
+    main()

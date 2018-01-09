@@ -56,11 +56,12 @@ class EditableLine:
         """
         assert amount_back != 0, "What are you trying to do? Get us all killed in a while True? Don't pass 0 to this."
         backwards = amount_back < 0
+        index = -1 if backwards else 0
 
         def get_using():
             """Gets the current string that we will delete from based on if the user pressed backspace or delete"""
             return self.before if backwards else self.after
-        return len(get_using()) != 0 and get_using()[-1 if backwards else 0] != " "
+        return len(get_using()) != 0 and get_using()[index] != " "
 
     def delete_word(self, backspace=True):
         amount = -1 if backspace else 1
@@ -246,9 +247,11 @@ class InputLineUpdater:
             self.text_printer.update_dimensions()  # this is the place where we actually get the new dimensions
             self.text_printer.update_all_lines()  # This will reload all of the sections and lines (Check overflows)
         elif key == 8 or key == 27 or key == 519:  # ctrl+backspace or alt+backspace or ctrl+delete
-            # TODO this code doesn't work perfectly like most ctrl+backspaces since it stops when it get to a space
+            # TODO this code doesn't work perfectly like most ctrl+backspaces since it stops when it get to a space and
+            #       on other implementations, they have a whole regex worked out
             backspace = key != 519
             current.delete_word(backspace)
+            # TODO On some systems, when you use ALT+Backspace, it removes an extra char.
         else:
             current.type("[{} ord: {}]".format(curses.keyname(key).decode("utf-8"), key))
 

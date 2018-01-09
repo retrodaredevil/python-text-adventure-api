@@ -55,7 +55,7 @@ def default_load(player: Player, handler: Handler):
 
 def after_player(handler: Handler, player: Player):
     handler.locations.extend([Entrance(), InsideEntrance(), EastInsideEntrance(), WestInsideEntrance(),
-                              EntranceSpiderWebForest(), CenterSpiderWebForest(), EastCenterSpiderWebForest(handler)])
+                              EntranceSpiderWebForest(), CenterSpiderWebForest(), EastCenterSpiderWebForest()])
     handler.input_handlers.extend([GoCommandHandler(), TakeCommandHandler(), PlaceCommandHandler(),
                                    YellCommandHandler(), UseCommandHandler(), SaveCommandHandler(),
                                    LoadCommandHandler(), NameCommandHandler(), InventoryCommandHandler(),
@@ -76,7 +76,7 @@ def after_player(handler: Handler, player: Player):
 
 
 def setup():
-    handler = Handler()
+    handler = Handler([], [], [], [], {})
 
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 

@@ -48,4 +48,4 @@ class SettingsHandler(InputHandler):
                                         "\tspeed: setting speed <fast:normal>", MessageType.IMMEDIATE))
             return InputHandleType.HANDLED_AND_DONE
 
-        return InputHandle(0, handle_function, self)
+        return InputHandle(InputHandle.PRIORITY_CLIENT, handle_function, self)

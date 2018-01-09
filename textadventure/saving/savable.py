@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from textadventure.player import Player
@@ -79,6 +79,58 @@ class Savable(ABC):
         pass
 
 
+class HasSavable(ABC):  # TODO do we actually need this class at all? Or can we just use the savables dict in Handler?
+    """
+    Can be used for classes that don't actually inherit Savable, but have a savable object
+    """
+    def __init__(self, savable: Optional[Savable]):
+        """
+        Constructor for a HasSavable instance which should be called by superclasses. When created, this class
+        and other subclasses aren't expected to add the Savable to the dictionary at handler.savables. Of course,
+        if the Savable is None, there's no point in putting it at handler.savables.
+
+        :param savable: A savable that should stick with the instance and the save file forever.It is optional because
+                when None, that means that this can't be saved or shouldn't be saved. The savable should save
+                important things from this class and basically handle the saving and loading of this class.
+        """
+
+        self.savable = savable if savable is not None else self._create_savable()
+        """Contains the Savable object that is used to saved data on this object. The point of this field is
+        to provide an access point to the savable object meaning that interacting with this object regularly
+        isn't what you should be doing. This should be used upon the initialization of this object and no
+        other objects."""
+
+    @abstractmethod
+    def _create_savable(self) -> Optional[Savable]:
+        """
+        This method is protected meaning that this should be overridden by subclasses and normally, it should only
+        be called in the HasSavable class
+
+        This method should return a Savable based on the inherited subclasses and the data you want to be saved.
+
+        If this method is implemented in a superclass, but not in a subclass, there will probably be errors if the
+        game is saved and loaded so it is almost always recommended to override this if possible.
+
+        :return: A Savable that will be set to self.savable or None.
+        """
+        pass
+
+
+"""
+This multi-line comment is just me thinking
+
+Do we really need the HasSavable class?
+Yes:
+* It allows things to have savables and use their data
+* It allows us to easily access the Savable object assuming the created object doesn't require one as a parameter
+
+Do we need to allow classes to use the data stored in a Savable?
+* No: We just store stuff in handler.savables and let the Savables handle stuff when loaded
+* Yes: 
+
+How are 
+"""
+
 """
 no one goes in this class right?
                                                &&&&&&&
@@ -90,9 +142,16 @@ no one goes in this class right?
                                     &&&&       /_            &&&&
                                     &&&&                     &&&&
                                     &&&&-_   -_____-       _-&&&&
-                                    &&&&  \_______________/  &&&&
+                                    &&&&  \_____-_________/  &&&&
                                     &&&&        |  |         &&&&
                                           _____/    \_______
+                                    __---^                  ^---__
+                               _---^                              ^---__
+                              /         __                  __          \ 
+                              |        ^ |                  | ^         |
+                              |       /  |                  |  \        |
+                              |      |   |                  |   |       |
+                              |      |   |                  |   |       |
                             I am an unfinished random person. Please finish me
                                         
 

@@ -207,13 +207,34 @@ class PlayerInputHandler(InputHandler):
 
 
 class InputHandle:  # returned and used to indicate when the handle function should be called
+    PRIORITY_LOW = 12
+    """Priority that is lower than PRIORITY_LOCATION."""
+    PRIORITY_LOCATION = 10
+    """Priority that should be used for almost all locations that handle commands"""
+
+    PRIORITY_COMMAND = 8
+    """Priority that should be used for almost all commands"""
+    PRIORITY_COMMAND_ALIAS = 7
+    """Priority that should be used for some commands. It is a higher priority than PRIORITY_COMMAND"""
+    PRIORITY_UNINTERRUPTED = 6
+    """Priority that should be used for custom parts. (Maybe a NameTaker or an options menu)"""
+    PRIORITY_COMMAND_HIGH = 5
+    """Priority that almost guarantees this will be handled first. (Although client side stuff will be handled first)"""
+
+    PRIORITY_CLIENT = 1
+    """Should be used for most client side commands that you don't want going to the server. One of the highest
+    priorities"""
+    PRIORITY_CLIENT_HIGH = 0
+    """Should be used if you are making something that you don't want anything else to handle. Highest priority"""
+
     def __init__(self, priority: int, handle: Callable[[List[InputHandleType]], InputHandleType],
                  input_handler: InputHandler):
         """
-        Note that 0 and 1 should be reserved for client side and to be safe, you shouldn't use 2 or 3 if what you're \
-                is not client side only
+        Note that 0 and 1 should be reserved for client side and to be safe, you shouldn't use 2 or 3 if what you're
+        is not client side only
 
-        :param priority: determines the order to call things in. Lower called first. Ex: 0 then 2 then 10
+        :param priority: determines the order to call things in. Lower called first. Ex: 0 then 2 then 10. Note it is\
+                recommended to use the class variables provided by using InputHandle.PRIORITY_<needed priority here>
         :param handle: A function that should return a InputHandleType and should expect a list of InputHandleType
         """
         self.priority = priority

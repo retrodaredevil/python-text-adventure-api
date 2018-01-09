@@ -10,8 +10,8 @@ from textadventure.player import Player
 class Weapon(Item):
     """
     All weapons should be items because they are going to be in your inventory and making them items makes it easier\
-        to change data for the weapon. Ex: A Weapon could be your right fist, but if you use the command use right fist,\
-        it would do something. That's why all Weapons will be items. Thanks for listening.
+    to change data for the weapon. Ex: A Weapon could be your right fist, but if you use the command use right fist,
+    it would do something. That's why all Weapons will be items. Thanks for listening.
 
     A weapon can also be something like a potion. Basically, a weapon is just something that you use in a battle
 

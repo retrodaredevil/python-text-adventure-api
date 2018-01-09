@@ -11,6 +11,7 @@ from textadventure.item.item import Item
 from textadventure.item.items import Wallet, Coin, CoinType
 from textadventure.location import Location, GoAction
 from textadventure.player import Player
+from textadventure.saving.handlerinit import IdentifiableInitialize
 from textadventure.sending.message import Message, MessageType
 from textadventure.utils import is_string_true, Point, SOUTH, EAST, WEST, NORTH, UP, DOWN, DIRECTIONS, CanDo
 
@@ -94,7 +95,7 @@ class NameTaker(PlayerInputHandler):
             self.current_name = None  # reset
             return InputHandleType.HANDLED
 
-        return InputHandle(4, handle_function, self)
+        return InputHandle(InputHandle.PRIORITY_UNINTERRUPTED, handle_function, self)
 
 
 class Entrance(Location):  # players should only be in this location when starting the ninjagame
@@ -140,7 +141,7 @@ class Entrance(Location):  # players should only be in this location when starti
                 handler.input_handlers.append(NameTaker(player))
             return InputHandleType.HANDLED
 
-        return InputHandle(10, handle_function, self)
+        return InputHandle(InputHandle.PRIORITY_LOCATION, handle_function, self)
 
     def feel(self, handler: Handler, player: Player):
         player.send_message(self.__class__.FEEL_MESSAGE)
@@ -535,17 +536,28 @@ class CenterSpiderWebForest(Location):
 
 
 class EastCenterSpiderWebForest(Location):
+    ID_WHITE_BELT_NINJA = ("EastCenterSpiderWebForest", 0)  # don't change to avoid loading errors
 
-    def __init__(self, handler: Handler):
+    def __init__(self):
         super().__init__("East of the Center of the Spider Web Forest",
                          "A nice big field with trees all around. You can see the path to the fountain to the west.",
                          Point(1, 3))
-        ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self)
-        sword = Sword(SwordType.WOODEN)
-        sword.change_holder(None, ninja)
-        handler.identifiables.append(ninja)
+        # ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self)
+        # sword = Sword(SwordType.WOODEN)
+        # sword.change_holder(None, ninja)
+        # handler.identifiables.append(ninja)
+        # self.ninja = ninja
+        self.ninja = None  # right now, this hasn't been initialized
 
-        self.ninja = ninja
+        def create_ninja():
+            ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self)
+            sword = Sword(SwordType.WOODEN)
+            sword.change_holder(None, ninja)
+
+            self.ninja = ninja
+            return ninja, ninja.savable
+
+        self.initializers.append(IdentifiableInitialize(self.__class__.ID_WHITE_BELT_NINJA, create_ninja))
 
     def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput):
         return None

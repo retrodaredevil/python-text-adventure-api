@@ -50,6 +50,8 @@ class CustomGame(ABC):
         necessary objects like a Savable, and other things that can be used to keep track of progress, or have \
         custom things
 
+        Remember, this method is only called when there is a new player
+
         :param handler: The handler that handles the game
         :param player: The new player that joined
         """

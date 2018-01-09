@@ -21,7 +21,7 @@ def is_path_valid(path: Path):
     return not path.is_reserved() and os.path.splitext(path.name)[1] == ".data"
 
 
-def save(handler, player: Player, path: Path = DEFAULT_PATH, override_file: bool = False) -> CanDo:
+def save(handler: 'Handler', player: Player, path: Path = DEFAULT_PATH, override_file: bool = False) -> CanDo:
     """
     Saves the data to the file. Will overwrite data if there is any
 
@@ -56,7 +56,7 @@ def save(handler, player: Player, path: Path = DEFAULT_PATH, override_file: bool
     return True, "Success in saving to file: '{}'. Saved {} parts".format(path.absolute().name, len(to_save))
 
 
-def load(handler, player: Player, path: Path = DEFAULT_PATH) -> CanDo:
+def load(handler: 'Handler', player: Player, path: Path = DEFAULT_PATH) -> CanDo:
     """
     Loads the player's save data from a file
 
@@ -125,10 +125,20 @@ class Saving:
         return self.path.joinpath("handler.dat")
 
     def _get_player_path(self, player: Player):
-        return self.path.joinpath(player.name + ".player.dat")
+        return self.path.joinpath("players/" + str(player.uuid) + ".dat")
 
-    def save_handler(self, handler: 'Handler'):
+    def _save_data(self, data, path: Path) -> CanDo:
+        pass
+
+    def _load_data(self, path: Path) -> CanDo:
+        pass
+
+    def save_handler(self, handler: 'Handler') -> CanDo:
         path = self._get_handler_path()
+        return self._save_data(handler.get_savables(), self._get_handler_path())
+
+    def save_player(self, player: Player) -> CanDo:
+        pass
 
 
 class SaveCommandHandler(SimpleCommandHandler):
@@ -150,7 +160,7 @@ class SaveCommandHandler(SimpleCommandHandler):
 
         result = save(handler, player, path, True)  # TODO ask the player if they want override_file to be True
         if result[0]:
-            player.send_message("You successfully saved your ninjagame to '{}'".format(path.name))
+            player.send_message("You successfully saved your game to '{}'".format(path.name))
         else:
             player.send_message(result[1])
         return InputHandleType.HANDLED
@@ -158,7 +168,7 @@ class SaveCommandHandler(SimpleCommandHandler):
 
 class LoadCommandHandler(SimpleCommandHandler):
     command_names = ["load"]
-    description = "Allows you to load a saved ninjagame.\n" \
+    description = "Allows you to load a saved game.\n" \
                   "Usage: load [file name/path]"
 
     def __init__(self):
@@ -177,7 +187,7 @@ class LoadCommandHandler(SimpleCommandHandler):
         was_loaded = load(handler, player, path)
 
         if was_loaded[0]:
-            player.send_message("You successfully loaded your ninjagame from '{}'".format(path.name))
+            player.send_message("You successfully loaded your game from '{}'".format(path.name))
         else:
             player.send_message(was_loaded[1])
         return InputHandleType.HANDLED

@@ -260,7 +260,7 @@ class DirectionInputHandler(PlayerInputHandler):
             command_name = command_input.get_command()
 
             if get_point(handler, player, command_name) is not None:  # we'll let the GoCommandHandler do what it wants
-                return InputHandle(7, handle_function, self)
+                return InputHandle(InputHandle.PRIORITY_COMMAND_ALIAS, handle_function, self)
         return None
 
 

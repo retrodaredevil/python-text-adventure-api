@@ -30,7 +30,7 @@ class CommandHandler(InputHandler):
                 return InputHandleType.HANDLED
             return self._handle_command(handler, sender, command_input)
 
-        return InputHandle(8, handle_function, self)  # 8 because most locations should return 10
+        return InputHandle(InputHandle.PRIORITY_COMMAND, handle_function, self)
 
     @abstractmethod
     def send_help(self, sender: CommandSender):

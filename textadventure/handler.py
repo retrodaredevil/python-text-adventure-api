@@ -1,12 +1,16 @@
-from typing import List, Optional, TypeVar, Type, TYPE_CHECKING
+from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any, Dict, Collection
 
 from textadventure.action import Action
-from textadventure.entity import Entity
+from textadventure.entity import Entity, Identifiable
 from textadventure.manager import Manager
 from textadventure.player import Player, Living
+from textadventure.saving.savable import Savable
 from textadventure.sending.commandsender import CommandSender
-from textadventure.utils import Point, get_type_from_list
+from textadventure.utils import Point, get_type_from_list, TypeCollection
 from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler
+
+if TYPE_CHECKING:
+    from textadventure.location import Location
 
 
 T = TypeVar("T")
@@ -14,10 +18,10 @@ T = TypeVar("T")
 
 def has_only(the_list: List[T], only_list: List[T]):
     """
-    Makes sure that all the items in a list are equal to one of the items in only_list
+    Checks to make sure that all the items that are in the_list are in only_list
 
     :param the_list: The list to check
-    :param only_list: The list of acceptable objects to make sure that every weapon in the list is one of these objects
+    :param only_list: The list of acceptable objects to make sure that every element in the list is one of these objects
     :return: True if all the items in the list are equal to only, Also True if there are no items in list.
     """
     for ele in the_list:
@@ -27,25 +31,86 @@ def has_only(the_list: List[T], only_list: List[T]):
 
 
 class Handler:
+    """
+    Although initializing data in this class requires other classes, this class holds all necessary data and functions
+    to keep the game running without help from other object.
+    """
 
-    def __init__(self):
+    def __init__(self, identifiables: List[Identifiable], locations: List['Location'],
+                 input_handlers: List[InputHandler], managers: List[Manager], savables: Dict[Any, Savable]):
+        """
+        Creates the Handler object with parameters where some are able to change
+
+        :param identifiables: The starting List of Identifiables. Normally, this list is very small or empty
+                since the Handler object needs to be constructed to initialize some Identifiables. Don't be afraid to
+                pass an empty list or a list with one Player.
+        :param locations: List of all the locations in the game that normally should almost never change
+        :param input_handlers: The list of starting InputHandlers where most of the elements shouldn't be removed.
+        :param managers: The list of starting Managers
+        :param savables: The Dictionary that was loaded from a save file or an empty dict if there was no save file
+                that was loaded from
+        """
         # self.entities = []
-        self.identifiables = []
-        self.locations = []
-        self.input_handlers = []
+        self.identifiables = identifiables  # TODO change the getter methods for these into a Sequence
+        """Contains Players, Entities and other types of Identifiables. Note that when a player is added to this list,
+        it should and will be saved separately. 
+        
+        Other elements like Entities that aren't Players will only be saved
+        if you have called set_savable and passed a Savable that will handle saving and loading for the Entity or
+        Identifiable."""
+        self.locations = locations
+        self.input_handlers = input_handlers
         """A list of InputHandlers that do not include Locations"""
-        self.managers = []
+        self.managers = managers
+        self._savables = savables
+        """
+        A Dictionary of savables where the key is something that is usually a tuple with the first value
+        being the name of the class that created it and the second value being a number or id to make sure that
+        that class can create multiple of something. 
+        
+        Note this does not include PlayerSavables. PlayerSavables are handled separately
+        
+        If this is something like a PlayerSavable, you should use their
+        uuid because you aren't going to be creating a Player named Bob at one point in the code like you might
+        create an entity named 'White Belt Ninja' once in the code
+        """
+
+        # Variables not from the constructor
         self.living_things = []
         """A list of livings that normally should never change. It's used to keep track of Living \
         objects which make them easy to retrieve without using a static variable in the class of the living"""
 
-        self.savables = []
-        """A Dictionary of savables where the key is something that - this is not completed"""  # TODO
+    def get_savable(self, key):
+        return self._savables.get(key, None)
+
+    def set_savable(self, key, value: Savable):
+        """
+        Sets the savable so get_savable(key) returns value.
+
+        :param key: The key. Usually A UUID or a Tuple[str, int]. It should never contain something like a type or
+                an instance of an object because we want it to be something if if saved, won't conflict later while
+                loading
+        :param value:
+        :return: None
+        """
+        self._savables[key] = value
+
+    def get_savables(self):
+        """
+        This should not be called to edit the savables dictionary, this should be used when saving or doing something
+        that get_savable or set_savable can't do
+
+        :return: Returns the dictionary of Savables.
+        """
+        return self._savables
 
     def start(self):
         """
          Starts the infinite loop for the ninjagame
         """
+        for location in self.locations:  # TODO should we initialize stuff in here?
+            for initializer in location.initializers:
+                initializer.do_init(self)
         while True:
             for player in self.get_players():
                 player.update(self)
@@ -119,7 +184,13 @@ class Handler:
 
         return r
 
-    def get_location(self, location_type: type):
+    def get_location(self, location_type: type, return_multiple=False):
+        """
+
+        :param location_type: The type of the location you are trying to get
+        :param return_multiple: Normally False. If True, this will return a list of locations instead of a single one
+        :return:
+        """
         for location in self.locations:
             # print("location's type: " + str(type(location)))
             # print("location_type: " + str(location_type))
@@ -127,18 +198,22 @@ class Handler:
                 return location
         return None
 
-    def get_players(self) -> List[Player]:
-        r = []
-        for entity in self.identifiables:
-            if isinstance(entity, Player):
-                r.append(entity)
-        return r
+    def get_players(self) -> Collection[Player]:
+        # r = []
+        # for entity in self.identifiables:
+        #     if isinstance(entity, Player):
+        #         r.append(entity)
+        # return r
+        # return get_type_from_list(self.identifiables, Player, None)
+        return TypeCollection(self.identifiables, [Player])
 
-    def get_entities(self) -> List[Entity]:
-        return get_type_from_list(self.identifiables, Entity, None)
+    def get_entities(self) -> Collection[Entity]:
+        # return get_type_from_list(self.identifiables, Entity, None)
+        return TypeCollection(self.identifiables, [Entity])
 
-    def get_command_senders(self) -> List[CommandSender]:
-        return get_type_from_list(self.identifiables, CommandSender, None)
+    def get_command_senders(self) -> Collection[CommandSender]:
+        # return get_type_from_list(self.identifiables, CommandSender, None)
+        return TypeCollection(self.identifiables, [CommandSender])
 
     def get_managers(self, manager_types: Type[Manager], expected_amount: Optional[int] = None) \
             -> List[Manager]:
