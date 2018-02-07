@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Optional
+from typing import Optional, Any
 
 from textadventure.handler import Handler
 from textadventure.item.holder import Holder
@@ -40,6 +40,7 @@ class FiveSensesHandler(ABC):
         pass
 
 
+# noinspection PyAbstractClass
 class Item(Savable, FiveSensesHandler):
     # doesn't have implementation for any methods of FiveSensesHandler so it's abstract
 
@@ -57,7 +58,7 @@ class Item(Savable, FiveSensesHandler):
     CANNOT_PUT = (False, "You can't place this")
     CANNOT_PUT_IN_LOCATION = (False, "It's already placed")  # may be returned from can_put
 
-    non_serialized = ["holder"]
+    # non_serialized = ["holder"]
     """
     An object that's handled by the object containing the Item
 
@@ -66,12 +67,12 @@ class Item(Savable, FiveSensesHandler):
     For calling any of the five senses methods, you should make sure the player is able to do that on this weapon
     """
 
-    def __new__(cls, *args, **kwargs):
-        """Needed for saving and so the non_serialized attribute actually works"""
-        instance = object.__new__(cls)
-        for item in cls.non_serialized:  # weapon is a string
-            setattr(instance, item, None)
-        return instance
+    # def __new__(cls, *args, **kwargs):
+    #     """Needed for saving and so the non_serialized attribute actually works"""
+    #     instance = object.__new__(cls)
+    #     for item in cls.non_serialized:  # weapon is a string
+    #         setattr(instance, item, None)
+    #     return instance
 
     def __init__(self, name: str, needs_light_to_see: bool):
         """
@@ -83,10 +84,10 @@ class Item(Savable, FiveSensesHandler):
         """
         super().__init__()
         self.name = name
-        self.holder = None  # can be player, location etc
+        # self.holder = None  # can be player, location etc
         """This object represents whatever is holding the item. It could be None if nothing is holding the item.\
         If that's the case, then this shouldn't be interacting with anything"""
-        self.non_serialized = self.__class__.non_serialized
+        # self.non_serialized = self.__class__.non_serialized
         self.__needs_light = needs_light_to_see
 
     def __str__(self):
@@ -99,27 +100,33 @@ class Item(Savable, FiveSensesHandler):
 
         :param previous_holder: The previous holder (should be the same as self.holder but pass it anyway)
         :param new_holder: The new holder
-        :return: Returns True if the holder was successfully changed. False if it was not (overriding subclasses may or\
-                        may not react to the changing or trying to change of the holder (You shouldn't react)
-        :param previous_holder test
+        :return: Returns True if the holder was successfully changed. False if it was not (overriding subclasses may or
+                 may not react to the changing or trying to change of the holder (You shouldn't react)) - This means
+                 that if for whatever reason this returns False, you should not try to send new_holder a message
+                 because whatever overrode this method has already sent new_holder a message
         """
         assert new_holder is not None, "Why would you change the holder to None?"
         # change in future if needs to delete weapon.
 
-        self.holder = new_holder
+        # self.holder = new_holder
         if previous_holder is not None and self in previous_holder.items:
             previous_holder.items.remove(self)
         if self not in new_holder.items:
             new_holder.items.append(self)
         return True
 
-    def before_save(self, player, handler):
-        """Note that player may not be the holder."""
-        # print("Saving: {}".format(type(self)))
+    def before_save(self, source: Any, handler: Handler):
+        """source should == self.holder"""
+        # assert source == self.holder, "The source must self.holder. If implementation has changed, remove this line."
+        assert isinstance(source, Holder), "Whatever is saving this item, should be a holder"
+        assert self in source.items, "If this happens, then a Holder is trying to save an item that it doesn't have"
 
-    def on_load(self, player, handler):
+    def on_load(self, source: Any, handler: Handler):
         """Note that player may not be the holder."""
-        self.holder = player
+        assert isinstance(source, Holder), "The source must be a holder"
+        # self.holder = source
+        assert self in source.items  # I think this line will work
+        # handler.debug("Items: " + str(source.items) + ", self: " + str(self))
 
     def is_reference(self, reference: str) -> bool:
         """
@@ -130,19 +137,19 @@ class Item(Savable, FiveSensesHandler):
         return are_mostly_equal(self.name, reference)
 
     def can_reference(self, player: Player) -> CanDo:
-        from textadventure.location import Location
-        if isinstance(self.holder, Location):
-            if self.holder.is_lit_up() or not self.__needs_light:
+        location = player.location
+        if self in location.items:
+            if location.is_lit_up() or not self.__needs_light:
                 return True, "You can reference this and self.holder is a Location"
-        if self.holder == player:
+        if self in player.items:
             return True, "You have the thing on you"
         return self.__class__.CANNOT_SEE
 
     def can_see(self, player: Player) -> CanDo:
-        from textadventure.location import Location
-        if isinstance(self.holder, Location):
+        location = player.location
+        if self in location.items:
             return True, "You can see this since self.holder is a Location"
-        elif self.holder == player:
+        if self in player.items:
             return False, "You cannot look at something on you!"
         return self.__class__.CANNOT_SEE
 
@@ -169,13 +176,12 @@ class Item(Savable, FiveSensesHandler):
         :param player: The player that wants to take the item or the player that you want to check if they are able to
         :return: A CanDo representing if the player can take this. (Send [1] to the player if [0] is False)
         """
-        if self.holder == player:
+        if self in player.items:
             return self.__class__.CANNOT_TAKE_ON_PERSON
         return self.__class__.CANNOT_TAKE
 
     def can_put(self, player: Player) -> CanDo:
-        from textadventure.location import Location
-        if isinstance(self.holder, Location):  # cannot place because player doesn't have it
+        if self in player.location:  # cannot place because player doesn't have it
             return self.__class__.CANNOT_PUT_IN_LOCATION
         return self.__class__.CANNOT_PUT
 

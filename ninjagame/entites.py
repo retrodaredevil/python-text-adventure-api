@@ -1,3 +1,6 @@
+from typing import Optional
+from uuid import UUID
+
 from ninjagame.data import EventsObject
 from textadventure.entity import Living, CommunityHostileEntity
 from textadventure.player import Player
@@ -54,7 +57,7 @@ class NinjaDude(Living):
 
 
 class NinjaEntity(CommunityHostileEntity):
-    def __init__(self, name, health, location):
-        super().__init__(name, health, location, [Player])
+    def __init__(self, name, health, location, uuid: Optional[UUID], savable: Optional[Savable]):
+        super().__init__(name, health, location, [Player], uuid, savable)
 
 

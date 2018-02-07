@@ -103,8 +103,7 @@ class Entity(Living, Holder, Identifiable, HasSavable):
     """
     Represents something that has a location and has health
     """
-    def __init__(self, name: str, health: Health, location: 'Location', uuid: UUID = None,
-                 savable: Optional[Savable] = None):
+    def __init__(self, name: str, health: Health, location: 'Location', uuid: Optional[UUID], savable: Optional[Savable]):
         """
         Creates an Entity the the given parameters
 
@@ -131,16 +130,6 @@ class Entity(Living, Holder, Identifiable, HasSavable):
         by yourself because you probably want to do it with GoAction or something similar that abstracts a few 
         details away.
         """
-
-    # def can_entity_pass(self, entity: 'Entity') -> CanDo:
-    #     """ Not going to use this - define in HostileEntity
-    #     Called when a entity, usually a player, is trying to go to another location.
-    #     This will be called if this entity is in the same location as the entity trying to move to another location
-    #     :param entity: The entity trying to move to another location
-    #     :return: A CanDo tuple where [0] is a boolean value representing the the entity can pass and if False,\
-    #                 [1] is the reason why the entity can't pass. (It will be displayed)
-    #     """
-    #     return True, "You can pass, a hostile entity might say otherwise, though."
 
     def _create_savable(self):
         """
@@ -172,8 +161,8 @@ class HostileEntity(Entity):  # abstract
 
     CANNOT_PASS_STRING = "You can't pass because {} wants to eat you."
 
-    def __init__(self, name: str, health: Health, location):
-        super().__init__(name, health, location)
+    def __init__(self, name: str, health: Health, location, uuid: Optional[UUID], savable: Optional[Savable]):
+        super().__init__(name, health, location, uuid, savable)
 
     @abstractmethod
     def can_entity_pass(self, entity: Entity) -> CanDo:
@@ -188,8 +177,9 @@ class HostileEntity(Entity):  # abstract
 
 
 class SimpleHostileEntity(HostileEntity):
-    def __init__(self, name: str, health: Health, location, hostile_to_types: List[Type[Entity]]):
-        super().__init__(name, health, location)
+    def __init__(self, name, health, location, hostile_to_types: List[Type[Entity]], uuid: Optional[UUID],
+                 savable: Optional[Savable]):
+        super().__init__(name, health, location, uuid, savable)
         self.hostile_to_types = hostile_to_types
 
         self.hostile_now = True
@@ -207,8 +197,8 @@ class SimpleHostileEntity(HostileEntity):
         :return:
         """
         if self.health.is_fainted():
-            return True, "I can't fight you because I'm dead."
-        return False, "Message shouldn't be displayed. There is no reason to let this entity pass."
+            return True, "(Not displayed) I can't fight you because I'm dead."
+        return False, "(Not displayed) There is no reason to let this entity pass."
 
     def _is_type_target(self, entity: Entity) -> bool:
         """
@@ -222,6 +212,10 @@ class SimpleHostileEntity(HostileEntity):
         return False
 
     def can_entity_pass(self, entity: Entity):
+        """
+        This is a method that is declared in HostileEntity and overridden in SimpleHostileEntity. This should not be
+        overridden in subclasses of SimpleHostileEntity, instead override _can_pass
+        """
         if not self.hostile_now:
             return True, "I'm not hostile right now"
 
@@ -239,8 +233,8 @@ class SimpleHostileEntity(HostileEntity):
 
 
 class CommunityHostileEntity(SimpleHostileEntity):
-    def __init__(self, name: str, health: Health, location, hostile_to_types: List[Type[Entity]]):
-        super().__init__(name, health, location, hostile_to_types)
+    def __init__(self, name, health, location, hostile_to_types, uuid: Optional[UUID], savable: Optional[Savable]):
+        super().__init__(name, health, location, hostile_to_types, uuid, savable)
         self.entities_lost_to = []
         self.entities_won_against = []
 

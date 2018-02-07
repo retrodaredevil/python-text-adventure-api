@@ -290,10 +290,21 @@ class TakeCommandHandler(SimpleCommandHandler):
         if can_take[0] is False:
             player.send_message(can_take[1])
             return InputHandleType.HANDLED
-        previous_holder = item.holder
-        if item.change_holder(previous_holder, player) and isinstance(previous_holder, Location):
-            previous_holder.on_take(handler, item)
-            player.send_message(Message("You took {}.", named_variables=[item]))
+
+        # if we are here, the player is allowed to take this item
+
+        if item in player.location.items:
+            if item.change_holder(player.location, player):
+                player.location.on_take(handler, item, player)
+                player.send_message(Message("You took {}.", named_variables=[item]))
+        else:
+            player.send_message("You were unable to take the item because we couldn't find who had the item.\n"
+                                "Obviously, this is kind of embarrassing so please tell someone what you did "
+                                "so it can be fixed.")
+
+        # previous_holder = item.holder
+        # if item.change_holder(previous_holder, player) and isinstance(previous_holder, Location):
+        #     previous_holder.on_take(handler, item)
         return InputHandleType.HANDLED
 
 
@@ -323,10 +334,13 @@ class PlaceCommandHandler(SimpleCommandHandler):
         if can_put[0] is False:
             player.send_message(can_put[1])
             return InputHandleType.HANDLED
-        previous_holder = item.holder
-        if item.change_holder(previous_holder, player.location):
-            player.location.on_place(handler, item, player)
-            player.send_message(Message("You placed {}.", named_variables=[item]))
+        if item in player.items:
+            if item.change_holder(player, player.location):
+                player.location.on_place(handler, item, player)
+                player.send_message(Message("You placed {}.", named_variables=[item]))
+        else:
+            player.send_message("Apparently, that item that you tried to place isn't in your inventory.\n"
+                                "Please tell someone what you did so it can be fixed. (This message shouldn't appear)")
         return InputHandleType.HANDLED
 
 

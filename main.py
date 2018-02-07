@@ -50,7 +50,6 @@ def default_load(player: Player, handler: Handler):
     # player.handled_objects.append(PlayerSavable())
     player[PlayerFriend] = PlayerFriend("Friend")  # not used as a magic string
     player[EventsObject] = EventsObject()
-    player[PlayerSavable] = PlayerSavable()
 
 
 def after_player(handler: Handler, player: Player):
@@ -113,7 +112,7 @@ def setup():
         print_section.update_lines(printer)
         input_section.update_lines(printer)
 
-        player = Player(player_input, output, None)
+        player = Player(player_input, output, None, None)
 
         handler.managers.append(LocationTitleBarManager(player, printer, title_section.print(printer, "")))
 

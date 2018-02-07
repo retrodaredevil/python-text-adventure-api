@@ -7,11 +7,13 @@ from textadventure.entity import Health
 from textadventure.handler import Handler
 from textadventure.input.inputhandling import CommandInput, InputHandle, InputHandleType
 from textadventure.input.inputhandling import PlayerInputHandler
+from textadventure.item.holder import Holder
 from textadventure.item.item import Item
 from textadventure.item.items import Wallet, Coin, CoinType
 from textadventure.location import Location, GoAction
 from textadventure.player import Player
 from textadventure.saving.handlerinit import IdentifiableInitialize
+from textadventure.saving.savable import Savable
 from textadventure.sending.message import Message, MessageType
 from textadventure.utils import is_string_true, Point, SOUTH, EAST, WEST, NORTH, UP, DOWN, DIRECTIONS, CanDo
 
@@ -260,10 +262,11 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
             return CANT_MOVE_DIRECTION
         return CANT_JUMP_LOCATION
 
-    def on_take(self, handler: Handler, item: Item):
-        if not isinstance(item.holder, Player):
+    def on_take(self, handler: Handler, item: Item, new_holder: Holder):
+        if not isinstance(new_holder, Player):
+            # If something else took the item we don't care. However, it's possible that this causes bugs so be careful
             return
-        player = item.holder
+        player = new_holder
         if isinstance(item, Wallet):
             if player[EventsObject].been_introduced_to_furry:
                 handler.get_livings(OtherPerson, 1)[0].tell(player, "Hey that's not yours!")
@@ -542,20 +545,17 @@ class EastCenterSpiderWebForest(Location):
         super().__init__("East of the Center of the Spider Web Forest",
                          "A nice big field with trees all around. You can see the path to the fountain to the west.",
                          Point(1, 3))
-        # ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self)
-        # sword = Sword(SwordType.WOODEN)
-        # sword.change_holder(None, ninja)
-        # handler.identifiables.append(ninja)
-        # self.ninja = ninja
         self.ninja = None  # right now, this hasn't been initialized
 
-        def create_ninja():
-            ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self)
+        def create_ninja(savable: Optional[Savable]):
+            uuid = None
+            if savable is not None:
+                uuid = savable.uuid  # TODO make the savable have a uuid or something
+            self.ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self, uuid, savable)
             sword = Sword(SwordType.WOODEN)
-            sword.change_holder(None, ninja)
+            sword.change_holder(None, self.ninja)
 
-            self.ninja = ninja
-            return ninja, ninja.savable
+            return self.ninja
 
         self.initializers.append(IdentifiableInitialize(self.__class__.ID_WHITE_BELT_NINJA, create_ninja))
 

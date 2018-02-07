@@ -26,7 +26,7 @@ class NinjaGame(CustomGame):
 
         player[PlayerFriend] = PlayerFriend("Friend")  # not used as a magic string
         player[EventsObject] = EventsObject()
-        player[PlayerSavable] = PlayerSavable()
+        # player[PlayerSavable] = PlayerSavable()
 
     def create_locations(self, handler: Handler) -> List[Location]:
         return [Entrance(), InsideEntrance(), EastInsideEntrance(), WestInsideEntrance(),

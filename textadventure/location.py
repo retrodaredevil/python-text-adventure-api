@@ -73,7 +73,7 @@ class Location(Holder, PlayerInputHandler, FiveSensesHandler):
         """
         return are_mostly_equal(self.name, reference)
 
-    def on_take(self, handler: Handler, item: Item) -> None:
+    def on_take(self, handler: Handler, item: Item, new_holder: Holder) -> None:
         """
         By default, doesn't do anything. Is called after the weapon's change_holder is called and should not be called\
         inside the weapon's change_holder function
@@ -82,6 +82,7 @@ class Location(Holder, PlayerInputHandler, FiveSensesHandler):
 
         :param handler: The handler object
         :param item: The weapon that was taken
+        :param new_holder: The new holder that is currently holding the item (item in new_holder.items is True)
         :return: None
         """
         pass

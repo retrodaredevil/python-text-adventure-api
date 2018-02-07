@@ -1,10 +1,10 @@
-from typing import Callable, Tuple, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING, Optional
 
-from textadventure.saving.savable import Savable
+from textadventure.entity import Identifiable
+from textadventure.saving.savable import Savable, HasSavable
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler
-    from textadventure.entity import Identifiable
 
 
 class HandlerInitialize:
@@ -26,18 +26,20 @@ class HandlerInitialize:
 
 
 class IdentifiableInitialize(HandlerInitialize):
-    def __init__(self, key, create_callable: Callable[[], Tuple['Identifiable', Savable]]):
+    def __init__(self, key, create_callable: Callable[[Optional[Savable]], HasSavable]):
         """
         :param key: The key to get the Savable from Handler if it is there
         :param create_callable: A Callable that will be called only if a Savable wasn't found in Handler. This should\
-                return the Identifiable that will be added to handler.identifiables and also return the savable that\
-                will be put under the key. (It returns a Tuple value)
+                return the Identifiable that will be added to handler.identifiables which is also an instance of
+                HasSavable
         """
         def init_callable(handler: 'Handler'):
-            created, savable = self.create_callable()
+            created = self.create_callable(handler.get_savable(key))
+            assert isinstance(created, Identifiable) and isinstance(created, HasSavable)
+
             handler.identifiables.append(created)
             # don't call handler.set_savable because the superclass does that
-            return savable
+            return created.savable
 
         super().__init__(key, init_callable)
         self.create_callable = create_callable

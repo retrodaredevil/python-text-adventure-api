@@ -1,6 +1,8 @@
 from typing import TypeVar, Type, Optional, TYPE_CHECKING
 
 from textadventure.entity import Entity, Health, Living
+from textadventure.saving.playersavable import PlayerSavable
+from textadventure.saving.savable import Savable
 from textadventure.sending.commandsender import InputGetter, OutputSender, CommandSender
 
 if TYPE_CHECKING:
@@ -12,18 +14,21 @@ T = TypeVar("T")
 
 
 class Player(Entity, CommandSender):
-    def __init__(self, command_input: InputGetter, player_output: OutputSender, name: Optional[str]):
+    def __init__(self, command_input: InputGetter, player_output: OutputSender, name: Optional[str],
+                 savable: Optional[Savable]):
         """
         :param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
                     that players' names are one word while other entities are multiple so no one can name themselves\
                     the name of an important entity
         """
-        super().__init__(name, Health(30, 30), None)  # TODO max_health, current_health, location
+        super().__init__(name, Health(30, 30), None, None, savable)  # TODO max_health, current_health, location
         CommandSender.__init__(self, command_input, player_output)
-        # self.__getitem__(PlayerFriend): Living = None
         self.handled_objects = []
-        """A list of objects which will be saved if they inherit Savable"""
-        # self.__getitem__(EventsObject): 'EventsObject' = data_object
+        """A list of objects which will be saved if they inherit Savable. This list does not include self.savable as
+        self.savable should help handle saving THIS list."""
+
+    def _create_savable(self):
+        return PlayerSavable()
 
     def __getitem__(self, item: Type[T]) -> Optional[T]:
         if not isinstance(item, type):

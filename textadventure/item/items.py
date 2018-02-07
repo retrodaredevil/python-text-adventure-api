@@ -1,5 +1,5 @@
 from enum import unique, Enum
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Any
 
 from textadventure.handler import Handler
 from textadventure.item.item import Item
@@ -26,10 +26,13 @@ class Coin(Item):
         self.coin_type = coin_type
 
     def change_holder(self, previous_holder: Optional[Holder], new_holder: Holder) -> bool:
-        if isinstance(new_holder, Player):
+        if isinstance(new_holder, Player):  # money goes into the player's wallet instead of their inventory
             wallet = new_holder.get_wallet()
             if wallet is not None:
                 new_holder = wallet
+            else:
+                new_holder.send_message("You don't have a wallet so this will be added to your inventory.\n"
+                                        "If you are seeing this message, please report it so it can be fixed.")
 
         return super().change_holder(previous_holder, new_holder)
 
@@ -42,11 +45,19 @@ class Coin(Item):
             player.send_message("You feel a nice GOLDEN coin. It's worth a lot! It's a {}!".format(name))
         else:
             player.send_message("You feel a nice coin. It's a {}!".format(name))
+
+        if self in player.items:  # TODO make a more reliable way of getting the holder and how much more money there is
+            holder = player
+        else:
+            wallet = player.get_wallet()
+            assert wallet is not None
+            holder = wallet
+
         amount_more = 0
-        for item in self.holder.items:  # use self.holder because it's probably the player's wallet
+        for item in holder.items:
             if isinstance(item, Coin) and item.coin_type is self.coin_type:
                 amount_more += 1
-        if self.holder == player:
+        if holder == player:
             player.send_message("You have {} more of this type of coin.".format(amount_more))
         else:
             player.send_message("There are {} more of this type of coin.".format(amount_more))
@@ -82,15 +93,15 @@ class Wallet(Item, Holder):
         super().__init__("wallet", True)
         Holder.__init__(self)
 
-    def before_save(self, player, handler):
-        super().before_save(player, handler)
+    def before_save(self, source: Any, handler: Handler):
+        super().before_save(source, handler)
         for item in self.items:
-            item.before_save(player, handler)
+            item.before_save(self, handler)
 
-    def on_load(self, player, handler):
-        super().on_load(player, handler)
+    def on_load(self, source: Any, handler: Handler):
+        super().on_load(source, handler)
         for item in self.items:
-            item.on_load(player, handler)
+            item.on_load(self, handler)  # This wallet is the source for each coin in it
 
     def can_hold(self, item: Item):  # from Holder
         return isinstance(item, Coin)
