@@ -1,6 +1,6 @@
 import sys
 from difflib import SequenceMatcher
-from typing import Union, List, Tuple, TypeVar, Type, Optional, Collection, Iterator
+from typing import Union, List, Tuple, TypeVar, Type, Optional, Iterator, Container, Iterable, Generic
 
 # if TYPE_CHECKING:
 #     from textadventure.message import Message
@@ -236,7 +236,7 @@ be doing that"""
 T = TypeVar('T')
 
 
-class TypeCollection(Collection[T]):
+class TypeCollection(Generic[T], Iterable[T], Container[T]):
     def __init__(self, the_list: List, types_list: List[Type], use_isinstance=True):
         """
         :param the_list: The list of elements that you want to use. Note that changing this list won't affect the one
@@ -248,10 +248,10 @@ class TypeCollection(Collection[T]):
         self.the_list = list(the_list)
         self.types_list = types_list
         self.use_isinstance = use_isinstance
+        #
+        # self._known_length = None  # simple cache for the __len__ function
 
-        self._known_length = None  # simple cache for the __len__ function
-
-    def can_have(self, element):
+    def _can_have(self, element):
         for t in self.types_list:
             can = isinstance(element, t) if self.use_isinstance else type(element) == t
             if can:
@@ -259,18 +259,18 @@ class TypeCollection(Collection[T]):
 
         return False
 
-    def __len__(self):
-        if self._known_length is not None:
-            return self._known_length
-        r = 0
-        for e in self.the_list:
-            if self.can_have(e):
-                r += 1
-        self._known_length = r
-        return self._known_length
+    # def __len__(self):
+    #     if self._known_length is not None:
+    #         return self._known_length
+    #     r = 0
+    #     for e in self.the_list:
+    #         if self.can_have(e):
+    #             r += 1
+    #     self._known_length = r
+    #     return self._known_length
 
     def __contains__(self, x):
-        return self.can_have(x) and x in self.the_list
+        return self._can_have(x) and x in self.the_list
 
     def __iter__(self):
         return TypeSequenceIterable(self)
@@ -283,7 +283,7 @@ class TypeSequenceIterable(Iterator):
 
     def __next__(self):
         n = self.iterator.__next__()
-        while not self.type_sequence.can_have(n):
+        while not self.type_sequence._can_have(n):
             n = self.iterator.__next__()
         return n
 

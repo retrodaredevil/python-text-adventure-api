@@ -41,7 +41,7 @@ class Main:
         :param player: The player that has just joined
         """
         # TODO make another method that makes sure all of the player's data is loaded if the player isn't new
-        pass
+        self.game.new_player(player)
 
     def start(self):
         assert self.handler is None, "If self.handler isn't None, then start must have been called before this."

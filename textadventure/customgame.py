@@ -44,7 +44,7 @@ class CustomGame(ABC):
         pass
 
     @abstractmethod
-    def new_player(self, handler: Handler, player: Player):
+    def new_player(self, player: Player):
         """
         An abstract method that is called whenever a new player joins the game. It should be used to give the player\
         necessary objects like a Savable, and other things that can be used to keep track of progress, or have \
@@ -52,7 +52,6 @@ class CustomGame(ABC):
 
         Remember, this method is only called when there is a new player
 
-        :param handler: The handler that handles the game
         :param player: The new player that joined
         """
         pass

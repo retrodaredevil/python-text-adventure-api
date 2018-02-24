@@ -64,7 +64,6 @@ class Player(Entity, CommandSender):
         """
         pass
 
-
     def get_wallet(self) -> 'Wallet':
         """
         This method returns the Wallet weapon. It is here so there aren't any import errors whenever you want to use it.

@@ -1,4 +1,4 @@
-from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any, Dict, Collection
+from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any, Dict
 
 from textadventure.action import Action
 from textadventure.entity import Entity, Identifiable
@@ -29,6 +29,11 @@ def has_only(the_list: List[T], only_list: List[T]):
             return False
     return True
 
+#
+# class BaseHandler:
+#     def __init__(self):
+#         pass
+
 
 class Handler(HasSavable):
     """
@@ -50,7 +55,6 @@ class Handler(HasSavable):
         :param savable: The savable that handles the saving of the Handler object
         """
         super().__init__(savable)
-        # self.entities = []
         self.identifiables = identifiables
         """Contains Players, Entities and other types of Identifiables. Note that when a player is added to this list,
         it should and will be saved separately. 
@@ -77,7 +81,7 @@ class Handler(HasSavable):
 
         # Variables not from the constructor
         self.living_things = []
-        """A list of livings that normally should never change. It's used to keep track of Living \
+        """A list of livings that normally should never change. It's used to keep track of Living
         objects which make them easy to retrieve without using a static variable in the class of the living"""
 
     def _create_savable(self):
@@ -117,27 +121,37 @@ class Handler(HasSavable):
         self._savables = savables
     # endregion
 
-    def start(self):
+    def start(self, is_manual=False):
         """
          Starts the infinite loop for the ninjagame
         """
         for location in self.locations:  # TODO should we initialize stuff in here?
             for initializer in location.initializers:
                 initializer.do_init(self)
+        if is_manual:
+            return
+
         while True:
-            for player in self.get_players():
-                player.update(self)
+            self.manual_update()
 
-            for sender in self.get_command_senders():
-                inp = sender.take_input()  # this does not pause the thread
-                if inp is not None:  # since taking input doesn't pause the thread this could be null
-                    self.__do_input(sender, inp)
+    def manual_update(self):
+        """
+        Should be called repeatedly in a loop if you called start with is_manual=True. Otherwise, this function should
+        only be used by the Handler class and will be called in its own loop
+        """
+        for player in self.get_players():
+            player.update(self)
 
-            for location in self.locations:
-                location.update(self)
+        for sender in self.get_command_senders():
+            inp = sender.take_input()  # this does not pause the thread
+            if inp is not None:  # since taking input doesn't pause the thread this could be null
+                self.__do_input(sender, inp)
 
-            for manager in self.managers:
-                manager.update(self)
+        for location in self.locations:
+            location.update(self)
+
+        for manager in self.managers:
+            manager.update(self)
 
     def __do_input(self, sender: CommandSender, inp: str):
         input_object = CommandInput(inp)
@@ -210,7 +224,7 @@ class Handler(HasSavable):
         return None
 
     # region identifiable getters
-    def get_players(self) -> Collection[Player]:
+    def get_players(self) -> TypeCollection[Player]:
         # r = []
         # for entity in self.identifiables:
         #     if isinstance(entity, Player):
@@ -219,11 +233,11 @@ class Handler(HasSavable):
         # return get_type_from_list(self.identifiables, Player, None)
         return TypeCollection(self.identifiables, [Player])
 
-    def get_entities(self) -> Collection[Entity]:
+    def get_entities(self) -> TypeCollection[Entity]:
         # return get_type_from_list(self.identifiables, Entity, None)
         return TypeCollection(self.identifiables, [Entity])
 
-    def get_command_senders(self) -> Collection[CommandSender]:
+    def get_command_senders(self) -> TypeCollection[CommandSender]:
         # return get_type_from_list(self.identifiables, CommandSender, None)
         return TypeCollection(self.identifiables, [CommandSender])
     # endregion

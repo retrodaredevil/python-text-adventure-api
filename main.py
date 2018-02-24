@@ -45,9 +45,6 @@ def default_load(player: Player, handler: Handler):
 
     assert player.location is not None, "handler.get_location returned None. Make sure you set up locations correctly."
 
-    # player.handled_objects.append(PlayerFriend("Friend"))  # not recommended way of doing this
-    # player.handled_objects.append(EventsObject())
-    # player.handled_objects.append(PlayerSavable())
     player[PlayerFriend] = PlayerFriend("Friend")  # not used as a magic string
     player[EventsObject] = EventsObject()
 
@@ -75,7 +72,7 @@ def after_player(handler: Handler, player: Player):
 
 
 def setup():
-    handler = Handler([], [], [], [], {})
+    handler = Handler([], [], [], [], None)
 
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 

@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import List
 
+from textadventure.entity import Entity
 from textadventure.handler import Handler
 from textadventure.input.inputhandling import InputHandler, CommandInput, InputHandle, InputHandleType
 from textadventure.location import Location
-from textadventure.player import Player
 from textadventure.sending.commandsender import CommandSender
 
 
@@ -96,8 +96,8 @@ class SimpleCommandHandler(CommandHandler):
     def _should_handle_command(self, command_input: CommandInput):
         return command_input.get_command().lower() in self.command_names
 
-    def send_help(self, player: Player):
-        player.send_message(self.description)
+    def send_help(self, sender: CommandSender):
+        sender.send_message(self.description)
 
 
 # noinspection PyAbstractClass
@@ -109,8 +109,8 @@ class LocationCommandHandler(SimpleCommandHandler):
         super(LocationCommandHandler, self).__init__(command_names, description)
         self.location = location
 
-    def _should_handle_player(self, player: Player) -> bool:
+    def _should_handle_player(self, sender: CommandSender) -> bool:
         """
         :return: return self.location is None or player.location == self.location
         """
-        return self.location is None or player.location == self.location
+        return self.location is None or (isinstance(sender, Entity) and sender.location == self.location)
