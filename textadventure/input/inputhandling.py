@@ -36,6 +36,10 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
     HANDLED_AND_DONE = 8
     """Represents when a response has been handled and should never be responded to again (Normally use HANDLED) \
             (It won't allow anything to respond at all after this is returned)"""
+    UNSUPPORTED_SENDER = 9
+    """Represents when there was no action taken because whatever was sending the command is unable to perform it.
+    This is not recommended every time since sometimes you will want to tell the sender that they can't perform it.
+    However, if you aren't going to tell them, you should return this instead of NOT_HANDLED"""
 
     def should_give_response(self):
         """
@@ -46,7 +50,7 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
         # return self is self.__class__.NOT_HANDLED or self is self.__class__.REMOVE_HANDLER_ALLOW_RESPONSE or \
         #     self is self.__class__.UNNOTICEABLE
         return self in [self.__class__.NOT_HANDLED, self.__class__.REMOVE_HANDLER_ALLOW_RESPONSE,
-                        self.__class__.UNNOTICEABLE]
+                        self.__class__.UNNOTICEABLE, self.__class__.UNSUPPORTED_SENDER]
 
 
 class CommandInput:

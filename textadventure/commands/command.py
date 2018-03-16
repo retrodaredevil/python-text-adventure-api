@@ -18,7 +18,7 @@ class CommandHandler(InputHandler):
         pass
 
     def on_input(self, handler: Handler, sender: CommandSender, command_input: CommandInput):
-        if not self._should_handle_player(sender) or not self._should_handle_command(command_input):
+        if not self._should_handle_sender(sender) or not self._should_handle_command(command_input):
             return None
 
         def handle_function(already_handled: List[InputHandleType]):
@@ -36,8 +36,9 @@ class CommandHandler(InputHandler):
     def send_help(self, sender: CommandSender):
         """
         Called inside from the handle_function in on_input and passed through the InputHandle returned by on_input
-        By default, the on_input method will call this method if the first argument of the command is equal to "help"\
-            so even if you don't call this in your overridden _handle_command, it can still be called.
+
+        By default, the on_input method will call this method if the first argument of the command is equal to "help"
+        so even if you don't call this in your overridden _handle_command, it can still be called.
         """
         pass
 
@@ -45,9 +46,10 @@ class CommandHandler(InputHandler):
     def _handle_command(self, handler: Handler, sender: CommandSender, command_input: CommandInput) -> InputHandleType:
         """
         The _ means that this method is meant to be "protected" and should only be called within classes and subclasses
-        Should not be called outside of CommandHandler
+        should not be called outside of CommandHandler
 
-        Obviously, since this is abstract, it should be overridden by subclasses
+        Obviously, since this is abstract, it should be overridden by subclasses. This is where your main command code
+        goes
 
         :param handler: The handler object
         :param sender:  The player object
@@ -68,7 +70,7 @@ class CommandHandler(InputHandler):
         """
         pass
 
-    def _should_handle_player(self, sender: CommandSender) -> bool:
+    def _should_handle_sender(self, sender: CommandSender) -> bool:
         """
         Tells whether or not a certain command will have an effect for a sender(Normally returns true unless overridden)
         called in on_input
@@ -109,7 +111,7 @@ class LocationCommandHandler(SimpleCommandHandler):
         super(LocationCommandHandler, self).__init__(command_names, description)
         self.location = location
 
-    def _should_handle_player(self, sender: CommandSender) -> bool:
+    def _should_handle_sender(self, sender: CommandSender) -> bool:
         """
         :return: return self.location is None or player.location == self.location
         """

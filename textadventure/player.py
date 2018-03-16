@@ -1,13 +1,13 @@
 from typing import TypeVar, Type, Optional, TYPE_CHECKING
 
-from textadventure.entity import Entity, Health, Living
+from textadventure.entity import Entity, Health
 from textadventure.saving.playersavable import PlayerSavable
 from textadventure.saving.savable import Savable
 from textadventure.sending.commandsender import InputGetter, OutputSender, CommandSender
+from textadventure.item.items import Wallet
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler
-    from textadventure.item.items import Wallet
 
 
 T = TypeVar("T")
@@ -64,14 +64,8 @@ class Player(Entity, CommandSender):
         """
         pass
 
-    def get_wallet(self) -> 'Wallet':
-        """
-        This method returns the Wallet weapon. It is here so there aren't any import errors whenever you want to use it.
-
-        :return: The wallet that's in the player's items or None if there is no Wallet
-        """
-        from textadventure.item.items import Wallet
+    def get_wallet(self):
         for item in self.items:
             if isinstance(item, Wallet):
                 return item
-        return None
+        return super().get_wallet()

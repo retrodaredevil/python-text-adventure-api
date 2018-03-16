@@ -1,6 +1,7 @@
 from typing import Optional, List
 
 from textadventure.battling.choosing import MoveOption
+from textadventure.entity import Entity
 from textadventure.handler import Handler
 from textadventure.item.item import Item
 from textadventure.player import Player
@@ -30,10 +31,10 @@ class Weapon(Item):
             move_options = []
         self.move_options = move_options
 
-    def can_take(self, player: Player):
+    def can_take(self, entity: Entity):
         return True, "You can take this"
 
-    def can_put(self, player: Player):
+    def can_put(self, entity: Entity):
         return True, "I guess you can put this. You may need it tho."
 
     def listen(self, handler: Handler, player: Player):

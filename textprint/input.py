@@ -1,7 +1,13 @@
-import curses
+import warnings
 from typing import TYPE_CHECKING
 
 from textprint.line import Line
+
+try:
+    import curses
+except ImportError:
+    curses = None
+    warnings.warn("module curses not installed. textprint module won't be fully operational")
 
 if TYPE_CHECKING:
     from textprint.textprinter import TextPrinter
@@ -16,6 +22,9 @@ class EditableLine:
         """The text before the cursor"""
         self.after = ""
         """The text after the cursor"""
+
+        if curses is None:
+            raise ImportError("curses is not installed.")
 
     def type(self, to_type: str):
         self.before += to_type

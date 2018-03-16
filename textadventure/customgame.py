@@ -32,13 +32,12 @@ class CustomGame(ABC):
         self.name = name
 
     @abstractmethod
-    def create_locations(self, handler: Handler) -> List[Location]:
+    def create_locations(self) -> List[Location]:
         """
-        An abstract method that should return all of the locations that will be used in the game. Most of the time,\
-        you shouldn't need to use the handler for anything unless a location wants to add an entity to \
-        handler.entities.
+        An abstract method that should return all of the locations that will be used in the game. Most of the time,
+        you shouldn't need to use the handler for anything unless a location wants to add an entity to
+        handler.identifiables
 
-        :param handler: The Handler object
         :return: A list of locations
         """
         pass
@@ -73,11 +72,10 @@ class CustomGame(ABC):
                 ]
 
     @abstractmethod
-    def create_custom_managers(self, handler: Handler) -> List[Manager]:
+    def create_custom_managers(self) -> List[Manager]:
         """
         Returns custom Managers
 
-        :param handler: The handler object
         :return: A list of Managers
         """
         pass

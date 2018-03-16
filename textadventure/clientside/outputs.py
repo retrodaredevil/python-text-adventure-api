@@ -18,6 +18,7 @@ from textprint.textprinter import TextPrinter
 
 if TYPE_CHECKING:
     from textadventure.input.inputhandling import CommandInput
+    from textadventure.sending.commandsender import CommandSender
 
 
 # deprecated
@@ -126,6 +127,20 @@ class StreamOutput(Thread, OutputSender):  # extending thread so we can let mess
                     self.stream.flush()
 
 
+class ImmediateStreamOutput(OutputSender):
+    def __init__(self):
+        pass
+
+    def send_message(self, message: Message):
+        pass
+
+    def on_input(self, sender: 'CommandSender', command_input: 'CommandInput'):
+        if command_input.is_empty():
+            return True
+
+        return False
+
+
 class TextPrinterOutput(Manager, OutputSender):
     def __init__(self, printer: TextPrinter, section: Section):
         """
@@ -160,7 +175,7 @@ class TextPrinterOutput(Manager, OutputSender):
         #                                       for part in message.create_parts()]), flush=True)
         self.messages.append(message)
 
-    def on_input(self, player: 'Player', command_input: 'CommandInput'):
+    def on_input(self, sender: 'CommandSender', command_input: 'CommandInput'):
         if command_input.is_empty():
             now = time.time()
             # if self._last_blank + 1 > now:
@@ -170,7 +185,6 @@ class TextPrinterOutput(Manager, OutputSender):
         current_is_instant = self.is_instant
 
         self.send_message(Message(Color.YELLOW >> command_input.string_input, message_type=MessageType.IMMEDIATE))
-        # self.send_message(Message(str([part.main_text for part in self.current_line_parts[0]])))
         self.is_instant = True  # we have regular so all the stuff before it should print immediately
         self.__add_messages()  # add the current message we just printed
         self.__print_parts(immediate=True)  # by default, this will change self.is_instant
@@ -189,14 +203,11 @@ class TextPrinterOutput(Manager, OutputSender):
         if len(self.message_parts) == 0:
             self.message_parts.append([])
         while len(self.messages) != 0:
-            # print(Cursor.POS(0, 0) + str(time.time()) + "outputs.py", end="")
             """The above line that was commented out was used to check if this piece of code really is slow, however\
             This code executes in a fine amount of time."""
             current_messages = self.messages
             self.messages = []  # doing this makes this method mostly thread safe if we decide to change it later
             for message in current_messages:
-                # self.section.print(self.printer, message.text, flush=True)
-                # continue
                 parts = message.create_parts()
                 # since we called message.create_parts, we can change them if we would like
 
@@ -214,6 +225,7 @@ class TextPrinterOutput(Manager, OutputSender):
         """
         :param immediate: Used throughout this method to tell if everything should be immediate
         """
+
         def iterate_parts():  # called below. This was turned into a method because we need to be able to return
             """Returns True at[0] if all of the parts were printed. And returns contents of line at [1]"""
             add_time = not self.is_instant and not immediate  # used to tell if we should add time to time_count
@@ -279,7 +291,17 @@ class LocationTitleBarManager(Manager):
     def update(self, handler: 'Handler'):
         location = self.player.location
         point = location.point
-        self.line.contents = Color.CYAN >> (Color.BOLD >> "{} at x: {}, y: {}, z: {}".format(location,
-                                                                                             point.x, point.y, point.z))
+
+        first_part = str(location)
+        second_part = "x: {} y: {} ".format(point.x, point.y)
+
+        if point.z != 0:
+            second_part += "z: {}".format(point.z)
+        else:
+            second_part += " " * 4
+
+        number_spaces = self.printer.dimensions[1] - (len(first_part) + len(second_part))
+        self.line.contents = Color.CYAN + Color.BOLD + first_part + (" " * number_spaces) + second_part
+
         self.line.update(self.printer)  # don't flush it because it will put the cursor in a different spot
         self.printer.set_title("Trail of Ninjas - " + str(location))

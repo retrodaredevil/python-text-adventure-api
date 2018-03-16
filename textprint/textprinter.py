@@ -1,10 +1,6 @@
 import os
-from typing import List, Optional
-
 import sys
-
-import time
-from colorama import Cursor
+from typing import List, Optional
 
 from textprint.section import Section
 
@@ -33,7 +29,12 @@ class TextPrinter:
         self.stdscr = stdscr
         """If you are using curses (very likely) You should pass the WindowObject created with initscr."""
 
-        self.__cursor = Cursor  # note that this isn't creating an object, it's an object already made
+        try:
+            import colorama
+            self.__cursor = colorama.Cursor  # note that this isn't creating an object, it's an object already made
+        except ImportError:
+            colorama = None
+            self.__cursor = None
 
         self.dimensions = (80, 24)
         """[0] is rows [1] is columns"""

@@ -1,4 +1,4 @@
-from typing import Optional, List, TYPE_CHECKING, Tuple
+from typing import Optional, TYPE_CHECKING, Tuple
 
 from textprint.line import Line
 

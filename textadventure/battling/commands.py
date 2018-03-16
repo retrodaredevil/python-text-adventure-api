@@ -8,6 +8,7 @@ from textadventure.commands.command import SimpleCommandHandler
 from textadventure.handler import Handler
 from textadventure.input.inputhandling import CommandInput, InputHandleType
 from textadventure.player import Player
+from textadventure.sending.commandsender import CommandSender
 from textadventure.sending.message import Message
 from textadventure.utils import join_list
 
@@ -24,8 +25,11 @@ class AttackCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: Handler, player: Player, command_input: CommandInput) -> InputHandleType:
-        # from textadventure.battling.managing import BattleManager importing non-locally now
+    def _handle_command(self, handler: Handler, sender: CommandSender, command_input: CommandInput) -> InputHandleType:
+        if not isinstance(sender, Player):
+            sender.send_message("This must be an error. A {} shouldn't be trying to attack.".format(type(sender)))
+        player = sender
+
         manager = handler.get_managers(BattleManager, 1)[0]  # get the BattleManager, there should be 1
         battles = manager.get_battles(player)
         assert len(battles) <= 1, "The player can only by in one battle"
@@ -78,7 +82,7 @@ class AttackCommandHandler(SimpleCommandHandler):
         return InputHandleType.HANDLED
 
     @staticmethod
-    def send_options(player, user):
+    def send_options(player: Player, user: Target):
         options = user.get_move_options()
         rep = join_list([str(option) for option in options], use_brackets=True, use_indexes=True)
         player.send_message(Message("Options: {}".format(rep), named_variables=options))

@@ -2,6 +2,7 @@ from enum import Enum, unique
 from typing import Tuple
 
 from textadventure.battling.weapon import Weapon
+from textadventure.entity import Entity
 from textadventure.handler import Handler
 from textadventure.player import Player
 from textadventure.sending.message import Message
@@ -78,7 +79,7 @@ class Sword(Weapon):
     def taste(self, handler: Handler, player: Player):
         player.send_message("It tastes like a... Eww. don't lick your sword.")
 
-    def can_use(self, player: Player):
+    def can_use(self, entity: Entity):
         return True, "You can use this as long as you're in the right place"
 
     def listen(self, handler: Handler, player: Player):

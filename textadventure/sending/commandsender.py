@@ -38,7 +38,7 @@ class OutputSender(ABC):
 
     def on_input(self, sender: 'CommandSender', command_input: 'CommandInput') -> bool:
         """
-        By default, this method returns False the string is empty. Subclasses of OutputSender may change this.
+        By default, this method returns False. Subclasses of OutputSender may change this.
         And if they do change the implementation, they should check if command_input.is_empty() or call super.
 
         Note that if this method returns False, no message is sent to the player so you should send a message to the \

@@ -1,12 +1,16 @@
 from abc import abstractmethod, ABC
-from typing import Optional, Any
+from typing import Optional, Any, TYPE_CHECKING
 
-from textadventure.handler import Handler
 from textadventure.item.holder import Holder
-from textadventure.player import Player
 from textadventure.saving.savable import Savable
+from textadventure.sending.commandsender import CommandSender
 from textadventure.sending.message import Message
 from textadventure.utils import are_mostly_equal, CanDo, MessageConstant
+
+if TYPE_CHECKING:
+    from textadventure.handler import Handler
+    from textadventure.player import Player
+    from textadventure.entity import Entity
 
 
 def create_use_message(item: 'Item') -> MessageConstant:
@@ -20,23 +24,23 @@ class FiveSensesHandler(ABC):
     """
 
     @abstractmethod
-    def see(self, handler: Handler, player: Player):
+    def see(self, handler: 'Handler', player: 'Player'):
         pass
 
     @abstractmethod
-    def listen(self, handler: Handler, player: Player):
+    def listen(self, handler: 'Handler', player: 'Player'):
         pass
 
     @abstractmethod
-    def feel(self, handler: Handler, player: Player):
+    def feel(self, handler: 'Handler', player: 'Player'):
         pass
 
     @abstractmethod
-    def smell(self, handler: Handler, player: Player):
+    def smell(self, handler: 'Handler', player: 'Player'):
         pass
 
     @abstractmethod
-    def taste(self, handler: Handler, player: Player):
+    def taste(self, handler: 'Handler', player: 'Player'):
         pass
 
 
@@ -115,13 +119,13 @@ class Item(Savable, FiveSensesHandler):
             new_holder.items.append(self)
         return True
 
-    def before_save(self, source: Any, handler: Handler):
+    def before_save(self, source: Any, handler: 'Handler'):
         """source should == self.holder"""
         # assert source == self.holder, "The source must self.holder. If implementation has changed, remove this line."
         assert isinstance(source, Holder), "Whatever is saving this item, should be a holder"
         assert self in source.items, "If this happens, then a Holder is trying to save an item that it doesn't have"
 
-    def on_load(self, source: Any, handler: Handler):
+    def on_load(self, source: Any, handler: 'Handler'):
         """Note that player may not be the holder."""
         assert isinstance(source, Holder), "The source must be a holder"
         # self.holder = source
@@ -136,7 +140,7 @@ class Item(Savable, FiveSensesHandler):
         """
         return are_mostly_equal(self.name, reference)
 
-    def can_reference(self, player: Player) -> CanDo:
+    def can_reference(self, player: 'Player') -> CanDo:
         location = player.location
         if self in location.items:
             if location.is_lit_up() or not self.__needs_light:
@@ -145,7 +149,7 @@ class Item(Savable, FiveSensesHandler):
             return True, "You have the thing on you"
         return self.__class__.CANNOT_SEE
 
-    def can_see(self, player: Player) -> CanDo:
+    def can_see(self, player: 'Player') -> CanDo:
         location = player.location
         if self in location.items:
             return True, "You can see this since self.holder is a Location"
@@ -153,19 +157,19 @@ class Item(Savable, FiveSensesHandler):
             return False, "You cannot look at something on you!"
         return self.__class__.CANNOT_SEE
 
-    def can_listen(self, player: Player) -> CanDo:
+    def can_listen(self, player: 'Player') -> CanDo:
         return self.__class__.CANNOT_LISTEN
 
-    def can_feel(self, player: Player) -> CanDo:
+    def can_feel(self, player: 'Player') -> CanDo:
         return self.__class__.CANNOT_FEEL
 
-    def can_smell(self, player: Player) -> CanDo:
+    def can_smell(self, player: 'Player') -> CanDo:
         return self.__class__.CANNOT_SMELL
 
-    def can_taste(self, player: Player) -> CanDo:
+    def can_taste(self, player: 'Player') -> CanDo:
         return self.__class__.CANNOT_TASTE
 
-    def can_take(self, player: Player) -> CanDo:
+    def can_take(self, entity: 'Entity') -> CanDo:
         """
         Corresponds with the method change_holder and depending on what this returns, the player may or may not be\
         allowed to take this item
@@ -173,73 +177,74 @@ class Item(Savable, FiveSensesHandler):
         By default, this returns False at [0] and gives a reason at [1] which you should send to the player if [0] is\
         False. (Just like most other CanDos)
 
-        :param player: The player that wants to take the item or the player that you want to check if they are able to
+        :param entity: The player that wants to take the item or the player that you want to check if they are able to
         :return: A CanDo representing if the player can take this. (Send [1] to the player if [0] is False)
         """
-        if self in player.items:
+        if self in entity.items:
             return self.__class__.CANNOT_TAKE_ON_PERSON
         return self.__class__.CANNOT_TAKE
 
-    def can_put(self, player: Player) -> CanDo:
-        if self in player.location:  # cannot place because player doesn't have it
+    def can_put(self, entity: 'Entity') -> CanDo:
+        if self in entity.location:  # cannot place because player doesn't have it
             return self.__class__.CANNOT_PUT_IN_LOCATION
         return self.__class__.CANNOT_PUT
 
-    def can_use(self, player: Player) -> CanDo:
+    def can_use(self, entity: 'Entity') -> CanDo:
         """
         This method should be used to tell if the player is able to use this item at all, not if the item is usable.
         However, if the item isn't usable by anyone or anything, then this should probably return False at [0]
 
-        For instance, if a player has a Sword in their inventory, this should return True. However, if that sword is\
+        For instance, if a player has a Sword in their inventory, this should return True. However, if that sword is
         broken, this should still return True but use_item should return False.
 
-        Another instance: If someone is trying to use a tree, this should return False at [0] and use_item can \
+        Another instance: If someone is trying to use a tree, this should return False at [0] and use_item can
         optionally raise an exception or do something to show that an error has occurred
 
-        :param player: The player that is trying to use the item
+        :param entity: The entity that is trying to use the item
         :return: A CanDo where [0] represents whether or not the player can use the item and [1] is the message\
                  that should be sent to the player if [0] is False
         """
-        if self in player.items:
+        if self in entity.items:
             return True, "You can use this because you have it"
         else:
             return self.__class__.CANNOT_USE_DO_NOT_HAVE
 
-    def use_item(self, handler: Handler, player: Player, does_custom_action=False) -> CanDo:
+    def use_item(self, handler: 'Handler', entity: 'Entity', does_custom_action=False) -> CanDo:
         """
-        Please, read the documentation on can_use and all of this because if you do, it will hopefully make sense.\
+        Please, read the documentation on can_use and all of this because if you do, it will hopefully make sense.
         If this is confusing in any way, please ask any questions.
 
         If this method is called, then it should not check can_use because we should do whatever this method needs.
-        However, this method can still 'fail' as long as a message that makes sense is sent or returned to the \
+        However, this method can still 'fail' as long as a message that makes sense is sent or returned to the
         player and does_custom_action is taken into account.
 
-        By default, this will return a CanDo where [0] is False and where [1] is a message telling the player \
+        By default, this will return a CanDo where [0] is False and where [1] is a message telling the player
         they can't use this item ([1] since [0] is False, you should send [1] to the player).
-        However, if does_custom_action is True, the method will send a message to the player saying they used the item\
-        and whoever is calling this, should send more messages informing the player what they are doing, because this\
+        However, if does_custom_action is True, the method will send a message to the player saying they used the item
+        and whoever is calling this, should send more messages informing the player what they are doing, because this
         method only tells the player that they "used this item"
 
-        This method should be called by the Location class and from no where else. The calling Location class should\
+        This method should be called by the Location class and from no where else. The calling Location class should
         also check can_use because this won't call that method
 
-        Reasoning: I made it so the implementation sends the message when the return value at [0] is True because\
-        it needs to be able to send more messages after that (making [1] pointless). But, I made it so the \
-        implementation doesn't send a message when it fails ([0] is False) because I want to keep the sending of \
-        that message optional and customizable. Also, if does_custom_action is True and this returns False, I want\
+        Reasoning: I made it so the implementation sends the message when the return value at [0] is True because
+        it needs to be able to send more messages after that (making [1] pointless). But, I made it so the
+        implementation doesn't send a message when it fails ([0] is False) because I want to keep the sending of
+        that message optional and customizable. Also, if does_custom_action is True and this returns False, I want
         the location or whatever the custom action is to be able to override that if needed or take it into account.
 
         :param handler: The handler object
-        :param player: The player using the item
-        :param does_custom_action: By default False. When called by a Location class, this should be set to True if\
-                the implementation of this method doesn't have a default 'action' or if the Location that is calling\
-                this wants to 'override' (per say) the action that this does. If set to True, the implementation\
+        :param entity: The entity (usually a player) using the item
+        :param does_custom_action: By default False. When called by a Location class, this should be set to True if
+                the implementation of this method doesn't have a default 'action' or if the Location that is calling
+                this wants to 'override' (per say) the action that this does. If set to True, the implementation
                 should then send a message to the player saying that the item was used.
-        :return: A CanDo representing whether or not the player was able to 'use' the item. If [0] is False, [1] \
-                represents the message that should be sent to the player. However, if [1] is True, no message \
+        :return: A CanDo representing whether or not the player was able to 'use' the item. If [0] is False, [1]
+                represents the message that should be sent to the player. However, if [1] is True, no message
                 should be sent
         """
         if does_custom_action:
-            player.send_message(create_use_message(self))  # Say that we used the item
+            if isinstance(entity, CommandSender):
+                entity.send_message(create_use_message(self))  # Say that we used the item
             return True, "You used this item, but this isn't the message that you'll see"
         return self.__class__.CANNOT_USE_HERE

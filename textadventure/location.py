@@ -11,6 +11,7 @@ from textadventure.input.inputhandling import CommandInput, PlayerInputHandler
 from textadventure.item.holder import Holder
 from textadventure.item.item import Item, FiveSensesHandler
 from textadventure.player import Player
+from textadventure.sending.commandsender import CommandSender
 from textadventure.sending.message import Message, MessageType
 from textadventure.utils import Point, MessageConstant, are_mostly_equal, CanDo
 
@@ -106,6 +107,7 @@ class Location(Holder, PlayerInputHandler, FiveSensesHandler):
     def on_yell(self, handler: Handler, player: Player, command_input: CommandInput, is_there_response=False) -> None:
         """
         There is a default player implementation for this
+
         is_there_response is only meant to be changed by inheriting classes (It shouldn't be changed by YellCommandHa..)
 
         :param handler: The handler object
@@ -142,18 +144,18 @@ class Location(Holder, PlayerInputHandler, FiveSensesHandler):
         if not result[0]:
             player.send_message(result[1])  # send the player a message if they failed in some way
 
-    def _send_welcome(self, player: Player):
+    def _send_welcome(self, sender: CommandSender):
         """
         The default method that should be called by a subclass of Location.
         Because this begins with an _, it is not called except by subclasses of Location
 
-        :param player: The player to send the message to
+        :param sender: The sender to send the message to
         :return: None
         """
-        player.send_message(self.name + ": " + self.description)
+        sender.send_message(self.name + ": " + self.description)
 
-    def send_locate_message(self, player: Player):
-        player.send_message(Message("You are at {}, which is '{}'", named_variables=[self.point, self]))
+    def send_locate_message(self, sender: CommandSender):
+        sender.send_message(Message("You are at {}, which is '{}'", named_variables=[self.point, self]))
 
     def update(self, handler: Handler):
         """

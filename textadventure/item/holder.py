@@ -21,3 +21,12 @@ class Holder:  # kind of like an interface
         :return: True if it can hold the weapon False otherwise
         """
         return True
+
+    def get_wallet(self) -> 'Holder':
+        """
+        This returns the holder that should be used instead of self to store money. Sometimes, this will return self but
+        other times, it could return some sort of Wallet object.
+
+        :return: The holder to be used to store money. It could be self
+        """
+        return self

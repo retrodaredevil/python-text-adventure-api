@@ -1,9 +1,9 @@
 from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any, Dict
 
 from textadventure.action import Action
-from textadventure.entity import Entity, Identifiable
+from textadventure.entity import Entity, Identifiable, Living
 from textadventure.manager import Manager
-from textadventure.player import Player, Living
+from textadventure.player import Player
 from textadventure.saving.savable import Savable, HasSavable
 from textadventure.sending.commandsender import CommandSender
 from textadventure.utils import Point, get_type_from_list, TypeCollection
@@ -11,6 +11,8 @@ from textadventure.input.inputhandling import CommandInput, InputHandleType, Inp
 
 if TYPE_CHECKING:
     from textadventure.location import Location
+# to future self, most of these imports would be in this if statement, but I assure you none of them can be.
+# if that changes, move as many as you can to the if statement
 
 
 T = TypeVar("T")
@@ -28,11 +30,6 @@ def has_only(the_list: List[T], only_list: List[T]):
         if ele not in only_list:
             return False
     return True
-
-#
-# class BaseHandler:
-#     def __init__(self):
-#         pass
 
 
 class Handler(HasSavable):
@@ -242,13 +239,11 @@ class Handler(HasSavable):
         return TypeCollection(self.identifiables, [CommandSender])
     # endregion
 
-    def get_managers(self, manager_types: Type[Manager], expected_amount: Optional[int] = None) \
-            -> List[Manager]:
+    def get_managers(self, manager_types: Type[Manager], expected_amount: Optional[int] = None) -> List[Manager]:
         """Quick note, manager_types can be a single type or a list of types. See docs for get_type_from_list"""
         return get_type_from_list(self.managers, manager_types, expected_amount)
 
-    def get_livings(self, living_types: Type[Living], expected_amount: Optional[int] = None) \
-            -> List[Living]:
+    def get_livings(self, living_types: Type[Living], expected_amount: Optional[int] = None) -> List[Living]:
         """Quick note, living_types can be a single type or a list of types. See docs for get_type_from_list"""
         return get_type_from_list(self.living_things, living_types, expected_amount)
 

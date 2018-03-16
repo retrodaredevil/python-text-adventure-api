@@ -1,10 +1,10 @@
+import math
 from typing import TYPE_CHECKING, Optional
 
-import math
 from colorama.ansi import clear_line
 
 from textprint.colors import Color
-from textutil import length_without_ansi
+from textprint.textutil import length_without_ansi
 
 if TYPE_CHECKING:
     from textprint.section import Section

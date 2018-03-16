@@ -28,11 +28,11 @@ class NinjaGame(CustomGame):
         player[EventsObject] = EventsObject()
         # player[PlayerSavable] = PlayerSavable()
 
-    def create_locations(self, handler: Handler) -> List[Location]:
+    def create_locations(self) -> List[Location]:
         return [Entrance(), InsideEntrance(), EastInsideEntrance(), WestInsideEntrance(),
                 EntranceSpiderWebForest(), CenterSpiderWebForest(), EastCenterSpiderWebForest()]
 
-    def create_custom_managers(self, handler: Handler) -> List[Manager]:
+    def create_custom_managers(self) -> List[Manager]:
         return [NinjaGamePropertyManager()]
 
     def add_other(self, handler: Handler) -> None:

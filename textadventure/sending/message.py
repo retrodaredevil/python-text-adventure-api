@@ -1,12 +1,9 @@
 import warnings
 from enum import Enum
-from typing import List, TYPE_CHECKING
+from typing import List
 
 from textadventure.utils import join_list
 from textprint.colors import Color
-
-if TYPE_CHECKING:
-    pass
 
 
 class MessageType(Enum):
@@ -27,7 +24,7 @@ class MessagePart:
     A class to represent a small and simple part of a message where all of the text in this part has the same\
     properties.
     """
-    DEFAULT_WAIT_BETWEEN = .026
+    DEFAULT_WAIT_BETWEEN = .018
 
     def __init__(self, main_text: str, print_before="", print_after="", wait_between=DEFAULT_WAIT_BETWEEN,
                  wait_after_print=0):
@@ -156,7 +153,7 @@ class Message:
             #       has continue statements
             if c == chr(27):
                 # current.main_text += "(esc)"
-                current_escape = c  # yep, it's the same as str(Color.ESCAPE)
+                current_escape = c
             elif c == '\n':
                 # if this message has a new line character, add it to the end of a MessagePart
                 current.print_after += c

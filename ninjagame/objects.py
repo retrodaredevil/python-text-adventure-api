@@ -1,5 +1,6 @@
 from abc import abstractmethod
 
+from textadventure.entity import Entity
 from textadventure.handler import Handler
 from textadventure.item.item import Item
 from textadventure.player import Player
@@ -17,13 +18,13 @@ class StaticObject(Item):
     def listen(self, handler: Handler, player: Player):
         pass
 
-    def can_use(self, player: Player):
+    def can_use(self, entity: Entity):
         return False, "You can't use this!"
 
-    def use_item(self, handler: Handler, player: Player, does_custom_action=False):
+    def use_item(self, handler: Handler, entity: Entity, does_custom_action=False):
         if not does_custom_action:
             raise Exception("can_use returned False, and we don't know what to do here.")
-        return super().use_item(handler, player, does_custom_action)
+        return super().use_item(handler, entity, does_custom_action)
 
     def taste(self, handler: Handler, player: Player):
         player.send_message(NOT_TASTE)

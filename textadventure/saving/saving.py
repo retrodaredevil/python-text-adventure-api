@@ -9,6 +9,7 @@ from textadventure.commands.command import SimpleCommandHandler
 from textadventure.input.inputhandling import CommandInput, InputHandleType
 from textadventure.player import Player
 from textadventure.saving.savable import Savable
+from textadventure.sending.commandsender import CommandSender
 from textadventure.utils import CanDo
 
 if TYPE_CHECKING:
@@ -212,20 +213,24 @@ class SaveCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: Player, command_input: CommandInput) -> InputHandleType:
-        path = get_path(command_input)
-        if path is None:
-            self.send_help(player)
-            return InputHandleType.HANDLED
-        if not is_path_valid(path):
-            player.send_message("The path '{}' is not valid. The save file must end in .data".format(path.name))
+    def _handle_command(self, handler: 'Handler', sender: CommandSender, command_input: CommandInput) -> InputHandleType:
+        if not isinstance(sender, Player):
+            sender.send_message("You must be a player to save the game. In the future, you can save handler")
             return InputHandleType.HANDLED
 
-        result = save(handler, player, path, True)  # TODO ask the player if they want override_file to be True
+        path = get_path(command_input)
+        if path is None:
+            self.send_help(sender)
+            return InputHandleType.HANDLED
+        if not is_path_valid(path):
+            sender.send_message("The path '{}' is not valid. The save file must end in .data".format(path.name))
+            return InputHandleType.HANDLED
+
+        result = save(handler, sender, path, True)  # TODO ask the player if they want override_file to be True
         if result[0]:
-            player.send_message("You successfully saved your game to '{}'".format(path.name))
+            sender.send_message("You successfully saved your game to '{}'".format(path.name))
         else:
-            player.send_message(result[1])
+            sender.send_message(result[1])
         return InputHandleType.HANDLED
 
 
@@ -237,20 +242,24 @@ class LoadCommandHandler(SimpleCommandHandler):
     def __init__(self):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
-    def _handle_command(self, handler: 'Handler', player: Player, command_input: CommandInput):
+    def _handle_command(self, handler: 'Handler', sender: CommandSender, command_input: CommandInput):
+        if not isinstance(sender, Player):
+            sender.send_message("You must be a player to save the game. In the future, you can save handler")
+            return InputHandleType.HANDLED
+
         path = get_path(command_input)
         if path is None:
-            self.send_help(player)
+            self.send_help(sender)
             return InputHandleType.HANDLED
         if not is_path_valid(path):
-            player.send_message("The path '{}' is not valid. The save file must end in .data".format(path.name))
+            sender.send_message("The path '{}' is not valid. The save file must end in .data".format(path.name))
             return InputHandleType.HANDLED
         # DONEish, most of the code above this is copy pasted. Fix it lol
 
-        was_loaded = load(handler, player, path)
+        was_loaded = load(handler, sender, path)
 
         if was_loaded[0]:
-            player.send_message("You successfully loaded your game from '{}'".format(path.name))
+            sender.send_message("You successfully loaded your game from '{}'".format(path.name))
         else:
-            player.send_message(was_loaded[1])
+            sender.send_message(was_loaded[1])
         return InputHandleType.HANDLED

@@ -243,7 +243,7 @@ class EastInsideEntrance(Location):  # where the furry monster is/was
             player[PlayerFriend].tell(player,
                                       "Take my wallet! It's on the ground! Maybe you can distract it!")
             wallet = Wallet()
-            penny = Coin(CoinType.PENNY)
+            penny = CoinType.PENNY.create()
             wallet.change_holder(None, player.location)
             penny.change_holder(None, wallet)
 
