@@ -17,10 +17,10 @@ class SettingsHandler(InputHandler):
     def on_input(self, handler: Handler, player: Player, command_input: CommandInput):
         command = command_input.get_command().lower()
         if player != self.allowed_player or (command != "setting" and not command.startswith(":")):
-                # or type(player.player_output) is not StreamOutput:
+                # or type(player.output) is not StreamOutput:
             return None
 
-        output = player.player_output
+        output = player.output
 
         def handle_function(already_handled: List[InputHandleType]) -> InputHandleType:
             arg_index = 1

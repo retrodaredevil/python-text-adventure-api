@@ -2,6 +2,7 @@ from typing import List
 
 from textadventure.customgame import CustomGame
 from textadventure.handler import Handler
+from textadventure.manager import Manager
 from textadventure.player import Player
 
 
@@ -10,13 +11,18 @@ class Main:
     Used to initialize a CustomGame object along with constructing a Handler object making initializing a game\
     a lot simpler and more abstract
     """
-    def __init__(self, game: CustomGame):
+    def __init__(self, game: CustomGame, custom_managers: List[Manager]):
         """
+        :param game: The custom game that this helps initialize
+        :param custom_managers: List of managers that will be updated before handler. Note these managers should NOT
+                                be related to the game and should not alter game play at all. They should only be
+                                cosmetic or should help with things unrelated to the game
         """
         self.game = game
 
         self.handler = None
         """Member that is initialized when start is called"""
+        self.custom_managers = custom_managers
 
     def create_players(self) -> List[Player]:
         """
@@ -26,6 +32,10 @@ class Main:
         The default implementation returns an empty list
 
         When this method is called, self.handler will not be None
+
+        Note: When overriding this is not meant to return a list of subclasses of Player. It should only be used to
+        create players that will start in the game. (Normally there should be just one) (If this Main instance controls
+        a server, then the list would probably be empty)
 
         :return: A list of players to add immediately
         """
@@ -41,15 +51,39 @@ class Main:
         :param player: The player that has just joined
         """
         # TODO make another method that makes sure all of the player's data is loaded if the player isn't new
-        self.game.new_player(player)
+        self.game.new_player(player)  # (we won't use this line in the future)
 
     def start(self):
         assert self.handler is None, "If self.handler isn't None, then start must have been called before this."
-        self.handler = Handler()
 
         players = self.create_players()
         for player in players:
             self.init_player(player)
+
+        locations = self.game.create_locations()
+
+        input_handlers = list(self.game.create_custom_input_handlers())
+        input_handlers.extend(self.game.create_input_handlers())
+
+        managers = list(self.game.create_custom_managers())
+        managers.extend(self.game.create_managers())
+
+        self.handler = Handler(list(players), locations, input_handlers, managers, None)
+
+        self.game.add_other(self.handler)
+
+        for player in self.handler.get_players():
+            player.location = self.game.get_starting_location(self.handler, player)
+            player.location.on_enter(player, None, self.handler)  # set the player's starting location
+
+            # assert player.location is not None, ""
+
+        self.handler.start()
+
+    def update(self):
+        self.handler.update()
+        for manager in self.custom_managers:
+            manager.update(self.handler)
 
     def end(self):
         """
@@ -62,4 +96,12 @@ class Main:
         Method that is called by end(). This should be overridden.
         """
         pass
-        # TODO replace this with on_player_end idk
+
+
+class ClientSideMain(Main):
+    def __init__(self, game: CustomGame, custom_managers: List[Manager], player: Player):
+        super().__init__(game, custom_managers)
+        self.player = player
+
+    def create_players(self):
+        return [self.player]

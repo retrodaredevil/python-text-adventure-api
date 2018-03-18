@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Any, TYPE_CHECKING
+from typing import Optional, Any, TYPE_CHECKING
 
 from textadventure.item.holder import Holder
 from textadventure.item.item import Item
@@ -9,30 +9,30 @@ if TYPE_CHECKING:
     from textadventure.handler import Handler
 
 
-CoinData = Tuple[int, str]
-
-
 class CoinType:
     """
     Like an enum except feel free to extend it. Each value is a CoinData
     """
-    PENNY = (1, "penny")
-    DIME = (10, "dime")
-    QUARTER = (25, "quarter")
-    DOLLAR = (100, "dollar")
 
-    def __init__(self, worth: int, name: str):
+    def __init__(self, worth: int, name: str, same_name_for_equal=False):
         self.worth = worth
         self.name = name
+        self.same_name_for_equal = same_name_for_equal
 
     def create(self):
         return Coin(self)
 
     def __eq__(self, other):
-        return isinstance(other, CoinType) and other.worth == self.worth
+        return isinstance(other, CoinType) and other.worth == self.worth and \
+               ((not self.same_name_for_equal and not other.same_name_for_equal) or other.name == self.name)
 
 
 class Coin(Item):
+    PENNY = CoinType(1, "penny")
+    DIME = CoinType(10, "dime")
+    QUARTER = CoinType(25, "quarter")
+    DOLLAR = CoinType(100, "dollar")
+
     def __init__(self, coin_type):
         super().__init__(coin_type.name, True)
         self.coin_type = coin_type
@@ -45,7 +45,6 @@ class Coin(Item):
         return True, "You can feel this"
 
     def feel(self, handler: 'Handler', player: 'Player'):
-        # if self.coin_type is CoinType.DOLLAR:
         #     player.send_message("You feel a nice GOLDEN coin. It's worth a lot! It's a {}!".format(name))
         player.send_message("You feel a nice coin. It's a {}!".format(self.name))
 

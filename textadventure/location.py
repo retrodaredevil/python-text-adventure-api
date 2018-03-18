@@ -225,7 +225,7 @@ class Location(Holder, PlayerInputHandler, FiveSensesHandler):
         """
         A method that is called by a subclass of Location usually when handling input.
         The default implementation (That probably shouldn't be changed) checks to see if the player's location is self
-        In the default implementation, handler and command_input are not used
+        In the default implementation, handler and input_getter are not used
 
         When handling input in an implementation of Location, this should almost always be called first to make sure\
             the player is at this location.

@@ -59,10 +59,11 @@ class StreamOutput(Thread, OutputSender):  # extending thread so we can let mess
         self.messages.append(message)  # note that this may cause an issue if it gets reset right after (very unlikely)
 
     def run(self):
-        from colorama import init, AnsiToWin32
-        if not self.is_unix:
-            init(autoreset=True)
-            self.stream = AnsiToWin32(self.stream).stream  # change the stream to one that automatically converts it
+        print("You are using deprecated StreamOutput")
+        # from colorama import init, AnsiToWin32
+        # if not self.is_unix:
+        #     init(autoreset=True)
+        #     self.stream = AnsiToWin32(self.stream).stream  # change the stream to one that automatically converts it
         while True:
             if len(self.messages) > 0:
                 current_messages = self.messages  # no need to clone because we will be resetting self.messages
@@ -146,7 +147,6 @@ class TextPrinterOutput(Manager, OutputSender):
         """
         Creates a TextPrinterOutput but does not start the Thread
         """
-        super().__init__()
         self.printer = printer
         self.section = section
 
@@ -268,7 +268,7 @@ class TextPrinterOutput(Manager, OutputSender):
                     return
                 self.message_parts.remove(first_list)
                 self.current_line_parts = (first_list, time.time())
-                self.current_line = self.section.print(self.printer, "")
+                self.current_line = self.section.println(self.printer, "")
             result = iterate_parts()  # this is where we call iterate_parts
             self.current_line.contents = result[1]
             self.current_line.update(self.printer)  # don't flush because whatever's controlling input will

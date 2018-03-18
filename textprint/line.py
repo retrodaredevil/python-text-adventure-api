@@ -1,9 +1,7 @@
 import math
 from typing import TYPE_CHECKING, Optional
 
-from colorama.ansi import clear_line
-
-from textprint.colors import Color
+from textprint.colors import Color, CLEAR_LINE
 from textprint.textutil import length_without_ansi
 
 if TYPE_CHECKING:
@@ -119,7 +117,7 @@ class Line:
             after = ""
             if index == len(lines) - 1:
                 after = str(Color.RESET)
-            text_printer.print(clear_line() + before + line + after, end="", flush=False)
+            text_printer.print(CLEAR_LINE + before + line + after, end="", flush=False)
 
         last_length = self._last_length_lines
         self._last_length_lines = len(lines)

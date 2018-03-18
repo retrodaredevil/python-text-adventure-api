@@ -135,7 +135,7 @@ class Battle:
             for target in team.members:
                 target.send_message(message)
 
-    # def on_input(self, handler: Handler, player: Player, command_input: InputObject):
+    # def on_input(self, handler: Handler, player: Player, input_getter: InputObject):
     #     commented cuz not an input handler
     #     team = self.get_team(player)
     #     if team is None:

@@ -64,7 +64,8 @@ def load(handler: 'Handler', player: Player, path: Path = DEFAULT_PATH) -> CanDo
     if not path.is_file():
         return False, "File was not found."
     try:
-        content = pickle.load(path.open("rb"))
+        open_file = path.open('rb')
+        content = pickle.load(open_file)
     except EOFError:  # End of File Error
         return False, "The file was either empty or something is wrong with it."
     except UnpicklingError:

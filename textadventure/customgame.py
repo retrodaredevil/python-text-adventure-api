@@ -42,12 +42,26 @@ class CustomGame(ABC):
         """
         pass
 
+    def get_starting_location(self, handler: Handler, player: Player):
+        """
+        By default returns the first location in handler.locations
+
+        :param handler: The handler object
+        :param player: The player that will start in the returned location
+        :return: The location that the player should start in
+        """
+        # TODO add more documentation deciding whether this method is only used when the player first begins or if it
+        # also applies when the player is joining the game again. ... Maybe we could have a second method for that?
+        return handler.locations[0]
+
     @abstractmethod
     def new_player(self, player: Player):
         """
         An abstract method that is called whenever a new player joins the game. It should be used to give the player\
         necessary objects like a Savable, and other things that can be used to keep track of progress, or have \
         custom things
+
+        When called, player.location is None
 
         Remember, this method is only called when there is a new player
 
@@ -80,7 +94,7 @@ class CustomGame(ABC):
         """
         pass
 
-    def create_managers(self, handler: Handler) -> List[Manager]:
+    def create_managers(self) -> List[Manager]:
         return [HostileEntityManager(), EntityActionToEntityManager(), BattleManager(), DamageActionManager()]
 
     @abstractmethod

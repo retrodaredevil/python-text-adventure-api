@@ -1,5 +1,7 @@
 from typing import Callable
 
+import sys
+
 
 def curses_init():
     """
@@ -48,6 +50,15 @@ def std_init(stdscr):
 
 
 def colorama_init():
-    """If your program is compatible with a dos terminal, you may want to call this"""
-    import colorama
-    colorama.init()
+    """
+    If your program is compatible with a dos terminal, you may want to call this
+
+    This tries to import colorama and initialize it. If it was unable, it will print to stderr but will not throw error
+    """
+    try:
+        import colorama
+        colorama.init()  # this should do things automatically
+        # sys.stdout = colorama.AnsiToWin32(sys.stdout).stream it should do this automatically
+    except ImportError:
+        colorama = None
+        print("Unable to import colorama", file=sys.stderr)

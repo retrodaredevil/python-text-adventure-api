@@ -59,7 +59,7 @@ class CommandInput:
     This object also contains the string split up (split_input) which is an array
 
     Not to be mistaken for PlayerInput, there may be instances in the code where I can call a CommandInput variable \
-    command_input but it's really an CommandInput
+    input_getter but it's really an CommandInput
     """
 
     def __init__(self, string_input: str):

@@ -118,23 +118,17 @@ class Handler(HasSavable):
         self._savables = savables
     # endregion
 
-    def start(self, is_manual=False):
+    def start(self):
         """
-         Starts the infinite loop for the ninjagame
+        Should be called before the first time update is called. (Does not do this automatically - do this manually)
         """
         for location in self.locations:  # TODO should we initialize stuff in here?
             for initializer in location.initializers:
                 initializer.do_init(self)
-        if is_manual:
-            return
 
-        while True:
-            self.manual_update()
-
-    def manual_update(self):
+    def update(self):
         """
-        Should be called repeatedly in a loop if you called start with is_manual=True. Otherwise, this function should
-        only be used by the Handler class and will be called in its own loop
+        Should be called repeatedly after calling start
         """
         for player in self.get_players():
             player.update(self)
@@ -152,7 +146,7 @@ class Handler(HasSavable):
 
     def __do_input(self, sender: CommandSender, inp: str):
         input_object = CommandInput(inp)
-        if sender.player_output.on_input(sender, input_object):
+        if sender.output.on_input(sender, input_object):
             # since the on_input method returned True, it must have done something, so we don't need to send a message
             return
         if input_object.is_empty():

@@ -1,33 +1,15 @@
-# import sys
-#
-# append = sys.path[0].replace("\\", "/").replace("/textadventure", "")  # when it's run in the command line
-# sys.path.append(append)
-# above was used for when main.py was not inside the root of the project
 import curses
-
 import sys
 
-from ninjagame.data import EventsObject
-from ninjagame.entites import PlayerFriend, LauraPerson, OtherPerson, NinjaDude
-from ninjagame.locations import (Entrance, InsideEntrance, EastInsideEntrance, WestInsideEntrance,
-                                 EntranceSpiderWebForest, CenterSpiderWebForest, EastCenterSpiderWebForest)
-from ninjagame.managing import NinjaGamePropertyManager
-from textadventure.actions import EntityActionToEntityManager
-from textadventure.battling.commands import AttackCommandHandler
-from textadventure.battling.managing import HostileEntityManager, BattleManager, DamageActionManager
+assert sys.version_info >= (3, 5), "Must use python 3.5 or greater. Many of the files use the typing module."
+
+from ninjagame.game import NinjaGame
 from textadventure.clientside.inputs import TextPrinterInputGetter, InputLineUpdaterManager
 from textadventure.clientside.outputs import TextPrinterOutput, LocationTitleBarManager
-from textadventure.commands.commands import (GoCommandHandler, TakeCommandHandler, PlaceCommandHandler,
-                                             YellCommandHandler, UseCommandHandler, NameCommandHandler,
-                                             InventoryCommandHandler, LocateCommandHandler, DirectionInputHandler,
-                                             HelpCommandHandler)
-from textadventure.handler import Handler
-from textadventure.input.inputhandlers import SettingsHandler
+from textadventure.mainclass import ClientSideMain
 from textadventure.player import Player
-from textadventure.saving.saving import SaveCommandHandler, LoadCommandHandler
-from textadventure.saving.playersavable import PlayerSavable
 from textprint.colors import Color
-from textprint.inithelper import curses_init, std_init, colorama_init, curses_end, add_interrupt_handler
+from textprint.inithelper import curses_init, std_init, curses_end, add_interrupt_handler, colorama_init
 from textprint.input import InputLineUpdater
 from textprint.section import Section
 from textprint.textprinter import TextPrinter
@@ -37,86 +19,40 @@ This file is an example game for my text adventure api using the ninjagame packa
 
 This file is not meant to be imported which is why it is not in any package right now
 """
-assert sys.version_info >= (3, 5), "Must use python 3.5 or greater. Many of the files use the typing module."
-
-
-def default_load(player: Player, handler: Handler):
-    player.location = handler.get_location(Entrance)
-
-    assert player.location is not None, "handler.get_location returned None. Make sure you set up locations correctly."
-
-    player[PlayerFriend] = PlayerFriend("Friend")  # not used as a magic string
-    player[EventsObject] = EventsObject()
-
-
-def after_player(handler: Handler, player: Player):
-    handler.locations.extend([Entrance(), InsideEntrance(), EastInsideEntrance(), WestInsideEntrance(),
-                              EntranceSpiderWebForest(), CenterSpiderWebForest(), EastCenterSpiderWebForest()])
-    handler.input_handlers.extend([GoCommandHandler(), TakeCommandHandler(), PlaceCommandHandler(),
-                                   YellCommandHandler(), UseCommandHandler(), SaveCommandHandler(),
-                                   LoadCommandHandler(), NameCommandHandler(), InventoryCommandHandler(),
-                                   LocateCommandHandler(), HelpCommandHandler(), AttackCommandHandler()])
-    handler.input_handlers.extend([DirectionInputHandler()])
-    handler.living_things.extend([OtherPerson(), LauraPerson(), NinjaDude()])
-
-    handler.identifiables.append(player)
-    handler.input_handlers.append(SettingsHandler(player))
-    handler.managers.extend([HostileEntityManager(), EntityActionToEntityManager(), BattleManager(),
-                             DamageActionManager(), NinjaGamePropertyManager()])
-
-    default_load(player, handler)
-
-    player.location.on_enter(player, None, handler)
-
-    handler.start()  # takes over this thread with infinite loop
 
 
 def setup():
-    handler = Handler([], [], [], [], None)
 
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 
     def start(stdscr):
-        # stream_output = StreamOutput()
-        # stream_output.is_unix = "y" in input("Is your terminal unix based? (y/n) (No if you don't know) > ").lower()
-        # player = Player(KeyboardInput(stream_output), stream_output, None)
         curses_init()
         std_init(stdscr)
-        # colorama_init()
+        colorama_init()
 
-        input_section = Section(None, force_rows=False)  # we want to allow it to go for as many lines it needs
+        input_section = Section(None, fill_up_left_over=False)  # we want to allow it to go for as many lines it needs
         print_section = Section(None, fake_line=(Color.BLUE >> "~"))
         title_section = Section(1)
-        printer = TextPrinter([input_section, print_section, title_section], stdscr=stdscr)
+        printer = TextPrinter([input_section, print_section, title_section], print_from_top=False, stdscr=stdscr)
         printer.update_dimensions()
-        # print_section.fake_line = "|" + (" " * (printer.dimensions[1] - 4)) + "|"
+        # print_section.fake_line = Color.RED + Color.BOLD + "|" + (" " * (printer.dimensions[1] - 3)) + "|"
 
-        updater = InputLineUpdater(printer, input_section.print(printer, "", flush=True), stdscr)
+        updater = InputLineUpdater(printer, input_section.println(printer, "", flush=True), stdscr)
         player_input = TextPrinterInputGetter(updater)
-        input_manager = InputLineUpdaterManager(updater)  # calls updater's update
-        handler.managers.append(input_manager)
-
-        def hand(): updater.current_line().clear()
-
-        add_interrupt_handler(hand)
-
         output = TextPrinterOutput(printer, print_section)
-        # output.daemon = True
-        # output.start()
-        handler.managers.append(output)
-
-        title_section.update_lines(printer)
-        print_section.update_lines(printer)
-        input_section.update_lines(printer)
-
         player = Player(player_input, output, None, None)
 
-        handler.managers.append(LocationTitleBarManager(player, printer, title_section.print(printer, "")))
+        add_interrupt_handler(lambda: updater.current_line().clear())  # clear line when CTRL+C is pressed
 
-        after_player(handler, player)
+        title_manager = LocationTitleBarManager(player, printer, title_section.println(printer, ""))
+        input_manager = InputLineUpdaterManager(updater)  # calls updater's update
 
-    # curses.wrapper(start)
-    # player[PlayerFriend] = PlayerFriend("Friend")
+        main_instance = ClientSideMain(NinjaGame(), [input_manager, output, title_manager], player)
+
+        main_instance.start()
+        while True:
+            main_instance.update()
+
     try:
         scanner = curses.initscr()
         start(scanner)

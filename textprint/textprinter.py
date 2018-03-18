@@ -2,6 +2,7 @@ import os
 import sys
 from typing import List, Optional
 
+from textprint.colors import CSI
 from textprint.section import Section
 
 
@@ -16,7 +17,7 @@ class TextPrinter:
 
         :param sections: The list of sections where the section at index 0 will be at the bottom. Ex: Most of the time\
                 you will have your input_section at the bottom. Note that there can only be one Section where\
-                Section#rows is None and Section#force_rows is True. If there are multiple with that, then two \
+                Section#rows is None and Section#fill_up_left_over is True. If there are multiple with that, then two \
                 sections will conflict with each other and you will get a recursion error.
         :param output: The output to write to. Defaults to sys.stdout and if you change it, you must make sure that\
                 other libraries like curses that are being used are altered correctly
@@ -28,13 +29,6 @@ class TextPrinter:
         self.print_from_top = print_from_top
         self.stdscr = stdscr
         """If you are using curses (very likely) You should pass the WindowObject created with initscr."""
-
-        try:
-            import colorama
-            self.__cursor = colorama.Cursor  # note that this isn't creating an object, it's an object already made
-        except ImportError:
-            colorama = None
-            self.__cursor = None
 
         self.dimensions = (80, 24)
         """[0] is rows [1] is columns"""
@@ -115,7 +109,8 @@ class TextPrinter:
         if position is not None and position[0] == used_rows and position[1] == column:
             # notice that this if statement uses used_rows and not rows. Please take note when debugging
             return
-        self.print(self.__cursor.POS(column, used_rows), end="", flush=flush)
+        # self.print(self.__cursor.POS(column, used_rows), end="", flush=flush)
+        self.print(CSI + str(used_rows) + ";" + str(column) + "H", end="", flush=flush)
         self._known_goto_position = used_rows, column  # use used_rows so if resize, if statement above won't fire
         # print("goto {}".format(self._known_goto_position), file=sys.stderr)
 

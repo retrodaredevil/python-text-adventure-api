@@ -22,7 +22,7 @@ class NinjaGame(CustomGame):
         return []
 
     def new_player(self, player: Player):
-        assert player.location is not None, "handler.get_location returned None. Make sure locations set up correct."
+
 
         player[PlayerFriend] = PlayerFriend("Friend")  # not used as a magic string
         player[EventsObject] = EventsObject()

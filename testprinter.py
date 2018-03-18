@@ -15,8 +15,8 @@ input_section = Section(1)
 printer = TextPrinter([input_section, console_section, title_bar_section])
 printer.update_dimensions()
 
-input_line = input_section.print(printer, "")
-title_bar = title_bar_section.print(printer, "Holder")
+input_line = input_section.println(printer, "")
+title_bar = title_bar_section.println(printer, "Holder")
 # we don't need a line for console_section because that's where we create a bunch of lines
 
 
@@ -47,7 +47,7 @@ def run_program(win):
         title_bar.contents = text
         title_bar.update(printer)
         # end section loading bar
-        console_section.print(printer, "Hello there: {}".format(i))
+        console_section.println(printer, "Hello there: {}".format(i))
         console_section.update_lines(printer)
         title_bar.update(printer)
 

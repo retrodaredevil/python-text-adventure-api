@@ -5,8 +5,9 @@ from typing import Union
 This file serves as place to store the class Color which is an abstraction for the colorama classes: Fore, Back, & Style
 """
 
-
+# thanks https://github.com/tartley/colorama/blob/master/colorama/ansi.py
 CSI = "\033["  # str(CSI)
+CLEAR_LINE = CSI + str(2) + "K"
 
 
 def code(*args):

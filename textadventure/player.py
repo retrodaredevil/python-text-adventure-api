@@ -14,7 +14,13 @@ T = TypeVar("T")
 
 
 class Player(Entity, CommandSender):
-    def __init__(self, command_input: InputGetter, player_output: OutputSender, name: Optional[str],
+    """
+    The Player class is what is used for all players. If you are using this API and would like your own player class,
+    it is recommended that instead, you just use another class called something like EventsObject and store that using
+    player[EventsObject] = EventsObject() (whenever you initialize your player object)
+    """
+
+    def __init__(self, input_getter: InputGetter, output: OutputSender, name: Optional[str],
                  savable: Optional[Savable]):
         """
         :param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
@@ -22,7 +28,7 @@ class Player(Entity, CommandSender):
                     the name of an important entity
         """
         super().__init__(name, Health(30, 30), None, None, savable)  # TODO max_health, current_health, location
-        CommandSender.__init__(self, command_input, player_output)
+        CommandSender.__init__(self, input_getter, output)
         self.handled_objects = []
         """A list of objects which will be saved if they inherit Savable. This list does not include self.savable as
         self.savable should help handle saving THIS list."""
