@@ -1,6 +1,11 @@
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from textadventure.utils import CanDo
+
+
+if TYPE_CHECKING:
+    from textadventure.handler import Handler
 
 
 class Action(ABC):
@@ -14,7 +19,7 @@ class Action(ABC):
         self.can_do = (True, "By default this is true")
 
     @abstractmethod
-    def _do_action(self, handler) -> CanDo:
+    def _do_action(self, handler: 'Handler') -> CanDo:
         """
         When overridden, this method should do whatever is wanted to matter what the state of the object is
         (Don't use the can_do field to alter what happens in this method)
@@ -25,7 +30,7 @@ class Action(ABC):
         """
         pass
 
-    def try_action(self, handler) -> CanDo:
+    def try_action(self, handler: 'Handler') -> CanDo:
         """
         Should be called after calling handlers do_action. This will make sure that if this Action was cancelled, it\
         won't be called (So you don't have to check can_do manually

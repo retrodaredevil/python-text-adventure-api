@@ -1,6 +1,7 @@
 import sys
 import time
 import warnings
+from abc import abstractmethod
 from threading import Thread
 from typing import List, TYPE_CHECKING
 
@@ -9,7 +10,7 @@ from textadventure.handler import Handler
 from textadventure.manager import Manager
 from textadventure.player import Player
 from textadventure.sending.message import Message, MessageType
-from textadventure.sending.commandsender import OutputSender
+from textadventure.sending.commandsender import OutputSender, OutputSenderType
 from textadventure.utils import join_list
 from textprint.colors import Color
 from textprint.line import Line
@@ -21,8 +22,27 @@ if TYPE_CHECKING:
     from textadventure.sending.commandsender import CommandSender
 
 
+# noinspection PyAbstractClass
+class BaseStreamOutput(OutputSender):
+    def __init__(self, stream=sys.stdout):
+        self.stream = stream
+
+    def get_sender_type(self):
+        return OutputSenderType.CLIENT_BASIC_STREAM
+
+    def send_raw_message(self, string_message: str):
+        # self.stream.write(string_message)
+        print(string_message, flush=False, file=self.stream, end="")
+        return True
+
+    def send_raw_flush(self):
+        # self.stream.flush()
+        print(flush=True, file=self.stream)
+        return True
+
+
 # deprecated
-class StreamOutput(Thread, OutputSender):  # extending thread so we can let messages pile up and print them out easily
+class RichStreamOutput(Thread, BaseStreamOutput):
 
     """
     Deprecated because it's not updated (it doesn't use MessageParts) and the code is very ugly and unreadable
@@ -38,9 +58,9 @@ class StreamOutput(Thread, OutputSender):  # extending thread so we can let mess
     """
 
     def __init__(self, stream=sys.stdout, is_unix=True):
-        warnings.warn("You are using the StreamOutput class which is deprecated and not updated.")
+        warnings.warn("You are using the RichStreamOutput class which is deprecated and not updated.")
         super().__init__()
-        self.stream = stream
+        BaseStreamOutput.__init__(self, stream)
         self.is_unix = is_unix
 
         self.messages = []
@@ -51,6 +71,11 @@ class StreamOutput(Thread, OutputSender):  # extending thread so we can let mess
         self.daemon = True
         self.start()
 
+    def get_sender_type(self):
+        if self.is_unix:
+            return OutputSenderType.CLIENT_UNIX_STREAM
+        return super().get_sender_type()
+
     def send_message(self, message: Message):
         if message is None:
             raise Exception("Cannot add an Message that's None")
@@ -59,7 +84,6 @@ class StreamOutput(Thread, OutputSender):  # extending thread so we can let mess
         self.messages.append(message)  # note that this may cause an issue if it gets reset right after (very unlikely)
 
     def run(self):
-        print("You are using deprecated StreamOutput")
         # from colorama import init, AnsiToWin32
         # if not self.is_unix:
         #     init(autoreset=True)
@@ -119,27 +143,49 @@ class StreamOutput(Thread, OutputSender):  # extending thread so we can let mess
 
                         time.sleep(to_wait)  # this is where the wait is applied
                         if c != '|':  # don't print these characters
-                            self.stream.write(c)  # print character
+                            # self.stream.write(c)  # print character
+                            self.send_raw_message(c)
                             if self.is_unix:  # if it's windows, this will look terrible
-                                self.stream.write("\033[s")  # save position for KeyboardInput
+                                # self.stream.write("\033[s")  # save position for KeyboardInput
+                                self.send_raw_message("\033[s")
                         if message.message_type != MessageType.IMMEDIATE \
                                 and (message.message_type != MessageType.TYPED or to_wait != 0) and not is_immediate:
-                            self.stream.flush()  # flush the stream assuming that we need to
-                    self.stream.flush()
+                            self.send_raw_flush()  # flush only if needed
+                    self.send_raw_flush()
 
 
-class ImmediateStreamOutput(OutputSender):
-    def __init__(self):
-        pass
+class ImmediateStreamOutput(Manager, BaseStreamOutput):
+    """
+    This class is designed for simplicity and should work across all platforms
+    """
+
+    def __init__(self, stream=sys.stdout):
+        BaseStreamOutput.__init__(self, stream)
+        self.messages = []
 
     def send_message(self, message: Message):
-        pass
+        self.messages.append(message)
 
     def on_input(self, sender: 'CommandSender', command_input: 'CommandInput'):
         if command_input.is_empty():
             return True
 
         return False
+
+    def update(self, handler: 'Handler'):
+        if len(self.messages) == 0:
+            return
+        for message in list(self.messages):
+            self.messages.remove(message)
+            parts = message.create_parts()
+            for part in parts:
+                full = part.print_before + part.main_text + part.print_after
+                self.send_raw_message(full)
+
+        self.send_raw_flush()
+
+    def on_action(self, handler: 'Handler', action: Action):
+        pass
 
 
 class TextPrinterOutput(Manager, OutputSender):
@@ -182,14 +228,28 @@ class TextPrinterOutput(Manager, OutputSender):
             self.__print_parts(immediate=True)  # only thing in if statement
             self._last_blank = now
             return True
-        current_is_instant = self.is_instant
 
         self.send_message(Message(Color.YELLOW >> command_input.string_input, message_type=MessageType.IMMEDIATE))
-        self.is_instant = True  # we have regular so all the stuff before it should print immediately
+        self.print_immediately()
+        return False
+
+    def send_raw_message(self, string_message: str):
+        return False
+
+    def send_raw_flush(self):
+        return False
+
+    def print_immediately(self):
         self.__add_messages()  # add the current message we just printed
         self.__print_parts(immediate=True)  # by default, this will change self.is_instant
-        self.is_instant = current_is_instant  # reset is_instant to what is was before
-        return False
+
+        # NOTE: For whatever reason, I had used this code below. I don't remember why I did it that way, but it works
+        #  now just by using __print_parts with immediate=True as seen above
+        # current_is_instant = self.is_instant
+        # self.is_instant = True  # we have regular so all the stuff before it should print immediately
+        # __print_parts call here
+        # self.is_instant = current_is_instant  # reset is_instant to what is was before
+        return True
 
     def on_action(self, handler: 'Handler', action: Action):
         pass

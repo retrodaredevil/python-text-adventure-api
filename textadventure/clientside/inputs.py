@@ -1,49 +1,47 @@
 from threading import Thread
+from typing import Optional
 
 from textadventure.action import Action
-from textadventure.clientside.outputs import StreamOutput
 from textadventure.handler import Handler
 from textadventure.manager import Manager
-from textadventure.sending.commandsender import InputGetter
+from textadventure.sending.commandsender import InputGetter, OutputSender, OutputSenderType
 from textprint.input import InputLineUpdater
 
 
 class KeyboardInputGetter(InputGetter, Thread):
     DEFAULT_INPUT_PROMPT = ""  # because it doesn't look how we want it to
 
-    def __init__(self, stream_output: StreamOutput):
+    def __init__(self, output: Optional[OutputSender] = None):
         """
+        Note thread does not start itself
 
-        :param stream_output: The stream output or None if the OutputSender object isn't a StreamOutput
+        :param output: The output to send raw messages to using ansi escapes or None if the console does not support
+                       these or if these are unwanted
         """
         super().__init__()
         self.inputs = []
-        self.stream_output = stream_output
-        self.__input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
-        self.start()
+        self.output = output
+        self.input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
 
     # def set_input_prompt(self, message: str):
-    #     self.__input_prompt = message
+    #     self.input_prompt = message
 
     def run(self):
         while True:
-            inp = str(input(self.__input_prompt))
-            self.__input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
+            try:
+                inp = input(self.input_prompt)
+            except EOFError:
+                raise KeyboardInterrupt("Thanks for using CTRL+D, press CTRL+C to actually exit.")
+
+            self.input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
             if not self.should_use_input(inp):  # ignore blank lines
-                if self.stream_output is not None:
+                if self.output is not None and self.output.get_sender_type() == OutputSenderType.CLIENT_UNIX_STREAM:
                     # get rid of enter # back to prev: \033[F
-                    if self.stream_output.is_unix:
-                        self.stream_output.stream.write("\033[K\033[u\033[1A")  # gosh, it was worth trying lots of stuf
-                        self.stream_output.stream.flush()
+                    self.output.send_raw_message("\033[K\033[u\033[1A")  # gosh, it was worth trying lots of stuf
                     # K: clear line, u: restore position, 1A: Move up 1 line   # ^ it works!!
+                    self.output.send_raw_flush()
 
-                    '''
-                    Can we just take a moment to appreciate whatever the heck I created does?
-                    All ya gotta do it press enter and this little if statement makes it happen.
-                    Duck this doesn't work on windows. I've been using gitbash. Duck DOS operating system wtf
-                    '''
-
-                    self.stream_output.print_immediate = True
+                    self.output.print_immediately()
                 continue
 
             self.inputs.append(inp)
@@ -61,29 +59,21 @@ class KeyboardInputGetter(InputGetter, Thread):
         return r
 
 
-class InputLineUpdaterManager(Manager):
-    """
-    Whenever the update method is called, updates self.updater using update_line.
-    Using this class helps the input look cleaner since InputLineUpdater runs on another Thread
-    """
-    def __init__(self, updater: InputLineUpdater):
-        self.updater = updater
+class BasicInputGetter(InputGetter, Manager):
+    def __init__(self):
+        pass
+
+    def take_input(self):
+        return input()
+
+    def update(self, handler: 'Handler'):
+        pass
 
     def on_action(self, handler: 'Handler', action: Action):
         pass
 
-    def update(self, handler: 'Handler'):
-        # start = time.time()  # tested and seems to have a good speed
-        self.updater.update()
-        if self.updater.should_exit:
-            raise KeyboardInterrupt("It seems updater.should_exit is True. Exiting program.")
-        # after = time.time()
-        # taken = after - start
-        # print(Cursor.POS(0, 0) + str(taken) + " seconds. inputs.py out", end="", flush=True)
-        # time.sleep(1)
 
-
-class TextPrinterInputGetter(InputGetter):
+class TextPrinterInputGetter(InputGetter, Manager):
     """
     Note that you should also probably add an instance of InputLineUpdaterManager to the list of managers in \
         the Handler to show smoother input
@@ -109,3 +99,12 @@ class TextPrinterInputGetter(InputGetter):
             return r
 
         return None
+
+    def update(self, handler: 'Handler'):
+        # start = time.time()  # tested and seems to have a good speed
+        self.updater.update()
+        if self.updater.should_exit:
+            raise KeyboardInterrupt("It seems updater.should_exit is True. Exiting program.")
+
+    def on_action(self, handler: 'Handler', action: Action):
+        pass

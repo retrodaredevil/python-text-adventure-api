@@ -7,11 +7,14 @@ from textadventure.battling.team import Team
 from textadventure.entity import EntityActionToEntity, Entity
 from textadventure.sending.message import Message
 
+import textadventure.battling as battling
+
 if typing.TYPE_CHECKING:
     from textadventure.battling.battle import Battle
     from textadventure.battling.damage import Damage
     from textadventure.battling.move import Move
     from textadventure.battling.effect import Effect
+    from textadventure.handler import Handler
 
 """
 A file dedicated to define implementations of the Action class related to the battling api
@@ -26,7 +29,7 @@ class BattleStart(Action):
         super().__init__()
         self.battle = battle
 
-    def _do_action(self, handler):
+    def _do_action(self, handler: 'Handler'):
         self.battle.has_started = True
         return self.can_do
 
@@ -40,7 +43,7 @@ class BattleEnd(Action):
         self.battle = battle
         self.winning_team = winning_team
 
-    def _do_action(self, handler):
+    def _do_action(self, handler: 'Handler'):
         self.battle.has_ended = True
         self.battle.broadcast(Message("{} has won the battle!", named_variables=[self.winning_team]))
         return self.can_do
@@ -50,9 +53,9 @@ class EntityChallengeAction(EntityActionToEntity):
     def __init__(self, entity: Entity, asked_entity: Entity):
         super().__init__(entity, asked_entity)
 
-    def _do_action(self, handler):
-        from textadventure.battling.battle import Battle
-        battle = Battle([Team([self.entity]), Team([self.asked_entity])])
+    def _do_action(self, handler: 'Handler'):
+        # from textadventure.battling.battle import Battle
+        battle = battling.battle.Battle([Team([self.entity]), Team([self.asked_entity])])
         manager = handler.get_managers(BattleManager, 1)[0]
         manager.add_battle(battle)
         battle.start(handler)
@@ -77,6 +80,6 @@ class DamageAction(Action):  # DONE create a manager where Effects can handle th
         """The list of outcome parts that will be appended to when _do_action is called. If a Manager changes \
         something in self.damage, they may want to append an OutcomePart so people know what happened."""
 
-    def _do_action(self, handler):
+    def _do_action(self, handler: 'Handler'):
         self.outcome_parts.append(self.damage.damage(self.battle))  # append a single OutcomePart
 

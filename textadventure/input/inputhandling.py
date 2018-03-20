@@ -78,7 +78,8 @@ class CommandInput:
 
         :return: True if the string is empty, False otherwise. (Normally False)
         """
-        return len(self.string_input) == 0
+        # return len(self.string_input) == 0
+        return len(self.get_split()) == 0
 
     def get_split(self) -> List[str]:
         r = self.string_input.split(" ")
@@ -100,7 +101,7 @@ class CommandInput:
         """
         return self.get_split()[self.get_command_index()]
 
-    def get_arg(self, index: int, ignore_unimportant_before=True) -> List[str]:
+    def get_arg(self, index: int, ignore_unimportant_before=True, ignore_flags=True) -> List[str]:
         """
         go to castle of rainbow unicorns
         get_arg(0, True) would return ["castle", "of", "rainbow", "unicorns"]
@@ -116,6 +117,8 @@ class CommandInput:
         :param index: The index for the arg. Starts at 0. Using a number less than 0 will produce an unexpected result
         :param ignore_unimportant_before Set to True if you want filter out unimportant words before the argument \
                 note that it will ALWAYS ignore unimportant AFTER the requested index.
+        :param ignore_flags: True if you want to filter out flags. Similar to ignore_unimportant_before, it will only
+                             ignore flags before the requested argument or if the requested argument is a flag
         :return: A list of the requested argument and all arguments after it. (Requested arg is in [0])
         """
         split = self.get_split()  # get the command args into split parts
@@ -130,13 +133,15 @@ class CommandInput:
         appending = False  # set to True once ready to start adding to list
         r = []
         for i, s in enumerate(split):
-            if appending:
+            if appending:  # once we start appending, we never stop
                 r.append(s)
             else:
                 if start_comparing + ignored == i:  # the next one is the request argument
-                    if i + 1 in unimportant or s.isspace():  # if the next one is unimportant
-                        # basically what this does, if we are ignoring this arg, add 1 to ignored so we will get \
-                        #       the arg 1 more to the left (ignoring s)
+                    is_next_flag = ignore_flags and len(split) > i + 1 \
+                                   and self.__class__.parse_flag(split[i + 1]) is not None
+                    if i + 1 in unimportant or s.isspace() or is_next_flag:
+                        # basically what this does, if we are ignoring this arg, add 1 to ignored so we will get
+                        # the arg 1 more to the left (ignoring s)
                         ignored += 1  # Needed to execute if first if statement again
                     else:  # the next one must be important
                         appending = True
@@ -145,9 +150,86 @@ class CommandInput:
         """
         return r
 
+    def subcommand(self, index=0, ignore_unimportant_before=True) -> 'CommandInput':
+        """
+        Creates another CommandInput that you can treat just like you would a regular command, except it's for a sub
+        command. Each argument is optional and normally they should not be changed
+
+        :param index: The argument index that you want to be the main command for the CommandInput that is returned
+        :param ignore_unimportant_before: If True, this will filter out unimportant arguments that are before or include
+                                          index
+        :return: A CommandInput where the main command is the argument specified by index (normally 0)
+        """
+        return CommandInput(self.__class__.join(self.get_arg(index, ignore_unimportant_before)))
+
+    def get_flags(self, ignore_unimportant_before=True, allow_flags_after_args=False, ignore_command=True) -> List[str]:
+        """
+        :param ignore_unimportant_before: If allow_flags_after_args is False, this says whether or not unimportant
+                                          words should be counted as args
+        :param allow_flags_after_args: If False, then flags after the first argument will not be returned
+        :param ignore_command: Normally True. If set to False, and the command is a flag, it will also return that
+        :return: The flags of this command as a list of strings
+        """
+        flags = []
+        split = self.get_split()
+        if ignore_unimportant_before:
+            unimportant = get_unimportant(split)
+        else:
+            unimportant = []
+
+        start_comparing = self.get_command_index()
+
+        for i, arg in enumerate(split):
+            if i > start_comparing or not ignore_command:  # make sure it isn't the command
+                flag = self.__class__.parse_flag(arg)
+                if flag is not None:
+                    flags.append(flag)
+                elif i not in unimportant and not allow_flags_after_args:
+                    break
+
+        return flags
+
+    @staticmethod
+    def parse_flag(arg: str) -> Optional[str]:
+        """
+        Examples:
+
+        "-h" -> "h"
+
+        "--help" -> "help"
+
+        "--" -> None
+
+        "hi" -> None
+
+
+        :param arg: The argument to parse the flag for
+        :return: The flag as a string or None if the passed arg is not a flag
+        """
+        length = len(arg)
+
+        if length < 2:
+            return None
+
+        if arg[0] == '-':
+            if arg[1] == '-':
+                if length > 2:  # there's no flag "--"
+                    return arg[2:]
+            elif length == 2:
+                return arg[1]
+
+        return None
+
     @staticmethod
     def join(to_join: List[str]) -> str:
-        return " ".join(to_join)  # before this line, I wrote about 5 lines. I don't even know python lol
+        """
+        If you have a list of arguments or something like that from a CommandInput, this is the recommended way of
+        reconstructing that into a string
+
+        :param to_join:
+        :return:
+        """
+        return " ".join(to_join)
 
 
 class InputHandler(ABC):

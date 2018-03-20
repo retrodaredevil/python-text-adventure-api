@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from enum import Enum, unique
 from typing import TYPE_CHECKING, Optional
 
 from textadventure.sending.message import Message, MessageType
@@ -17,6 +18,15 @@ class InputGetter(ABC):
         :return: a string representing the input or None
         """
         pass
+
+
+@unique
+class OutputSenderType(Enum):
+    CLIENT_BASIC_STREAM = 1
+    CLIENT_UNIX_STREAM = 2
+    CLIENT_CUSTOM = 3
+    REMOTE_SENDER = 4
+    UNKNOWN = 5
 
 
 class OutputSender(ABC):
@@ -40,9 +50,44 @@ class OutputSender(ABC):
         :return: True if you want to cancel the handling/sending of the input. False otherwise (Normally False)
         """
         if command_input.is_empty():
-            sender.send_message("You entered an empty line.")
+            if not self.print_immediately():
+                sender.send_message("You entered an empty line.")
             return True
         return False
+
+    def send_raw_message(self, string_message: str) -> bool:
+        """
+        This should be used to send things like special characters but should almost never be used repeatedly in the
+        code without good reason.
+
+        Note this should not flush the stream as that is what send_raw_flush is for
+
+        :param string_message: The message you want to print usually containing special characters
+        :return: True if the message was sent, False if this instance doesn't support it or False if unsuccessful
+        """
+        return False
+
+    def send_raw_flush(self) -> bool:
+        """
+        If possible on the current instance, tries to flush the stream and returns whether or not it was successful
+        :return: True if it was able to flush the stream. False if there is no stream or this instance does not support
+                 flushing
+        """
+        return False
+
+    def print_immediately(self) -> bool:
+        """
+        If possible and if necessary, prints all the current messages immediately. (Should be used to make text that
+        is being typed or text that has waits between each line to print immediately)
+
+        Note this is a one time thing and does NOT make it print immediately forever
+
+        :return: Whether or not it was able to print everything immediately. (False if not implemented)
+        """
+        return False
+
+    def get_sender_type(self) -> OutputSenderType:
+        return OutputSenderType.UNKNOWN
 
 
 class CommandSender:

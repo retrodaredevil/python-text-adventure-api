@@ -1,11 +1,12 @@
-import curses
 import sys
+
+from textadventure.input.inputhandling import CommandInput
 
 assert sys.version_info >= (3, 5), "Must use python 3.5 or greater. Many of the files use the typing module."
 
 from ninjagame.game import NinjaGame
-from textadventure.clientside.inputs import TextPrinterInputGetter, InputLineUpdaterManager
-from textadventure.clientside.outputs import TextPrinterOutput, LocationTitleBarManager
+from textadventure.clientside.inputs import TextPrinterInputGetter, KeyboardInputGetter
+from textadventure.clientside.outputs import TextPrinterOutput, LocationTitleBarManager, ImmediateStreamOutput
 from textadventure.mainclass import ClientSideMain
 from textadventure.player import Player
 from textprint.colors import Color
@@ -21,7 +22,8 @@ This file is not meant to be imported which is why it is not in any package righ
 """
 
 
-def setup():
+def setup_fancy():
+    import curses
 
     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
 
@@ -39,15 +41,15 @@ def setup():
 
         updater = InputLineUpdater(printer, input_section.println(printer, "", flush=True), stdscr)
         player_input = TextPrinterInputGetter(updater)
+        # input_manager = InputLineUpdaterManager(updater)  # calls updater's update
         output = TextPrinterOutput(printer, print_section)
         player = Player(player_input, output, None, None)
 
         add_interrupt_handler(lambda: updater.current_line().clear())  # clear line when CTRL+C is pressed
 
         title_manager = LocationTitleBarManager(player, printer, title_section.println(printer, ""))
-        input_manager = InputLineUpdaterManager(updater)  # calls updater's update
 
-        main_instance = ClientSideMain(NinjaGame(), [input_manager, output, title_manager], player)
+        main_instance = ClientSideMain(NinjaGame(), [player_input, output, title_manager], player)
 
         main_instance.start()
         while True:
@@ -60,8 +62,35 @@ def setup():
         curses_end()
 
 
+def setup_simple():
+    colorama_init()
+
+    player_input = KeyboardInputGetter()
+    player_input.daemon = True
+    player_input.start()
+
+    output = ImmediateStreamOutput()
+
+    player = Player(player_input, output, None, None)
+
+    main_instance = ClientSideMain(NinjaGame(), [output], player)
+    main_instance.start()
+    while True:
+        main_instance.update()
+
+
 def main():
-    setup()
+    command = CommandInput(CommandInput.join(sys.argv))
+    flags = command.get_flags()
+    if "simple" in flags:
+        setup_simple()
+    else:
+        try:
+            import curses
+        except ModuleNotFoundError:
+            pass
+        else:
+            setup_fancy()
 
 
 if __name__ == '__main__':
