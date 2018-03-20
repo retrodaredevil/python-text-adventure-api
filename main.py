@@ -88,7 +88,8 @@ def main():
         try:
             import curses
         except ModuleNotFoundError:
-            pass
+            print("Unable to load curses library. Initializing simple instead of fancy")
+            setup_simple()
         else:
             setup_fancy()
 

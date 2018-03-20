@@ -1,10 +1,12 @@
 .metadata
 build
 
+save.dat  # we don't want the save file
 
 #  https://stackoverflow.com/questions/3719243/recommended-gitignore-file-for-python-projects  << thanks
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*.pyc
 
 # C extensions
 *.so
