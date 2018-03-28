@@ -7,6 +7,11 @@ if TYPE_CHECKING:
 
 
 class Section:
+    OLD_LINES_AMOUNT = 100
+    """The amount of lines to keep and possibly render if they fit on screen"""
+    OLD_LINES_REMOVE_AT_TIME = 10
+    """The amount of lines to remove if the amount of lines gets above OLD_LINES_AMOUNT + OLD_LINES_REMOVE_AT_TIME"""
+
     def __init__(self, rows: Optional[int], columns: Optional[int] = None,
                  fill_up_left_over: bool = True, fake_line: Optional[str] = None):
         """
@@ -91,10 +96,10 @@ class Section:
         return line
 
     def __remove_old_lines(self):
-        if len(self.lines) < 110:  # we should remove 10 lines at a time -> might improve performance
+        if len(self.lines) < self.__class__.OLD_LINES_AMOUNT + self.__class__.OLD_LINES_REMOVE_AT_TIME:
             return
         amount_removed = 0
-        while len(self.lines) > 100:
+        while len(self.lines) > self.__class__.OLD_LINES_AMOUNT:
             del self.lines[0]  # removes first item by index
             amount_removed += 1
 

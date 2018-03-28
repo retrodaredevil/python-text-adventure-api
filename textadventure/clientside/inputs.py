@@ -1,3 +1,6 @@
+import _thread
+import sys
+import threading
 from threading import Thread
 from typing import Optional
 
@@ -31,13 +34,15 @@ class KeyboardInputGetter(InputGetter, Thread):
             try:
                 inp = input(self.input_prompt)
             except EOFError:
-                raise KeyboardInterrupt("Thanks for using CTRL+D, press CTRL+C to actually exit.")
+                _thread.interrupt_main()  # TODO find a better replacement
+                # threading.main_thread().idk
+                return
 
             self.input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
             if not self.should_use_input(inp):  # ignore blank lines
                 if self.output is not None and self.output.get_sender_type() == OutputSenderType.CLIENT_UNIX_STREAM:
                     # get rid of enter # back to prev: \033[F
-                    self.output.send_raw_message("\033[K\033[u\033[1A")  # gosh, it was worth trying lots of stuf
+                    self.output.send_raw_message("\033[K\033[u\033[1A")  # gosh, it was worth trying lots of stuff
                     # K: clear line, u: restore position, 1A: Move up 1 line   # ^ it works!!
                     self.output.send_raw_flush()
 

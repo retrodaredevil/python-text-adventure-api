@@ -20,18 +20,20 @@ class Player(Entity, CommandSender):
     player[EventsObject] = EventsObject() (whenever you initialize your player object)
     """
 
-    def __init__(self, input_getter: InputGetter, output: OutputSender, name: Optional[str],
-                 savable: Optional[Savable]):
+    def __init__(self, input_getter: InputGetter, output: OutputSender, savable: Optional[PlayerSavable]):
         """
         :param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
                     that players' names are one word while other entities are multiple so no one can name themselves\
                     the name of an important entity
         """
-        super().__init__(name, Health(30, 30), None, None, savable)  # TODO max_health, current_health, location
+        super().__init__(None, Health(30, 30), None, None, savable)  # TODO max_health, current_health, location
         CommandSender.__init__(self, input_getter, output)
         self.handled_objects = []
         """A list of objects which will be saved if they inherit Savable. This list does not include self.savable as
         self.savable should help handle saving THIS list."""
+
+        # Even though we can, we aren't going to do anything with savable right here. It is pointless since we don't
+        # have an instance of Handler. We'll just trust that PlayerSavable will initialize variables if needed
 
     def _create_savable(self):
         return PlayerSavable()

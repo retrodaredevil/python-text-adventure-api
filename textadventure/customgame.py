@@ -12,7 +12,6 @@ from textadventure.input.inputhandling import InputHandler
 from textadventure.location import Location
 from textadventure.manager import Manager
 from textadventure.player import Player
-from textadventure.saving.saving import SaveCommandHandler, LoadCommandHandler
 
 
 class CustomGame(ABC):
@@ -80,7 +79,7 @@ class CustomGame(ABC):
 
     def create_input_handlers(self) -> List[InputHandler]:
         return [GoCommandHandler(), TakeCommandHandler(), PlaceCommandHandler(), YellCommandHandler(),
-                UseCommandHandler(), SaveCommandHandler(), LoadCommandHandler(), NameCommandHandler(),
+                UseCommandHandler(), NameCommandHandler(),
                 InventoryCommandHandler(), LocateCommandHandler(), HelpCommandHandler(), AttackCommandHandler(),
                 DirectionInputHandler()
                 ]

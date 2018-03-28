@@ -1,13 +1,14 @@
-from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any, Dict
+from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any
 
 from textadventure.action import Action
 from textadventure.entity import Entity, Identifiable, Living
+from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler
 from textadventure.manager import Manager
 from textadventure.player import Player
 from textadventure.saving.savable import Savable, HasSavable
+from textadventure.saving.saving import SavePath, save_data
 from textadventure.sending.commandsender import CommandSender
-from textadventure.utils import Point, get_type_from_list, TypeCollection
-from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler
+from textadventure.utils import Point, get_type_from_list, TypeCollection, CanDo
 
 if TYPE_CHECKING:
     from textadventure.location import Location
@@ -39,7 +40,8 @@ class Handler(HasSavable):
     """
 
     def __init__(self, identifiables: List[Identifiable], locations: List['Location'],
-                 input_handlers: List[InputHandler], managers: List[Manager], savable: Optional[Savable]):
+                 input_handlers: List[InputHandler], managers: List[Manager], save_path: SavePath,
+                 savable: Optional['HandlerSavable']):
         """
         Creates the Handler object with parameters where some are able to change
 
@@ -49,6 +51,7 @@ class Handler(HasSavable):
         :param locations: List of all the locations in the game that normally should almost never change
         :param input_handlers: The list of starting InputHandlers where most of the elements shouldn't be removed.
         :param managers: The list of starting Managers
+        :param save_path: The path where the game will be saved
         :param savable: The savable that handles the saving of the Handler object
         """
         super().__init__(savable)
@@ -63,60 +66,36 @@ class Handler(HasSavable):
         self.input_handlers = input_handlers
         """A list of InputHandlers that do not include Locations"""
         self.managers = managers
-        self._savables = {}
-        """
-        A Dictionary of savables where the key is something that is usually a tuple with the first value
-        being the name of the class that created it and the second value being a number or id to make sure that
-        that class can create multiple of something. 
-        
-        Note this does not include PlayerSavables. PlayerSavables are handled separately
-        
-        If this is something like a PlayerSavable, you should use their
-        uuid because you aren't going to be creating a Player named Bob at one point in the code like you might
-        create an entity named 'White Belt Ninja' once in the code
-        """
+        self.save_path = save_path
 
         # Variables not from the constructor
+        """Can be used by the save and load command to easily save and load things"""
+        if savable is None:
+            self._savables = {}
+            """
+            A Dictionary of savables where the key is something that is usually a tuple with the first value
+            being the name of the class that created it and the second value being a number or id to make sure that
+            that class can create multiple of something. 
+            
+            Note this does not include PlayerSavables. PlayerSavables are handled separately
+            
+            If this is something like a PlayerSavable, you should use their
+            uuid because you aren't going to be creating a Player named Bob at one point in the code like you might
+            create an entity named 'White Belt Ninja' once in the code
+            """
+        else:
+            self._savables = savable.savables
+
         self.living_things = []
         """A list of livings that normally should never change. It's used to keep track of Living
         objects which make them easy to retrieve without using a static variable in the class of the living"""
+        self.should_end = False
+        """
+        When True, what ever is calling the update method should stop their infinite loop, and terminate the program.
+        """
 
     def _create_savable(self):
         return HandlerSavable()
-
-    # region savable and savables getters/setters
-    def get_savable(self, key):
-        return self._savables.get(key, None)
-
-    def set_savable(self, key, value: Savable):
-        """
-        Sets the savable so get_savable(key) returns value.
-
-        :param key: The key. Usually A UUID or a Tuple[str, int]. It should never contain something like a type or
-                an instance of an object because we want it to be something if if saved, won't conflict later while
-                loading
-        :param value:
-        :return: None
-        """
-        self._savables[key] = value
-
-    def get_savables(self):
-        """
-        This should not be called to edit the savables dictionary, this should be used when saving or doing something
-        that get_savable or set_savable can't do
-
-        :return: Returns the dictionary of Savables. Not this is mutable, so clone it if you wish to edit it
-        """
-        return self._savables
-
-    def set_savables(self, savables: Dict[Any, Savable]):
-        """
-        Should be used when loading data
-
-        :param savables: The dictionary of Savables
-        """
-        self._savables = savables
-    # endregion
 
     def start(self):
         """
@@ -130,6 +109,10 @@ class Handler(HasSavable):
         """
         Should be called repeatedly after calling start
         """
+        if self.should_end:
+            self.broadcast("The program should have already ended.")
+            return
+
         for player in self.get_players():
             player.update(self)
 
@@ -192,6 +175,55 @@ class Handler(HasSavable):
         for manager in self.managers:
             manager.on_action(self, action)
 
+    def save(self) -> CanDo:
+        """
+        Saves data for the running game. If you want to change the save path, set SAVE_PATH before you call this method
+        as this method uses self.SAVE_PATH to determine where to save the data
+        :return: A CanDo representing whether or not the data saved successfully. The return value at [1] should always
+                 be displayed to the user.
+        """
+        is_valid = self.save_path.is_valid()
+        if not is_valid[0]:
+            return is_valid
+        handler_result = self._save_handler()
+        if not handler_result[0]:
+            return handler_result
+
+        for player in self.get_players():
+            player_result = self._save_player(player)
+            if not player_result[0]:
+                return player_result
+
+        return True, "You successfully saved data to {}".format(self.save_path)
+
+    def _save_handler(self) -> CanDo:
+        path = self.save_path.get_handler_path()
+        self.savable.before_save(self, self)
+        return save_data(self.savable, path)
+
+    def _save_player(self, player: Player) -> CanDo:
+        path = self.save_path.get_player_path(player)
+        player.savable.before_save(player, self)
+        return save_data(player.savable, path)
+
+    # region all getters
+    # region savable and savables getters/setters
+    def get_savable(self, key):
+        return self._savables.get(key, None)
+
+    def set_savable(self, key, value: Savable):
+        """
+        Sets the savable so get_savable(key) returns value.
+
+        :param key: The key. Usually A UUID or a Tuple[str, int]. It should never contain something like a type or
+                an instance of an object because we want it to be something if if saved, won't conflict later while
+                loading
+        :param value:
+        :return: None
+        """
+        self._savables[key] = value
+    # endregion
+
     def get_input_handlers(self) -> List[InputHandler]:
         r = []
         for location in self.locations:
@@ -246,6 +278,7 @@ class Handler(HasSavable):
             if location.point == point:
                 return location
         return None
+    # endregion end all getters
 
     def broadcast(self, message):
         for player in self.get_players():
@@ -261,9 +294,10 @@ class HandlerSavable(Savable):
         self.savables = {}  # type Dict[Any, Savable]
 
     def before_save(self, source: Any, handler: 'Handler'):
-        assert isinstance(source, Handler)
-        self.savables = dict(source.get_savables())
+        assert source is handler
+        self.savables = dict(source.get_savables())  # store a clone of Handler's savable dict
 
     def on_load(self, source: Any, handler: 'Handler'):
-        assert isinstance(source, Handler)
+        assert source is handler
         assert source.get_savables() == self.savables, "The handler object is expected to apply variables."
+        # this does nothing because we expect that Handler's init used this instance to already initialize variables.

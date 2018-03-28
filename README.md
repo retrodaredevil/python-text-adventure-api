@@ -5,26 +5,26 @@ The textadventure package has the essentials to create a game.
 ## Before Installing
 If you are on windows and are not using gitbash or a unix compatable terminal, you will not get the full experience. If you still aren't convinved to switch to a unix like shell, it is recommended to install colorama so the colors work. This along with the curses library is completely optional to install.
 
-If you are using a unix like terminal, if you install curses you will be able to get a full screen experience with shortcuts like CTRL+Right Arrow and other emac shortcuts.
+If you are on anything but windows (sorry windows users), if you install curses you will be able to get a full screen experience with shortcuts like CTRL+Right Arrow and other emac shortcuts.
 ## Prerequisites
 Python 3.5 or Greater
 
-Colorama (recommended especially if not using unix like shell)
+Colorama (recommended especially if on windows)
 
-curses (if using unix like shell)
+curses (if using Mac/Linux) (optional)
 ## Installing
 ```
-\# optional:
+# optional:
 pip3 install colorama
 pip3 install curses
 
-\#cloning
+#cloning
 git clone https://github.com/retrodaredevil/python-text-adventure-api
 ```
 ## Running
 ```
 python3.5 main.py
-\# or
+# or
 python3.5 main.py --simple
 ```
 

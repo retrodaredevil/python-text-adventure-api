@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum, unique
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Any, Union
 
 from textadventure.sending.message import Message, MessageType
 from textadventure.utils import MessageConstant
@@ -103,11 +103,7 @@ class CommandSender:
         self.output.send_message(Message("", end="", wait_in_seconds=seconds))
 
     def send_line(self, amount: int = 1):
-        ending = Message.DEFAULT_ENDING
-        if amount != 1:
-            ending = ""
-            for i in range(0, amount):
-                ending += Message.DEFAULT_ENDING
+        ending = Message.DEFAULT_ENDING * amount
         self.send_message(Message("", MessageType.IMMEDIATE, end=ending))
 
     def clear_screen(self):
@@ -124,7 +120,7 @@ class CommandSender:
         return self.input_getter.take_input()
 
     @staticmethod
-    def get_message(message: MessageConstant) -> Message:
+    def get_message(message: Union[MessageConstant, Any]) -> Message:
         """
         Converts a MessageConstant to a Message
         Makes sure that the passed message value is returned as a Message object
@@ -133,9 +129,12 @@ class CommandSender:
         :return: A message object
         """
 
-        if type(message) is str:
-            message = Message(message)
-        if type(message) is not Message:
-            raise TypeError("The type: " + str(type(message)) + " is not supported")
-        return message
+        if isinstance(message, Message):
+            return message
+        return Message(str(message))
+        # if type(message) is str:
+        #     message = Message(message)
+        # if type(message) is not Message:
+        #     raise TypeError("The type: " + str(type(message)) + " is not supported")
+        # return message
 

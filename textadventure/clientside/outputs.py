@@ -180,6 +180,8 @@ class ImmediateStreamOutput(Manager, BaseStreamOutput):
             parts = message.create_parts()
             for part in parts:
                 full = part.print_before + part.main_text + part.print_after
+                full = full.replace(str(Color.CLEAR_SECTION), "\n" * 5 + "." * 10 + "\n" * 5)
+
                 self.send_raw_message(full)
 
         self.send_raw_flush()

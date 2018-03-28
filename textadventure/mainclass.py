@@ -1,9 +1,11 @@
-from typing import List
+from pathlib import Path
+from typing import List, Optional
 
 from textadventure.customgame import CustomGame
 from textadventure.handler import Handler
 from textadventure.manager import Manager
 from textadventure.player import Player
+from textadventure.saving.saving import SavePath
 
 
 class Main:
@@ -11,7 +13,7 @@ class Main:
     Used to initialize a CustomGame object along with constructing a Handler object making initializing a game\
     a lot simpler and more abstract
     """
-    def __init__(self, game: CustomGame, custom_managers: List[Manager]):
+    def __init__(self, game: CustomGame, custom_managers: List[Manager], save_path: SavePath):
         """
         Note: Custom managers do not yet call on_action when an action happens. This may be easily implemented in the
         future but, is not needed as of right now
@@ -26,7 +28,7 @@ class Main:
         self.handler = None
         """Member that is initialized when start is called"""
         self.custom_managers = custom_managers
-        # self.saving = saving if saving is not None else Saving(Path("./save.dat.d"))
+        self.save_path = save_path if save_path is not None else SavePath(Path("./save.dat.d"))
 
     def create_players(self) -> List[Player]:
         """
@@ -74,7 +76,7 @@ class Main:
         managers = list(self.game.create_custom_managers())
         managers.extend(self.game.create_managers())
 
-        self.handler = Handler(list(players), locations, input_handlers, managers, None)
+        self.handler = Handler(list(players), locations, input_handlers, managers, self.save_path, None)
 
         self.game.add_other(self.handler)
 
@@ -103,8 +105,8 @@ class Main:
 
 
 class ClientSideMain(Main):
-    def __init__(self, game: CustomGame, custom_managers: List[Manager], player: Player):
-        super().__init__(game, custom_managers)
+    def __init__(self, game: CustomGame, custom_managers: List[Manager], player: Player, save_path: SavePath):
+        super().__init__(game, custom_managers, save_path)
         self.player = player
 
     def create_players(self):

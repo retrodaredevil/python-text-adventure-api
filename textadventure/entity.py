@@ -38,7 +38,7 @@ class Living:
         is it's name
     """
 
-    def __init__(self, name):
+    def __init__(self, name: Optional[str]):
         self.name = name
 
     def get_used_name(self, sender: CommandSender) -> str:
@@ -46,7 +46,7 @@ class Living:
         By default, returns self.name but can be overridden to create the effect that someone doesn't know this person
 
         :param sender: The person that the returned name will be showed to
-        :return: The string that represents the name the passed 'living' will be shown
+        :return: The string that represents the name the passed 'sender' will be shown
         """
         return self.name
 
@@ -54,7 +54,7 @@ class Living:
         message = CommandSender.get_message(message)
         # if we change the way we do this, like doing this at a later time.
         #   Things could get messed up on the correct name
-        message.text = "|" + self.get_used_name(sender) + ":| " + message.text
+        message.text = "|" + self.get_used_name(sender) + ": |" + message.text
         sender.send_message(message)
 
     def is_reference(self, reference: str) -> bool:
@@ -103,16 +103,17 @@ class Entity(Living, Holder, Identifiable, HasSavable):
     """
     Represents something that has a location and has health
     """
-    def __init__(self, name: str, health: Health, location: 'Location', uuid: Optional[UUID], savable: Optional[Savable]):
+    def __init__(self, name: Optional[str], health: Health, location: Optional['Location'], uuid: Optional[UUID],
+                 savable: Optional[Savable]):
         """
         Creates an Entity the the given parameters
 
-        Note on parameter savable: Remember, this won't do anything unless it is added to handler.savables which
+        Note on parameter savable: Remember, this won't do anything unless it is set with handler.set_savable which
         doesn't happen here
 
-        :param name: The name of the entity
+        :param name: The name of the entity. If None, should only be None until initialized
         :param health: The health of the entity
-        :param location: The location of the entity.
+        :param location: The location of the entity. If None, should only be None until initialized
         :param uuid: The id of the entity or None if you want to create a new id
         :param savable: The Savable object that was loaded or None if it doesn't apply to this class or it doesn't
                 exist. (If None, HasSavable should call _create_savable)

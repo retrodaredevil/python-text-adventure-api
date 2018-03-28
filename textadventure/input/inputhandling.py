@@ -119,7 +119,8 @@ class CommandInput:
                 note that it will ALWAYS ignore unimportant AFTER the requested index.
         :param ignore_flags: True if you want to filter out flags. Similar to ignore_unimportant_before, it will only
                              ignore flags before the requested argument or if the requested argument is a flag
-        :return: A list of the requested argument and all arguments after it. (Requested arg is in [0])
+        :return: A list of the requested argument and all arguments after it. (Requested arg is in [0]) You are allowed
+                 to change (remove/append) to the returned list
         """
         split = self.get_split()  # get the command args into split parts
         unimportant = []  # a list of ints representing the unimportant words in a string where each is an index
@@ -168,7 +169,8 @@ class CommandInput:
                                           words should be counted as args
         :param allow_flags_after_args: If False, then flags after the first argument will not be returned
         :param ignore_command: Normally True. If set to False, and the command is a flag, it will also return that
-        :return: The flags of this command as a list of strings
+        :return: The flags of this command as a list of strings. You are allowed to change (remove/append) to the
+                 returned list
         """
         flags = []
         split = self.get_split()
@@ -183,20 +185,21 @@ class CommandInput:
             if i > start_comparing or not ignore_command:  # make sure it isn't the command
                 flag = self.__class__.parse_flag(arg)
                 if flag is not None:
-                    flags.append(flag)
+                    flags.extend(flag)
                 elif i not in unimportant and not allow_flags_after_args:
                     break
 
         return flags
 
     @staticmethod
-    def parse_flag(arg: str) -> Optional[str]:
+    def parse_flag(arg: str) -> Optional[List[str]]:
         """
         Examples:
 
-        "-h" -> "h"
+        "-h" -> ["h"]
+        "-hs" -> ["h", "s"]
 
-        "--help" -> "help"
+        "--help" -> ["help"]
 
         "--" -> None
 
@@ -204,7 +207,7 @@ class CommandInput:
 
 
         :param arg: The argument to parse the flag for
-        :return: The flag as a string or None if the passed arg is not a flag
+        :return: A list of one flag or a list of multiple, single character flags, or None if there was no flag
         """
         length = len(arg)
 
@@ -214,9 +217,9 @@ class CommandInput:
         if arg[0] == '-':
             if arg[1] == '-':
                 if length > 2:  # there's no flag "--"
-                    return arg[2:]
-            elif length == 2:
-                return arg[1]
+                    return [arg[2:]]
+            else:  # -a -ab -abc
+                return list(arg[1:])
 
         return None
 

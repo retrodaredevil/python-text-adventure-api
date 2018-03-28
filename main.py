@@ -1,6 +1,8 @@
 import sys
+from pathlib import Path
 
 from textadventure.input.inputhandling import CommandInput
+from textadventure.saving.saving import SavePath
 
 assert sys.version_info >= (3, 5), "Must use python 3.5 or greater. Many of the files use the typing module."
 
@@ -20,6 +22,9 @@ This file is an example game for my text adventure api using the ninjagame packa
 
 This file is not meant to be imported which is why it is not in any package right now
 """
+
+
+SAVE_PATH = SavePath(Path("./save.dat.d"))
 
 
 def setup_fancy():
@@ -43,13 +48,13 @@ def setup_fancy():
         player_input = TextPrinterInputGetter(updater)
         # input_manager = InputLineUpdaterManager(updater)  # calls updater's update
         output = TextPrinterOutput(printer, print_section)
-        player = Player(player_input, output, None, None)
+        player = Player(player_input, output, None)
 
         add_interrupt_handler(lambda: updater.current_line().clear())  # clear line when CTRL+C is pressed
 
         title_manager = LocationTitleBarManager(player, printer, title_section.println(printer, ""))
 
-        main_instance = ClientSideMain(NinjaGame(), [player_input, output, title_manager], player)
+        main_instance = ClientSideMain(NinjaGame(), [player_input, output, title_manager], player, SAVE_PATH)
 
         main_instance.start()
         while True:
@@ -64,6 +69,7 @@ def setup_fancy():
 
 def setup_simple():
     colorama_init()
+    print()
 
     player_input = KeyboardInputGetter()
     player_input.daemon = True
@@ -71,27 +77,37 @@ def setup_simple():
 
     output = ImmediateStreamOutput()
 
-    player = Player(player_input, output, None, None)
+    player = Player(player_input, output, None)
 
-    main_instance = ClientSideMain(NinjaGame(), [output], player)
+    main_instance = ClientSideMain(NinjaGame(), [output], player, SAVE_PATH)
     main_instance.start()
     while True:
         main_instance.update()
 
 
-def main():
+def auto_flag_setup():
     command = CommandInput(CommandInput.join(sys.argv))
     flags = command.get_flags()
-    if "simple" in flags:
+    print(flags)
+    if any(x in flags for x in ["simple", "s", "windows", "dos"]):
         setup_simple()
     else:
         try:
             import curses
+            import pyparsing
         except ModuleNotFoundError:
-            print("Unable to load curses library. Initializing simple instead of fancy")
+            print("Unable to load curses or pyparsing library. Initializing simple instead of fancy")
             setup_simple()
         else:
             setup_fancy()
+
+
+def main():
+    try:
+        auto_flag_setup()
+    except KeyboardInterrupt:
+        print("Ended program with a keyboard interrupt")
+        sys.exit(0)
 
 
 if __name__ == '__main__':

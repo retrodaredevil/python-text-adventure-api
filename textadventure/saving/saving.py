@@ -3,9 +3,9 @@ import pickle
 import sys
 from pathlib import Path
 from pickle import UnpicklingError
-from typing import Optional, TYPE_CHECKING, Any, Union, Dict
+from typing import Optional, TYPE_CHECKING, Any, Union
 
-from textadventure.commands.command import SimpleCommandHandler
+# from textadventure.commands.command import SimpleCommandHandler
 from textadventure.input.inputhandling import CommandInput, InputHandleType
 from textadventure.player import Player
 from textadventure.saving.savable import Savable
@@ -108,104 +108,87 @@ def get_path(command_input: CommandInput) -> Optional[Path]:
     return path.absolute()
 
 
-class Saving:
+def save_data(data, path: Path) -> CanDo:
+    """
+    Saves the data to file opened from path and does nothing else. (Doesn't call methods, doesn't check if Savable)
+
+    :param data: The data that you want to save to a file.
+    :param path: The path to the file to open
+    :return: A CanDo where [0] represents whether or not it was successful or not and [1] tells the person who
+            saved the data if they were successful. [1] should normally be printed unlike most other CanDo[1]
+    """
+    try:
+        with path.open("wb") as file:
+            # print("Going to save: {}".format(to_save))
+            pickle.dump(data, file)
+    except IOError:
+        info = sys.exc_info()
+        return False, "error: '{}'".format(info)
+    return True, "You successfully saved your data to {}.".format(path.absolute())
+
+
+def load_data(path: Path) -> Union[Any, str]:
+    """
+    Loads data from a file returning the contents of that file or returning a string representing an error
+
+    Because this returns a string for an error, this will also return a string if the contents of the file are a
+    string. The returned string will be an error message saying the data cannot be a string
+
+    :param path: The path to the file to open
+    :return: The content if the file was loaded successfully or an error message
+    """
+    if not path.is_file():
+        return "File was not found."
+    try:
+        content = pickle.load(path.open("rb"))
+    except EOFError:  # End of File Error
+        return "The file was either empty or something is wrong with it."
+    except UnpicklingError:
+        return "Unpickling Error: {}".format(sys.exc_info()[0])
+    # except:  # we want to see this error fully. And this error is a bad one so we commented this out
+    #     return False, "Unexpected error: {}".format(sys.exc_info()[0])
+
+    if content is None:
+        return "The file's contents were null. (Or None) Why anyone would pickle a NoneType is beyond me."
+    if isinstance(content, str):
+        return "The file's contents cannot be a string."
+
+    return content
+
+
+class SavePath:
+    """
+    A class that represents a path object and has helper methods but doesn't actually do any of the work in saving data.
+    """
     def __init__(self, path: Path):
         """
-        Creates a Saving object
-
-        :param path: The path to the directory that it will save in
+        :param path: The path
         """
-        self.path = path
+        self._path = path
+        """This is private because no one should need to see this or need to change it"""
 
-        assert not self.path.is_file() and not self.path.is_reserved()
+        # assert not self.path.is_file() and not self.path.is_reserved()
 
-    def _get_handler_path(self):
-        return self.path.joinpath("handler.dat")
+    def __str__(self):
+        return self.__class__.__name__ + "(" + str(self._path) + ")"
 
-    def _get_player_path(self, player: Player):
-        return self.path.joinpath("players/" + str(player.uuid) + ".dat")
+    def is_valid(self) -> CanDo:
+        if self._path.is_file():
+            return False, "The save path cannot be a file that already exists. " \
+                          "It must be a directory or a non existent file."
+        if self._path.is_reserved():
+            return False, "You can't use this path because it's reserved."
 
-    @staticmethod
-    def _save_data(data, path: Path) -> CanDo:
-        """
-        Saves the data to file opened from path and does nothing else. (Doesn't call methods, doesn't check if Savable)
+        return True, "This is a valid path"
 
-        :param data: The data that you want to save to a file.
-        :param path: The path to the file to open
-        :return: A CanDo where [0] represents whether or not it was successful or not and [1] tells the person who
-                saved the data if they were successful. [1] should normally be printed unlike most other CanDo[1]
-        """
-        try:
-            with path.open("wb") as file:
-                # print("Going to save: {}".format(to_save))
-                pickle.dump(data, file)
-        except IOError:
-            info = sys.exc_info()
-            return False, "error: '{}'".format(info)
-        return True, "You successfully saved your data to {}.".format(path.absolute())
+    def get_handler_path(self):
+        return self._path.joinpath("handler.dat")
 
-    @staticmethod
-    def _load_data(path: Path) -> Union[Any, str]:
-        """
-        Loads data from a file returning the contents of that file or returning a string representing an error
-
-        Because this returns a string for an error, this will also return a string if the contents of the file are a
-        string. The returned string will be an error message saying the data cannot be a string
-
-        :param path: The path to the file to open
-        :return: The content if the file was loaded successfully or an error message
-        """
-        if not path.is_file():
-            return "File was not found."
-        try:
-            content = pickle.load(path.open("rb"))
-        except EOFError:  # End of File Error
-            return "The file was either empty or something is wrong with it."
-        except UnpicklingError:
-            return "Unpickling Error: {}".format(sys.exc_info()[0])
-        # except:  # we want to see this error fully. And this error is a bad one so we commented this out
-        #     return False, "Unexpected error: {}".format(sys.exc_info()[0])
-
-        if content is None:
-            return "The file's contents were null. (Or None) Why anyone would pickle a NoneType is beyond me."
-        if isinstance(content, str):
-            return "The file's contents cannot be a string."
-
-        return content
-
-    def save_handler(self, handler: 'Handler') -> CanDo:
-        path = self._get_handler_path()
-        data = handler.get_savables()
-
-        for source, savable in data.items():
-            savable.before_save(source, handler)
-        return self._save_data(data, path)
-
-    def load_handler(self, handler: 'Handler') -> CanDo:
-        path = self._get_handler_path()
-        content = self._load_data(path)
-        if isinstance(content, str):
-            return False, content  # When _load_data returns a string, it's an error message
-        if not isinstance(content, Dict[Any, Savable]):
-            return False, "The format of the handler file is not correct."
-        for savable in content.values():
-            savable.on_load(handler, handler)  # load this savable with handler as the source because we have that
-
-        handler.set_savables(content)
-
-    def save_player(self, player: Player, handler: 'Handler') -> CanDo:
-        path = self._get_player_path(player)
-
-        to_save = []
-        data = player.handled_objects  # one of the only places it should do this
-        for part in data:
-            if isinstance(part, Savable):  # there may be non-savables in here
-                to_save.append(part)
-                part.before_save(player, handler)
-
-        return self._save_data(to_save, path)
+    def get_player_path(self, player: Player):
+        return self._path.joinpath("players/" + str(player.uuid) + ".dat")
 
 
+"""
 class SaveCommandHandler(SimpleCommandHandler):
     command_names = ["save"]
     description = "Allows you to save your ninjagame to a file. (Usually save.data)\n" \
@@ -264,3 +247,4 @@ class LoadCommandHandler(SimpleCommandHandler):
         else:
             sender.send_message(was_loaded[1])
         return InputHandleType.HANDLED
+"""

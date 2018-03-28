@@ -11,7 +11,7 @@ class HandlerInitialize:
     def __init__(self, key, init_callable: Callable[['Handler'], Savable]):
         """
 
-        :param key: The key the Savable should be saved under or is already saved under in handler.savables
+        :param key: The key the Savable should be saved under or is already saved in the handler savables dict
         :param init_callable: Will be called only if there wasn't a Savable found under key 'key' in handler.savables.
                 This should return the Savable that will be saved under 'key'.
         """
