@@ -1,11 +1,12 @@
+import time
 from pathlib import Path
 from typing import List, Optional
 
 from textadventure.customgame import CustomGame
-from textadventure.handler import Handler
+from textadventure.handler import Handler, HandlerSavable
 from textadventure.manager import Manager
 from textadventure.player import Player
-from textadventure.saving.saving import SavePath
+from textadventure.saving.saving import SavePath, load_data
 
 
 class Main:
@@ -13,7 +14,7 @@ class Main:
     Used to initialize a CustomGame object along with constructing a Handler object making initializing a game\
     a lot simpler and more abstract
     """
-    def __init__(self, game: CustomGame, custom_managers: List[Manager], save_path: SavePath):
+    def __init__(self, game: CustomGame, custom_managers: List[Manager], save_path: SavePath, rest=0.0):
         """
         Note: Custom managers do not yet call on_action when an action happens. This may be easily implemented in the
         future but, is not needed as of right now
@@ -22,6 +23,8 @@ class Main:
         :param custom_managers: List of managers that will be updated before handler. Note these managers should NOT
                                 be related to the game and should not alter game play at all. They should only be
                                 cosmetic or should help with things unrelated to the game
+        :param rest: The amount of time to wait between each update. If this is not 0, calling update will pause the
+                     program
         """
         self.game = game
 
@@ -29,6 +32,7 @@ class Main:
         """Member that is initialized when start is called"""
         self.custom_managers = custom_managers
         self.save_path = save_path if save_path is not None else SavePath(Path("./save.dat.d"))
+        self.rest = rest
 
     def create_players(self) -> List[Player]:
         """
@@ -76,7 +80,17 @@ class Main:
         managers = list(self.game.create_custom_managers())
         managers.extend(self.game.create_managers())
 
-        self.handler = Handler(list(players), locations, input_handlers, managers, self.save_path, None)
+        message = "Unable to load data."
+        savable = None
+        data = load_data(self.save_path.get_handler_path())
+        if not isinstance(data, str):
+            if isinstance(data, HandlerSavable):
+                savable = data
+                message = "Loaded data successfully."
+            else:
+                message = "Tried to load data for handler and got: {}".format(data)
+        self.handler = Handler(list(players), locations, input_handlers, managers, self.save_path, savable)
+        self.handler.broadcast(message)
 
         self.game.add_other(self.handler)
 
@@ -90,6 +104,8 @@ class Main:
         self.handler.update()
         for manager in self.custom_managers:
             manager.update(self.handler)
+
+        time.sleep(self.rest)
 
     def end(self):
         """

@@ -1,10 +1,20 @@
+#!/bin/sh
+''''which python3.5 1>/dev/null 2>&1 && exec python3.5 "$0" "$@" # '''
+''''which python3 1>/dev/null 2>&1 && exec python3 "$0" "$@"     # '''
+''''which python 1>/dev/null 2>&1 && exec python "$0" "$@" # '''
+''''exec echo "You must not have python 3 installed. Make sure you have at least version 3.5" # '''
+# thanks https://stackoverflow.com/a/26056481 for the above!
+
 import sys
+assert sys.version_info >= (3, 5), "Must use python 3.5 or greater. Many of the files use the typing module."
+
+import time
+
 from pathlib import Path
 
-from textadventure.input.inputhandling import CommandInput
+from textadventure.input.inputhandling import CommandInput, FlagData
 from textadventure.saving.saving import SavePath
 
-assert sys.version_info >= (3, 5), "Must use python 3.5 or greater. Many of the files use the typing module."
 
 from ninjagame.game import NinjaGame
 from textadventure.clientside.inputs import TextPrinterInputGetter, KeyboardInputGetter
@@ -24,7 +34,7 @@ This file is not meant to be imported which is why it is not in any package righ
 """
 
 
-SAVE_PATH = SavePath(Path("./save.dat.d"))
+save_path = SavePath(Path("./save.dat.d"))
 
 
 def setup_fancy():
@@ -54,11 +64,12 @@ def setup_fancy():
 
         title_manager = LocationTitleBarManager(player, printer, title_section.println(printer, ""))
 
-        main_instance = ClientSideMain(NinjaGame(), [player_input, output, title_manager], player, SAVE_PATH)
+        main_instance = ClientSideMain(NinjaGame(), [player_input, output, title_manager], player, save_path)
 
         main_instance.start()
         while True:
             main_instance.update()
+            time.sleep(.001)  # let the cpu rest a little bit
 
     try:
         scanner = curses.initscr()
@@ -79,17 +90,39 @@ def setup_simple():
 
     player = Player(player_input, output, None)
 
-    main_instance = ClientSideMain(NinjaGame(), [output], player, SAVE_PATH)
+    main_instance = ClientSideMain(NinjaGame(), [output], player, save_path)
     main_instance.start()
     while True:
         main_instance.update()
+        time.sleep(.2)
 
 
 def auto_flag_setup():
     command = CommandInput(CommandInput.join(sys.argv))
-    flags = command.get_flags()
-    print(flags)
-    if any(x in flags for x in ["simple", "s", "windows", "dos"]):
+    options = {
+        ("rest", "r"): 1,
+        ("simple", "windows", "dos"): 0,
+        ("file", "f", "save", "path"): 1,
+        ("clean", "no_load"): 0,
+        ("user", "u", "player"): 1  # TODO
+    }
+    flag_data = FlagData(command, options)
+
+    rest = 0.0
+    string_rest = flag_data.get_flag("rest")
+    if string_rest:
+        try:
+            rest = float(string_rest)
+        except ValueError:
+            print("{} is not a valid number for rest.".format(string_rest))
+            sys.exit(1)
+
+    string_file = flag_data.get_flag("file")
+    if string_file:
+        global save_path
+        save_path = SavePath(Path(string_file))
+
+    if flag_data.get_flag("simple"):
         setup_simple()
     else:
         try:

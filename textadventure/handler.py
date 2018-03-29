@@ -177,8 +177,8 @@ class Handler(HasSavable):
 
     def save(self) -> CanDo:
         """
-        Saves data for the running game. If you want to change the save path, set SAVE_PATH before you call this method
-        as this method uses self.SAVE_PATH to determine where to save the data
+        Saves data for the running game. If you want to change the save path, set save_path before you call this method
+        as this method uses self.save_path to determine where to save the data
         :return: A CanDo representing whether or not the data saved successfully. The return value at [1] should always
                  be displayed to the user.
         """
@@ -222,6 +222,10 @@ class Handler(HasSavable):
         :return: None
         """
         self._savables[key] = value
+
+    def get_savables(self):
+        """Should only be used in handler.py and nowhere else."""
+        return self._savables
     # endregion
 
     def get_input_handlers(self) -> List[InputHandler]:
@@ -295,7 +299,7 @@ class HandlerSavable(Savable):
 
     def before_save(self, source: Any, handler: 'Handler'):
         assert source is handler
-        self.savables = dict(source.get_savables())  # store a clone of Handler's savable dict
+        self.savables = dict(handler.get_savables())  # store a clone of Handler's savable dict
 
     def on_load(self, source: Any, handler: 'Handler'):
         assert source is handler

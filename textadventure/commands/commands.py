@@ -474,3 +474,16 @@ class LocateCommandHandler(SimpleCommandHandler):
 
         sender.location.send_locate_message(sender)
         return InputHandleType.HANDLED
+
+
+class SaveCommandHandler(SimpleCommandHandler):
+    command_names = ["save"]
+    description = "Allows you to save the game easily."
+
+    def __init__(self):
+        super().__init__(self.__class__.command_names, self.__class__.description)
+
+    def _handle_command(self, handler: Handler, sender: CommandSender, command_input: CommandInput):
+        result = handler.save()
+        sender.send_message(result[1])
+        return InputHandleType.HANDLED

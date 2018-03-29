@@ -1,6 +1,6 @@
 from abc import abstractmethod, ABC
 from enum import Enum, unique
-from typing import List, Callable, Optional, TYPE_CHECKING
+from typing import List, Callable, Optional, TYPE_CHECKING, Dict, Union, Tuple
 
 from textadventure.player import Player
 from textadventure.sending.commandsender import CommandSender
@@ -8,6 +8,12 @@ from textadventure.utils import get_unimportant
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler
+
+
+FlagOptions = Dict[Tuple[str, ...], Optional[int]]
+"""A dictionary where each key is a tuple of strings that represent a single flag. Each value is the number of
+arguments each flag should have. Usually 0 for most flags (True and False) but sometimes 1 for something like --file
+and rarely more than 1. If the value is None, then the flag takes up the rest of the command"""
 
 
 @unique
@@ -101,7 +107,8 @@ class CommandInput:
         """
         return self.get_split()[self.get_command_index()]
 
-    def get_arg(self, index: int, ignore_unimportant_before=True, ignore_flags=True) -> List[str]:
+    def get_arg(self, index: int, ignore_unimportant_before=True,
+                flag_options: Optional[FlagOptions] = None) -> List[str]:
         """
         go to castle of rainbow unicorns
         get_arg(0, True) would return ["castle", "of", "rainbow", "unicorns"]
@@ -117,8 +124,16 @@ class CommandInput:
         :param index: The index for the arg. Starts at 0. Using a number less than 0 will produce an unexpected result
         :param ignore_unimportant_before Set to True if you want filter out unimportant words before the argument \
                 note that it will ALWAYS ignore unimportant AFTER the requested index.
-        :param ignore_flags: True if you want to filter out flags. Similar to ignore_unimportant_before, it will only
-                             ignore flags before the requested argument or if the requested argument is a flag
+        :param flag_options: The dict representing the flag options. This is used to ignore flags in the returned list.
+                             If set to None (default), then it will assume that all flags have 0 arguments after them
+                             essentially only ignoring the flags themselves. If it is not None, then it will only
+                             ignore flags specified in the dict itself.
+
+                             If this is an empty dict, then that essentially makes it so flags are not ignored
+                             and can be in the returned list.
+
+                             Note that flags after the first argument are not treated as flags ex:
+                             "command_name my_arg --my_flag" --my_flag is always treated as an argument
         :return: A list of the requested argument and all arguments after it. (Requested arg is in [0]) You are allowed
                  to change (remove/append) to the returned list
         """
@@ -137,10 +152,24 @@ class CommandInput:
             if appending:  # once we start appending, we never stop
                 r.append(s)
             else:
+                is_next_flag = False
+                if len(split) > i + 1:  # entire if statement is to check for flags
+                    next_arg = split[i + 1]
+                    flags = self.__class__.parse_flag(next_arg)
+                    if flags is not None:
+                        if len(flags) > 1:  # assume that there are 0 arguments after something like -al
+                            is_next_flag = all([FlagData.get_option(flag, flag_options) is not None for flag in flags])
+                        else:
+                            option = FlagData.get_option(flags[0], flag_options)
+                            if option is not None:
+                                aliases, num_flag_args = option
+                                is_next_flag = True  # 1 will be added to ignored anyway
+                                ignored += num_flag_args
+                                # TODO fix side effect where if next arg is flag it still increments ignored
+                    if is_next_flag:
+                        ignored += 1
                 if start_comparing + ignored == i:  # the next one is the request argument
-                    is_next_flag = ignore_flags and len(split) > i + 1 \
-                                   and self.__class__.parse_flag(split[i + 1]) is not None
-                    if i + 1 in unimportant or s.isspace() or is_next_flag:
+                    if i + 1 in unimportant or s.isspace():
                         # basically what this does, if we are ignoring this arg, add 1 to ignored so we will get
                         # the arg 1 more to the left (ignoring s)
                         ignored += 1  # Needed to execute if first if statement again
@@ -191,6 +220,8 @@ class CommandInput:
 
         return flags
 
+    # def get_arg_flag(self):
+
     @staticmethod
     def parse_flag(arg: str) -> Optional[List[str]]:
         """
@@ -233,6 +264,79 @@ class CommandInput:
         :return:
         """
         return " ".join(to_join)
+
+
+class FlagData:
+    def __init__(self, command: CommandInput, flag_options: FlagOptions):
+        self.command = command
+        self.flag_options = flag_options
+
+    @staticmethod
+    def get_option(flag_name: str, flag_options: Optional[FlagOptions]) -> Optional[Tuple[Tuple[str], int]]:
+        """
+
+        :param flag_name: The name of the flag which may have multiple aliases
+        :param flag_options: The FlagOptions dict where each key is a tuple of aliases/names and each value is the
+                             number of arguments that come after the flag represented by the names
+
+                             If this is None, then the returned value will be (flag_name,), 0 meaning that by default,
+                             this allows you to have no flag_options making things assume every flag is valid and
+                             has no arguments after it. Use this carefully.
+        :return: A tuple where [0] is a tuple representing all the aliases/names of the flag. [1] is an int
+                 representing the number of arguments that come after the flag usually 0, sometimes 1, rarely > 1
+        """
+        if flag_options is None:
+            return (flag_name,), 0
+        try:
+            # thanks: https://stackoverflow.com/a/2974082
+            return next((k, v) for k, v in flag_options.items() if flag_name in k)
+        except StopIteration:
+            return None
+
+    def get_flag(self, name) -> Union[bool, Optional[str], Optional[List[str]]]:
+        """
+        :param name: The name of the flag.
+        :return: If the value corresponding with the name is 0 (0 arguments) then the return value will be a bool
+                 that is True if the name (or any aliases) are in command.get_flags().
+
+                 If the value is 1, then the return value will be: a string representing the argument that came after
+                 the flag. If the flag was not in the command it will return None.
+                 However, if it was in the command and there was no argument after it, it will return an empty string.
+
+                 If the value is greater than 1, then the return value will be a list of strings with a max length of
+                 the value from flag_options. If the flag was not present in the command, it will return None.
+                 However,
+                 if there were no arguments or there were less than <value> amount of arguments after it then the length
+                 of the returned list may not be value
+        """
+        option = self.__class__.get_option(name, self.flag_options)
+        if option is None:
+            raise ValueError("Was unable to find flag: '{}' in flag_options: {}".format(name, self.flag_options))
+        aliases, num_args = option
+
+        if num_args == 0:
+            return any([flag in aliases for flag in self.command.get_flags()])
+
+        r = []
+        append = False
+        for arg in self.command.get_split():
+            if append:
+                r.append(arg)
+                if len(r) == num_args:
+                    break
+                continue
+
+            flags = CommandInput.parse_flag(arg)
+            if flags is not None and any([alias in flags for alias in aliases]):
+                append = True
+                if len(flags) > 1:
+                    break  # if there are multiple flags like: -asdf then return an empty list or empty string
+
+        if not append:  # flag was not present in command
+            return None
+        if num_args == 1:
+            return r[0] if len(r) > 0 else ""
+        return r
 
 
 class InputHandler(ABC):
