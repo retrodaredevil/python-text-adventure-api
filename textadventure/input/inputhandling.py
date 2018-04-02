@@ -5,6 +5,7 @@ from typing import List, Callable, Optional, TYPE_CHECKING, Dict, Union, Tuple
 from textadventure.player import Player
 from textadventure.sending.commandsender import CommandSender
 from textadventure.utils import get_unimportant
+import shlex
 
 if TYPE_CHECKING:
     from textadventure.handler import Handler
@@ -45,7 +46,7 @@ class InputHandleType(Enum):  # returned when the InputHandle's handle method/va
     UNSUPPORTED_SENDER = 9
     """Represents when there was no action taken because whatever was sending the command is unable to perform it.
     This is not recommended every time since sometimes you will want to tell the sender that they can't perform it.
-    However, if you aren't going to tell them, you should return this instead of NOT_HANDLED"""
+    However, if you are NOT going to tell them, you should return this instead of NOT_HANDLED"""
 
     def should_give_response(self):
         """
@@ -64,14 +65,27 @@ class CommandInput:
     This object contains a string_input which is the unchanged string that was inputted
     This object also contains the string split up (split_input) which is an array
 
-    Not to be mistaken for PlayerInput, there may be instances in the code where I can call a CommandInput variable \
-    input_getter but it's really an CommandInput
+    Also, this uses shlex.split so a command like: "command_name 'cool string' space\ string" gives 3 parts. 1 command,
+    2 args
     """
 
     def __init__(self, string_input: str):
-        self.string_input = string_input
-        # DONE actually make this good. I deleted a bunch of this and now it doesn't work. I need to find a better way
-        # if you're wondering, this class used to be a lot different.
+        self._string_input = string_input
+        try:
+            self._split = self.__class__.do_split(string_input)
+        except ValueError as e:
+            self._split = string_input.split(" ")
+            self.input_error = e
+        else:
+            self.input_error = None
+            """
+            If the parser had trouble parsing the input. (Ex: There's no closing quote) this will be a ValueError
+            where input_error.args[0] is the error as a string. If this is not None, then that means that split() will 
+            return a list of strings split only by spaces (not using unix like parsing).
+            """
+
+    def __str__(self):
+        return self._string_input
 
     def is_empty(self):
         """
@@ -84,15 +98,10 @@ class CommandInput:
 
         :return: True if the string is empty, False otherwise. (Normally False)
         """
-        # return len(self.string_input) == 0
-        return len(self.get_split()) == 0
+        return len(self.split()) == 0
 
-    def get_split(self) -> List[str]:
-        r = self.string_input.split(" ")
-        for element in list(r):
-            if not element:
-                r.remove(element)
-        return r
+    def split(self) -> List[str]:
+        return self._split
 
     def get_command_index(self) -> int:
         """
@@ -105,7 +114,7 @@ class CommandInput:
         """
         :return: The name of the command keeping the same case as the input
         """
-        return self.get_split()[self.get_command_index()]
+        return self.split()[self.get_command_index()]
 
     def get_arg(self, index: int, ignore_unimportant_before=True,
                 flag_options: Optional[FlagOptions] = None) -> List[str]:
@@ -137,7 +146,7 @@ class CommandInput:
         :return: A list of the requested argument and all arguments after it. (Requested arg is in [0]) You are allowed
                  to change (remove/append) to the returned list
         """
-        split = self.get_split()  # get the command args into split parts
+        split = self.split()  # get the command args into split parts
         unimportant = []  # a list of ints representing the unimportant words in a string where each is an index
         if ignore_unimportant_before:
             unimportant = get_unimportant(split)
@@ -158,7 +167,7 @@ class CommandInput:
                     flags = self.__class__.parse_flag(next_arg)
                     if flags is not None:
                         if len(flags) > 1:  # assume that there are 0 arguments after something like -al
-                            is_next_flag = all([FlagData.get_option(flag, flag_options) is not None for flag in flags])
+                            is_next_flag = all(FlagData.get_option(flag, flag_options) is not None for flag in flags)
                         else:
                             option = FlagData.get_option(flags[0], flag_options)
                             if option is not None:
@@ -169,9 +178,10 @@ class CommandInput:
                     if is_next_flag:
                         ignored += 1
                 if start_comparing + ignored == i:  # the next one is the request argument
-                    if i + 1 in unimportant or s.isspace():
+                    # assert not s.isspace()
+                    if i + 1 in unimportant:
                         # basically what this does, if we are ignoring this arg, add 1 to ignored so we will get
-                        # the arg 1 more to the left (ignoring s)
+                        # one arg to the right
                         ignored += 1  # Needed to execute if first if statement again
                     else:  # the next one must be important
                         appending = True
@@ -202,7 +212,7 @@ class CommandInput:
                  returned list
         """
         flags = []
-        split = self.get_split()
+        split = self.split()
         if ignore_unimportant_before:
             unimportant = get_unimportant(split)
         else:
@@ -263,7 +273,11 @@ class CommandInput:
         :param to_join:
         :return:
         """
-        return " ".join(to_join)
+        return " ".join(shlex.quote(part) for part in to_join)
+
+    @staticmethod
+    def do_split(to_split: str) -> List[str]:
+        return shlex.split(to_split)
 
 
 class FlagData:
@@ -315,11 +329,11 @@ class FlagData:
         aliases, num_args = option
 
         if num_args == 0:
-            return any([flag in aliases for flag in self.command.get_flags()])
+            return any(flag in aliases for flag in self.command.get_flags())
 
         r = []
         append = False
-        for arg in self.command.get_split():
+        for arg in self.command.split():
             if append:
                 r.append(arg)
                 if len(r) == num_args:
@@ -327,7 +341,7 @@ class FlagData:
                 continue
 
             flags = CommandInput.parse_flag(arg)
-            if flags is not None and any([alias in flags for alias in aliases]):
+            if flags is not None and any(alias in flags for alias in aliases):
                 append = True
                 if len(flags) > 1:
                     break  # if there are multiple flags like: -asdf then return an empty list or empty string

@@ -1,3 +1,4 @@
+import sys
 from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any
 
 from textadventure.action import Action
@@ -5,10 +6,13 @@ from textadventure.entity import Entity, Identifiable, Living
 from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler
 from textadventure.manager import Manager
 from textadventure.player import Player
-from textadventure.saving.savable import Savable, HasSavable
-from textadventure.saving.saving import SavePath, save_data
+from textadventure.saving.playersavable import PlayerSavable
+from textadventure.saving.savable import Savable, HasSavable, SaveLoadException
+from textadventure.saving.saving import SavePath, save_data, load_data
 from textadventure.sending.commandsender import CommandSender
+from textadventure.sending.message import Message, MessageType
 from textadventure.utils import Point, get_type_from_list, TypeCollection, CanDo
+from textprint.colors import Color
 
 if TYPE_CHECKING:
     from textadventure.location import Location
@@ -41,18 +45,18 @@ class Handler(HasSavable):
 
     def __init__(self, identifiables: List[Identifiable], locations: List['Location'],
                  input_handlers: List[InputHandler], managers: List[Manager], save_path: SavePath,
-                 savable: Optional['HandlerSavable']):
+                 savable: Optional['HandlerSavable'], player_handler: Optional['PlayerHandler'] = None):
         """
         Creates the Handler object with parameters where some are able to change
 
         :param identifiables: The starting List of Identifiables. Normally, this list is very small or empty
-                since the Handler object needs to be constructed to initialize some Identifiables. Don't be afraid to
-                pass an empty list or a list with one Player.
+                since the Handler object needs to be constructed to initialize some Identifiables.
         :param locations: List of all the locations in the game that normally should almost never change
         :param input_handlers: The list of starting InputHandlers where most of the elements shouldn't be removed.
         :param managers: The list of starting Managers
         :param save_path: The path where the game will be saved
         :param savable: The savable that handles the saving of the Handler object
+        :param player_handler: The PlayerHandler object. By default, it is None which will create a new one
         """
         super().__init__(savable)
         self.identifiables = identifiables
@@ -86,6 +90,7 @@ class Handler(HasSavable):
         else:
             self._savables = savable.savables
 
+        self.player_handler = player_handler if player_handler is not None else PlayerHandler(None, self)
         self.living_things = []
         """A list of livings that normally should never change. It's used to keep track of Living
         objects which make them easy to retrieve without using a static variable in the class of the living"""
@@ -104,6 +109,14 @@ class Handler(HasSavable):
         for location in self.locations:  # TODO should we initialize stuff in here?
             for initializer in location.initializers:
                 initializer.do_init(self)
+
+        # above for loop may append to self.identifiables so this loop is second
+        # this was a terrible idea and broke some stuff
+        # for ident in self.identifiables:
+        #     if isinstance(ident, HasSavable):
+        #         if ident.savable is not None:
+        #             ident.savable.on_load(ident, self)
+        # assert next(iter(self.get_players()))[PlayerFriend] is not None this is just debug that helped find problem
 
     def update(self):
         """
@@ -175,12 +188,12 @@ class Handler(HasSavable):
         for manager in self.managers:
             manager.on_action(self, action)
 
-    def save(self) -> CanDo:
+    def save(self, sender: Optional[CommandSender] = None) -> CanDo:
         """
         Saves data for the running game. If you want to change the save path, set save_path before you call this method
         as this method uses self.save_path to determine where to save the data
-        :return: A CanDo representing whether or not the data saved successfully. The return value at [1] should always
-                 be displayed to the user.
+        :return: A CanDo representing whether or not the handler data saved successfully. The return value at [1]
+                 should always be displayed to the user.
         """
         is_valid = self.save_path.is_valid()
         if not is_valid[0]:
@@ -189,25 +202,27 @@ class Handler(HasSavable):
         if not handler_result[0]:
             return handler_result
 
+        unsaved_string = ""
+        unsaved_amount = 0
         for player in self.get_players():
-            player_result = self._save_player(player)
+            # sender.send_message(Message("Saving: {}", named_variables=[player]))
+            player_result = self.player_handler.save_player(player)
             if not player_result[0]:
-                return player_result
+                sender.send_message(Message(str(player.uuid) + " - " + player_result[1],
+                                            message_type=MessageType.IMMEDIATE))
+                unsaved_amount += 1
 
-        return True, "You successfully saved data to {}".format(self.save_path)
+        if unsaved_amount:
+            unsaved_string = " {} players were unable to be saved.".format(unsaved_amount)
+
+        return True, "You successfully saved data to {}.".format(self.save_path) + unsaved_string
 
     def _save_handler(self) -> CanDo:
         path = self.save_path.get_handler_path()
         self.savable.before_save(self, self)
         return save_data(self.savable, path)
 
-    def _save_player(self, player: Player) -> CanDo:
-        path = self.save_path.get_player_path(player)
-        player.savable.before_save(player, self)
-        return save_data(player.savable, path)
-
     # region all getters
-    # region savable and savables getters/setters
     def get_savable(self, key):
         return self._savables.get(key, None)
 
@@ -226,7 +241,6 @@ class Handler(HasSavable):
     def get_savables(self):
         """Should only be used in handler.py and nowhere else."""
         return self._savables
-    # endregion
 
     def get_input_handlers(self) -> List[InputHandler]:
         r = []
@@ -305,3 +319,99 @@ class HandlerSavable(Savable):
         assert source is handler
         assert source.get_savables() == self.savables, "The handler object is expected to apply variables."
         # this does nothing because we expect that Handler's init used this instance to already initialize variables.
+
+
+class PlayerHandler:
+    """
+    A class where one instance of this class belongs to the Handler instance and this classes sole purpose is to
+    separate methods used for saving players, loading players, and validating player names etc.
+
+    This class also assumes that any players that already have names that aren't None, are valid and are not duplicates.
+    Unless some other code altered the names or something, this should not be a problem if you just let this class
+    handle it
+    """
+    _VALID_RANGES = [range(48, 57 + 1), range(65, 91 + 1), range(95, 95 + 1), range(97, 122 + 1)]
+
+    def __init__(self, save_path: Optional[SavePath], handler: Optional[Handler] = None):
+        """
+        :param save_path: The save path. Note if handler is not None, this will not be used. If handler it not None,
+                          that should be the only instance where this can be None
+        :param handler: The handler or None if it has not been initialized yet.
+        """
+        if save_path is None and handler is None:
+            raise ValueError("Each provided argument was None. One of them has to not be None.")
+        self._save_path = save_path
+        self.handler = handler
+
+        self.player_savables = []  # type List[PlayerSavable]
+
+    def get_save_path(self):
+        return self.handler.save_path if self.handler is not None else self._save_path
+
+    def load_player_savables(self) -> CanDo:
+        """
+        Loads all saved player data from the player directory
+        :return: A CanDo where [0] is True if it loaded any amount of player savables correctly. [1] is the result and
+                 should be displayed no matter what [0] is. Note that [1] may have multiple lines. The first line
+                 says "Loaded {} players successfully. {} others unsuccessfully" while other lines are errors
+        """
+        folder = self.get_save_path().get_player_folder()
+        if not folder.exists():
+            return False, "The player directory does not exist"
+        if not folder.is_dir():
+            return False, "The player directory is not a directory."
+
+        errors = []
+        good_amount = 0
+        for item in folder.iterdir():
+            if item.is_file():
+                data = load_data(item)
+                if isinstance(data, PlayerSavable):  # probably a PlayerSavable, but what do we care?
+                    self.player_savables.append(data)
+                    good_amount += 1
+                elif isinstance(data, str):  # this is the error message
+                    errors.append("File: {} - ".format(item.name) + data)
+                else:
+                    errors.append("File: {} - Loaded unknown data of type: {}".format(item.name, type(data)))
+
+        error_string = ""
+        if len(errors) > 0:
+            error_string = "{} others unsuccessfully:\n".format(len(errors))
+            error_string += "\n".join(errors)
+        return good_amount > 0, "Loaded {} players successfully. ".format(good_amount) + error_string
+
+    def get_player_savable(self, name: str) -> Optional[PlayerSavable]:
+        """
+        Finds the player with the name of name. Note you must call load_player_savables for this to get updated data
+        but you shouldn't have to worry about it because every time a player leaves, they should save the game
+
+        This function compares the names of the saved players and ignores the case
+        :param name: The name of the player's savable to get
+        :return: The savable with that belongs to the player with the name of name or None if it was not found
+        """
+        for save in self.player_savables:
+            if save.name.lower() == name.lower():
+                return save
+        return None
+
+    def is_name_taken(self, name: str) -> bool:
+        if self.handler is not None:
+            for player in self.handler.get_players():
+                if player.name is not None and player.name.lower() == name.lower():
+                    return True
+        return self.get_player_savable(name) is not None
+
+    def is_name_valid(self, name):
+        if name is None:
+            return False
+
+        return all(any(ord(c) in r for r in self.__class__._VALID_RANGES) for c in name)
+
+    def save_player(self, player: Player) -> CanDo:
+        assert self.handler is not None
+        path = self.get_save_path().get_player_path(player)
+        try:
+            player.savable.before_save(player, self.handler)
+        except SaveLoadException as e:
+            return False, e.args[0]
+        return save_data(player.savable, path)

@@ -22,11 +22,9 @@ class NinjaGame(CustomGame):
         return []
 
     def new_player(self, player: Player):
-
-
+        # player.send_message("Yay you are a new player!" + str(player.uuid))
         player[PlayerFriend] = PlayerFriend("Friend")  # not used as a magic string
         player[EventsObject] = EventsObject()
-        # player[PlayerSavable] = PlayerSavable()
 
     def create_locations(self) -> List[Location]:
         return [Entrance(), InsideEntrance(), EastInsideEntrance(), WestInsideEntrance(),

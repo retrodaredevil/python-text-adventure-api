@@ -180,6 +180,7 @@ class ImmediateStreamOutput(Manager, BaseStreamOutput):
             parts = message.create_parts()
             for part in parts:
                 full = part.print_before + part.main_text + part.print_after
+                full = full.replace("\n", "\n" + Color.RESET)
                 full = full.replace(str(Color.CLEAR_SECTION), "\n" * 5 + "." * 10 + "\n" * 5)
 
                 self.send_raw_message(full)
@@ -231,7 +232,7 @@ class TextPrinterOutput(Manager, OutputSender):
             self._last_blank = now
             return True
 
-        self.send_message(Message(Color.YELLOW >> command_input.string_input, message_type=MessageType.IMMEDIATE))
+        self.send_message(Message(Color.YELLOW >> str(command_input), message_type=MessageType.IMMEDIATE))
         self.print_immediately()
         return False
 

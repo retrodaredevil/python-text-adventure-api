@@ -172,12 +172,12 @@ class Location(Holder, PlayerInputHandler, FiveSensesHandler):
         Should be called when the player's location is changed (this method doesn't set the players location)
         If for whatever reason, this method may change the player's location back to the previous (update if becomes t)
 
-        When overriding, make sure that even if the player doesn't leave and this method gets called twice for whatever\
-        reason, it doesn't do something like give them a second weapon or make them face an enemy they already faced
+        It is possible that this method is called twice even if the player doesn't leave so when overriding, make sure
+        that if this method was called twice in a row, it doesn't affect gameplay. Ex: Spawning in another sword
 
         :param handler:
         :param player: The player
-        :param previous_location: the previous location or None if there is none or it couldn't be found
+        :param previous_location: the previous location or None if the player is new or if the player just loaded data
         """
         pass
 

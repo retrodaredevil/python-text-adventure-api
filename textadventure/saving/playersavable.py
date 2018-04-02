@@ -1,6 +1,6 @@
 from typing import Any, TYPE_CHECKING
 
-from textadventure.saving.savable import Savable
+from textadventure.saving.savable import Savable, SaveLoadException
 from textadventure.utils import Point
 
 if TYPE_CHECKING:
@@ -23,6 +23,7 @@ class PlayerSavable(Savable):
         self.items = []
         self.handled_savables = []
         self.name = None
+        self.uuid = None
 
     def __str__(self):
         return "PlayerSavable(point:{},items:{},name:{})".format(self.point, self.items, self.name)
@@ -32,6 +33,7 @@ class PlayerSavable(Savable):
         self.point = player.location.point
         self.items = list(player.items)
         self.name = player.name
+        self.uuid = player.uuid
         for o in player.handled_objects:
             if isinstance(o, Savable):
                 self.handled_savables.append(o)
@@ -44,6 +46,7 @@ class PlayerSavable(Savable):
         player.items.extend(self.items)
 
         player.name = self.name
+        player.uuid = self.uuid
 
         player.handled_objects.clear()
         player.handled_objects.extend(self.handled_savables)
@@ -56,6 +59,9 @@ class PlayerSavable(Savable):
 
         for o in self.handled_savables:
             o.before_save(source, handler)
+
+        if not handler.player_handler.is_name_valid(self.name):
+            raise SaveLoadException("The player does not have a valid name")
 
     def on_load(self, source: Any, handler: 'Handler'):
         # assert isinstance(source, Player), "The only thing that should be handling this is a player"

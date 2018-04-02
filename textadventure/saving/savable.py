@@ -10,6 +10,15 @@ To avoid namespace and type error, this file shouldn't import anything from the 
 """
 
 
+class SaveLoadException(Exception):
+    """
+    Is raised when there was an error related to the data being saved or being loaded. This should be used if you
+    don't want the program to crash as it can usually be used to display information to the user
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 class Savable(ABC):
     """
     A class that, if implemented, will allow you to save this class. Note that just implementing this class does
@@ -52,6 +61,8 @@ class Savable(ABC):
         """
         Called before the data will be saved. Override to do whatever you want with it.
 
+        If this object cannot be saved, it should raise a SaveLoadException
+
         :param source: What is saving/handling this object. (A player, an entity, a location)
         :param handler: The handler object
         :return: None
@@ -64,6 +75,8 @@ class Savable(ABC):
         Called when the object is loaded into the player's handled_object
         this should not be called from __init__ and should and will only be called when unserializing/unpickling data\
         (that's handled for you)
+
+        If this cannot be loaded correctly, then a SaveLoadException should be raised
 
         :param source: What is loading/handling this object. (A player, an entity, a location)
         :param handler: The handler object

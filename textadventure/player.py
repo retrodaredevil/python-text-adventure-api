@@ -21,16 +21,16 @@ class Player(Entity, CommandSender):
     """
 
     def __init__(self, input_getter: InputGetter, output: OutputSender, savable: Optional[PlayerSavable]):
-        """
-        :param name: The name of the player. If you would like, it can start out to be None. It is also recommended \
-                    that players' names are one word while other entities are multiple so no one can name themselves\
-                    the name of an important entity
-        """
-        super().__init__(None, Health(30, 30), None, None, savable)  # TODO max_health, current_health, location
+        super().__init__(None, Health(30, 30), None, savable)  # TODO max_health, heath, location
         CommandSender.__init__(self, input_getter, output)
         self.handled_objects = []
         """A list of objects which will be saved if they inherit Savable. This list does not include self.savable as
         self.savable should help handle saving THIS list."""
+        self.is_new = savable is None  # NOTE even if savable is None, self.savable is not None because of HasSavable
+        """
+        This is True when the player first plays until they log off and save their game. After their first
+        "play session" this will forever be False
+        """
 
         # Even though we can, we aren't going to do anything with savable right here. It is pointless since we don't
         # have an instance of Handler. We'll just trust that PlayerSavable will initialize variables if needed

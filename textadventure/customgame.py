@@ -6,7 +6,7 @@ from textadventure.battling.commands import AttackCommandHandler
 from textadventure.battling.managing import DamageActionManager, BattleManager, HostileEntityManager
 from textadventure.commands.commands import GoCommandHandler, TakeCommandHandler, PlaceCommandHandler, \
     YellCommandHandler, UseCommandHandler, NameCommandHandler, InventoryCommandHandler, LocateCommandHandler, \
-    HelpCommandHandler, DirectionInputHandler, SaveCommandHandler
+    HelpCommandHandler, DirectionInputHandler, SaveCommandHandler, UUIDCommandHandler
 from textadventure.handler import Handler
 from textadventure.input.inputhandling import InputHandler
 from textadventure.location import Location
@@ -79,7 +79,7 @@ class CustomGame(ABC):
 
     def create_input_handlers(self) -> List[InputHandler]:
         return [GoCommandHandler(), TakeCommandHandler(), PlaceCommandHandler(), YellCommandHandler(),
-                UseCommandHandler(), NameCommandHandler(), SaveCommandHandler(),
+                UseCommandHandler(), NameCommandHandler(), SaveCommandHandler(), UUIDCommandHandler(),
                 InventoryCommandHandler(), LocateCommandHandler(), HelpCommandHandler(), AttackCommandHandler(),
                 DirectionInputHandler()
                 ]

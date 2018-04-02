@@ -191,7 +191,8 @@ class Item(Savable, FiveSensesHandler):
 
     def can_use(self, entity: 'Entity') -> CanDo:
         """
-        This method should be used to tell if the player is able to use this item at all, not if the item is usable.
+        This method should be used to tell if the player is able to use this item at all, not if the item is usable in
+        its current state.
         However, if the item isn't usable by anyone or anything, then this should probably return False at [0]
 
         For instance, if a player has a Sword in their inventory, this should return True. However, if that sword is

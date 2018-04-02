@@ -26,8 +26,7 @@ class KeyboardInputGetter(InputGetter, Thread):
         self.output = output
         self.input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
 
-    # def set_input_prompt(self, message: str):
-    #     self.input_prompt = message
+        self.daemon = True
 
     def run(self):
         while True:
@@ -39,15 +38,15 @@ class KeyboardInputGetter(InputGetter, Thread):
                 return
 
             self.input_prompt = self.__class__.DEFAULT_INPUT_PROMPT
-            if not self.should_use_input(inp):  # ignore blank lines
-                if self.output is not None and self.output.get_sender_type() == OutputSenderType.CLIENT_UNIX_STREAM:
-                    # get rid of enter # back to prev: \033[F
-                    self.output.send_raw_message("\033[K\033[u\033[1A")  # gosh, it was worth trying lots of stuff
-                    # K: clear line, u: restore position, 1A: Move up 1 line   # ^ it works!!
-                    self.output.send_raw_flush()
-
-                    self.output.print_immediately()
-                continue
+            # if not self.should_use_input(inp):  # ignore blank lines
+            #     if self.output is not None and self.output.get_sender_type() == OutputSenderType.CLIENT_UNIX_STREAM:
+            #         # get rid of enter # back to prev: \033[F
+            #         self.output.send_raw_message("\033[K\033[u\033[1A")  # gosh, it was worth trying lots of stuff
+            #         # K: clear line, u: restore position, 1A: Move up 1 line   # ^ it works!!
+            #         self.output.send_raw_flush()
+            #
+            #         self.output.print_immediately()
+            #     continue
 
             self.inputs.append(inp)
 

@@ -26,6 +26,7 @@ from textprint.inithelper import curses_init, std_init, curses_end, add_interrup
 from textprint.input import InputLineUpdater
 from textprint.section import Section
 from textprint.textprinter import TextPrinter
+from textadventure.handler import PlayerHandler
 
 """
 This file is an example game for my text adventure api using the ninjagame package
@@ -34,67 +35,79 @@ This file is not meant to be imported which is why it is not in any package righ
 """
 
 
-save_path = SavePath(Path("./save.dat.d"))
 
 
-def setup_fancy():
-    import curses
+def create_fancy_player(stdscr, savable):
 
-    # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
+    curses_init()
+    std_init(stdscr)
+    colorama_init()
 
-    def start(stdscr):
-        curses_init()
-        std_init(stdscr)
-        colorama_init()
+    input_section = Section(None, fill_up_left_over=False)  # we want to allow it to go for as many lines it needs
+    print_section = Section(None, fake_line=(Color.BLUE >> "~"))
+    title_section = Section(1)
+    printer = TextPrinter([input_section, print_section, title_section], print_from_top=False, stdscr=stdscr)
+    printer.update_dimensions()
+    # print_section.fake_line = Color.RED + Color.BOLD + "|" + (" " * (printer.dimensions[1] - 3)) + "|"
 
-        input_section = Section(None, fill_up_left_over=False)  # we want to allow it to go for as many lines it needs
-        print_section = Section(None, fake_line=(Color.BLUE >> "~"))
-        title_section = Section(1)
-        printer = TextPrinter([input_section, print_section, title_section], print_from_top=False, stdscr=stdscr)
-        printer.update_dimensions()
-        # print_section.fake_line = Color.RED + Color.BOLD + "|" + (" " * (printer.dimensions[1] - 3)) + "|"
+    updater = InputLineUpdater(printer, input_section.println(printer, "", flush=True), stdscr)
+    player_input = TextPrinterInputGetter(updater)
+    # input_manager = InputLineUpdaterManager(updater)  # calls updater's update
+    output = TextPrinterOutput(printer, print_section)
+    player = Player(player_input, output, savable)
 
-        updater = InputLineUpdater(printer, input_section.println(printer, "", flush=True), stdscr)
-        player_input = TextPrinterInputGetter(updater)
-        # input_manager = InputLineUpdaterManager(updater)  # calls updater's update
-        output = TextPrinterOutput(printer, print_section)
-        player = Player(player_input, output, None)
+    add_interrupt_handler(lambda: updater.current_line().clear())  # clear line when CTRL+C is pressed
 
-        add_interrupt_handler(lambda: updater.current_line().clear())  # clear line when CTRL+C is pressed
+    title_manager = LocationTitleBarManager(player, printer, title_section.println(printer, ""))
 
-        title_manager = LocationTitleBarManager(player, printer, title_section.println(printer, ""))
-
-        main_instance = ClientSideMain(NinjaGame(), [player_input, output, title_manager], player, save_path)
-
-        main_instance.start()
-        while True:
-            main_instance.update()
-            time.sleep(.001)  # let the cpu rest a little bit
-
-    try:
-        scanner = curses.initscr()
-        start(scanner)
-    finally:
-        curses_end()
+    return player, [player_input, output, title_manager], lambda: curses_end()
 
 
-def setup_simple():
+# def setup_fancy(savable):
+#     import curses
+#
+#     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
+#
+#     def start(stdscr):
+#         player, custom_managers = create_fancy_player(stdscr, savable)
+#
+#         main_instance = ClientSideMain(NinjaGame(), custom_managers, player, save_path)
+#
+#         main_instance.start()
+#         while True:
+#             main_instance.update()
+#             time.sleep(.001)  # let the cpu rest a little bit
+#
+#     try:
+#         scanner = curses.initscr()
+#         start(scanner)
+#     finally:
+#         curses_end()
+
+
+def create_simple_player(savable):
+
     colorama_init()
     print()
 
     player_input = KeyboardInputGetter()
-    player_input.daemon = True
     player_input.start()
 
     output = ImmediateStreamOutput()
 
-    player = Player(player_input, output, None)
+    player = Player(player_input, output, savable)
 
-    main_instance = ClientSideMain(NinjaGame(), [output], player, save_path)
-    main_instance.start()
-    while True:
-        main_instance.update()
-        time.sleep(.2)
+    return player, [output], lambda: None
+
+
+# def setup_simple(savable):
+#     player, custom_managers = create_simple_player(savable)
+#
+#     main_instance = ClientSideMain(NinjaGame(), custom_managers, player, save_path)
+#     main_instance.start()
+#     while True:
+#         main_instance.update()
+#         time.sleep(.2)
 
 
 def auto_flag_setup():
@@ -104,35 +117,76 @@ def auto_flag_setup():
         ("simple", "windows", "dos"): 0,
         ("file", "f", "save", "path"): 1,
         ("clean", "no_load"): 0,
-        ("user", "u", "player"): 1  # TODO
+        ("user", "u", "player"): 1
     }
     flag_data = FlagData(command, options)
 
-    rest = 0.0
+    rest = 0.001
     string_rest = flag_data.get_flag("rest")
-    if string_rest:
+    if string_rest is not None:
         try:
             rest = float(string_rest)
         except ValueError:
-            print("{} is not a valid number for rest.".format(string_rest))
+            print("'{}' is not a valid number for rest.".format(string_rest))
             sys.exit(1)
+    if rest > 1:
+        print("Rest cannot be greater than 1. Rest is the amount of time in seconds it waits to update.")
+        print("Making this greater than 1 makes the game unresponsive for too long of a period.")
+        sys.exit(1)
 
     string_file = flag_data.get_flag("file")
+    save_path = SavePath(Path("./save.dat.d"))
     if string_file:
-        global save_path
         save_path = SavePath(Path(string_file))
 
+    is_clean = flag_data.get_flag("clean")  # should we load data?
+
+    player_handler = PlayerHandler(save_path)
+    player_savable = None
+
+    result = player_handler.load_player_savables()  # load these anyway
+
+    player_name = flag_data.get_flag("user")
+    if player_name is not None:
+        if is_clean:
+            print("Error: Using --clean flag but also specifying a player to load.")
+            sys.exit(1)
+        if not result[0]:
+            print(result[1])
+            sys.exit(1)
+        player_savable = player_handler.get_player_savable(player_name)
+        if player_savable is None:
+            print("Unable to find player with name: '{}'".format(player_name))
+            sys.exit(1)
+        else:
+            print("Successfully loaded player: '{}'".format(player_savable.name))
+
     if flag_data.get_flag("simple"):
-        setup_simple()
+        # setup_simple(player_savable)
+        information = create_simple_player(player_savable)
     else:
         try:
             import curses
             import pyparsing
         except ModuleNotFoundError:
             print("Unable to load curses or pyparsing library. Initializing simple instead of fancy")
-            setup_simple()
+            # setup_simple(player_savable)
+            information = create_simple_player(player_savable)
         else:
-            setup_fancy()
+            # setup_fancy(player_savable)
+            information = create_fancy_player(curses.initscr(), player_savable)
+
+    player, custom_managers, end_function = information
+    try:
+        main_instance = ClientSideMain(NinjaGame(), custom_managers, player, save_path, rest=rest)
+        main_instance.start()
+
+        while True:
+            main_instance.update()
+            time.sleep(rest)
+    finally:
+        end_function()
+
 
 
 def main():

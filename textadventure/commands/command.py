@@ -25,7 +25,7 @@ class CommandHandler(InputHandler):
             if not self._should_handle_input(already_handled):
                 return InputHandleType.NOT_HANDLED
             first_arg = command_input.get_arg(0, False)
-            if len(first_arg) != 0 and first_arg[0].lower() == "help":
+            if "help" in command_input.get_flags() or (len(first_arg) != 0 and first_arg[0].lower() == "help"):
                 self.send_help(sender)
                 return InputHandleType.HANDLED
             return self._handle_command(handler, sender, command_input)

@@ -64,6 +64,8 @@ def load_data(path: Path) -> Union[Any, str]:
 class SavePath:
     """
     A class that represents a path object and has helper methods but doesn't actually do any of the work in saving data.
+
+    This object is also immutable
     """
     def __init__(self, path: Path):
         """
@@ -89,8 +91,11 @@ class SavePath:
     def get_handler_path(self):
         return self._path.joinpath("handler.dat")
 
+    def get_player_folder(self):
+        return self._path.joinpath("players")
+
     def get_player_path(self, player: 'Player'):
-        return self._path.joinpath("players/" + str(player.uuid) + ".dat")
+        return self.get_player_folder().joinpath(str(player.uuid) + ".dat")
 
 
 '''

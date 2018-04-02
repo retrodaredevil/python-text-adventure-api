@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import List, Optional
 
 from textadventure.commands.command import LocationCommandHandler, SimpleCommandHandler
-from textadventure.entity import Entity
+from textadventure.entity import Entity, Identifiable
 from textadventure.handler import Handler
 from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler, InputHandle, \
     PlayerInputHandler
@@ -73,7 +73,7 @@ def get_point(handler: Handler, player: Player, string_args: str) -> Optional[Po
 
 class HelpCommandHandler(SimpleCommandHandler):
     def __init__(self):
-        super().__init__(["help"], "The help for this command isn't very helpful now it it?")
+        super().__init__(["help", "man", "manual"], "The help for this command isn't very helpful now it it?")
 
     def _handle_command(self, handler: Handler, sender: CommandSender, command_input: CommandInput) -> InputHandleType:
         sender.send_message(Message("Get help for commands: '<command> help'", message_type=MessageType.IMMEDIATE))
@@ -484,6 +484,22 @@ class SaveCommandHandler(SimpleCommandHandler):
         super().__init__(self.__class__.command_names, self.__class__.description)
 
     def _handle_command(self, handler: Handler, sender: CommandSender, command_input: CommandInput):
-        result = handler.save()
-        sender.send_message(result[1])
+        result = handler.save(sender)
+        sender.send_message(Message(result[1], message_type=MessageType.IMMEDIATE))
         return InputHandleType.HANDLED
+
+
+class UUIDCommandHandler(SimpleCommandHandler):
+    command_names = ["uuid"]
+    description = "Allows you to see your UUID"
+
+    def __init__(self):
+        super().__init__(self.__class__.command_names, self.__class__.description)
+
+    def _handle_command(self, handler: Handler, sender: CommandSender, command_input: CommandInput):
+        if isinstance(sender, Identifiable):
+            sender.send_message(Message("Your UUID: ", end=""))
+            sender.send_message(Message("{}", named_variables=[sender.uuid], message_type=MessageType.IMMEDIATE))
+            return InputHandleType.HANDLED
+
+        return InputHandleType.UNSUPPORTED_SENDER

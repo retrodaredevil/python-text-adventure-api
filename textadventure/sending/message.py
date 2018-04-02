@@ -90,7 +90,7 @@ class Message:
                 # asked, list(map(str, named)) transforms the list, named, into a list of strings, then\
                 # it calls join_list which there is some excellent documentation on that elsewhere. Good day
             else:
-                names.append(Color.CYAN >> str(named))  # named could be a string or something that has an __str__ mthd
+                names.append(Color.CYAN >> str(named))  # named could be a string or something with a __str__()
 
         try:
             text = text.format(*names)

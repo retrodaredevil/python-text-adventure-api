@@ -57,7 +57,7 @@ class NinjaDude(Living):
 
 
 class NinjaEntity(CommunityHostileEntity):
-    def __init__(self, name, health, location, uuid: Optional[UUID], savable: Optional[Savable]):
-        super().__init__(name, health, location, [Player], uuid, savable)
+    def __init__(self, name, health, location, savable: Optional[Savable]):
+        super().__init__(name, health, location, [Player], savable)
 
 

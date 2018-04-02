@@ -49,8 +49,11 @@ class NameTaker(PlayerInputHandler):
         self.current_friend_name = None
         self.player = player
 
-        player[PlayerFriend].tell(player, "Oh hey! You've just accepted to start your journey too! "
-                                          "I just did too. Wait, what's your name again?")
+        assert player is not None
+        friend = player[PlayerFriend]
+        assert friend is not None, "Player with uuid: '{}' doesn't have a friend!".format(player.uuid)
+        friend.tell(player, "Oh hey! You've just accepted to start your journey too! "
+                            "I just did too. Wait, what's your name again?")
 
     def on_player_input(self, handler: Handler, player: Player, command_input: CommandInput) -> Optional[InputHandle]:
         if player != self.player:
@@ -59,7 +62,7 @@ class NameTaker(PlayerInputHandler):
         def handle_function(already_handled: List[InputHandleType]):
             if not self._should_handle_input(already_handled):
                 raise Exception("NameTaker is the number one priority! What happened?")
-            split = command_input.get_split()
+            split = command_input.split()
             if len(split) > 1:
                 player[PlayerFriend].tell(player, "Hey, I can't remember that many words!")
                 return InputHandleType.INCORRECT_RESPONSE
@@ -83,6 +86,13 @@ class NameTaker(PlayerInputHandler):
                 return InputHandleType.HANDLED
             # stuff below is for the player's name (think like an else statement from cuz it returns above)
             if self.current_name is None:
+                name = split[0]
+                if not handler.player_handler.is_name_valid(name):
+                    player.send_message(Message("'{}' is not valid", named_variables=[name]))
+                    return InputHandleType.HANDLED
+                elif handler.player_handler.is_name_taken(name):
+                    player.send_message(Message("'{}' is already taken!", named_variables=[name]))
+                    return InputHandleType.HANDLED
                 self.current_name = split[0]
                 player[PlayerFriend].tell(player, Message("Are you sure your name is {}? (y/n)",
                                                           named_variables=[self.current_name]))
@@ -123,7 +133,7 @@ class Entrance(Location):  # players should only be in this location when starti
             if not self._should_handle_input(already_handled):
                 return InputHandleType.NOT_HANDLED
             # if ["hi", "ho", "he"] any/all/only 1 in "hello there how are you"
-            if "n" in command_input.string_input:
+            if "n" in str(command_input):
                 player.send_message("What? Are you sure?")
             else:
                 player.send_message("OK, that's great")
@@ -548,10 +558,10 @@ class EastCenterSpiderWebForest(Location):
         self.ninja = None  # right now, this hasn't been initialized
 
         def create_ninja(savable: Optional[Savable]):
-            uuid = None
-            if savable is not None:
-                uuid = savable.uuid  # TODO make the savable have a uuid or something
-            self.ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self, uuid, savable)
+            # uuid = None
+            # if savable is not None:
+            #     uuid = savable.uuid  # TODO make the savable have a uuid or something
+            self.ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self, savable)
             sword = Sword(SwordType.WOODEN)
             sword.change_holder(None, self.ninja)
 

@@ -1,12 +1,14 @@
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
+from ninjagame.entites import PlayerFriend
 from textadventure.customgame import CustomGame
 from textadventure.handler import Handler, HandlerSavable
 from textadventure.manager import Manager
 from textadventure.player import Player
 from textadventure.saving.saving import SavePath, load_data
+from textadventure.sending.message import Message
 
 
 class Main:
@@ -14,7 +16,7 @@ class Main:
     Used to initialize a CustomGame object along with constructing a Handler object making initializing a game\
     a lot simpler and more abstract
     """
-    def __init__(self, game: CustomGame, custom_managers: List[Manager], save_path: SavePath, rest=0.0):
+    def __init__(self, game: CustomGame, custom_managers: List[Manager], save_path: SavePath, rest=0.0, clean=False):
         """
         Note: Custom managers do not yet call on_action when an action happens. This may be easily implemented in the
         future but, is not needed as of right now
@@ -25,6 +27,8 @@ class Main:
                                 cosmetic or should help with things unrelated to the game
         :param rest: The amount of time to wait between each update. If this is not 0, calling update will pause the
                      program
+        :param clean: True if the program shouldn't attempt to load any data which will overwrite existing data when
+                      saving
         """
         self.game = game
 
@@ -33,6 +37,7 @@ class Main:
         self.custom_managers = custom_managers
         self.save_path = save_path if save_path is not None else SavePath(Path("./save.dat.d"))
         self.rest = rest
+        self.clean = False
 
     def create_players(self) -> List[Player]:
         """
@@ -62,8 +67,8 @@ class Main:
 
         :param player: The player that has just joined
         """
-        # TODO make another method that makes sure all of the player's data is loaded if the player isn't new
-        self.game.new_player(player)  # (we won't use this line in the future)
+        if player.is_new:
+            self.game.new_player(player)
 
     def start(self):
         assert self.handler is None, "If self.handler isn't None, then start must have been called before this."
@@ -94,11 +99,14 @@ class Main:
 
         self.game.add_other(self.handler)
 
-        for player in self.handler.get_players():
-            player.location = self.game.get_starting_location(self.handler, player)
-            player.location.on_enter(player, None, self.handler)  # set the player's starting location
-
         self.handler.start()
+        for player in self.handler.get_players():
+            if player.is_new:
+                player.location = self.game.get_starting_location(self.handler, player)
+            else:
+                player.savable.on_load(player, self.handler)
+
+            player.location.on_enter(player, None, self.handler)
 
     def update(self):
         self.handler.update()
@@ -121,8 +129,9 @@ class Main:
 
 
 class ClientSideMain(Main):
-    def __init__(self, game: CustomGame, custom_managers: List[Manager], player: Player, save_path: SavePath):
-        super().__init__(game, custom_managers, save_path)
+    def __init__(self, game: CustomGame, custom_managers: List[Manager], player: Player, save_path: SavePath, rest=0.0,
+                 clean=False):
+        super().__init__(game, custom_managers, save_path, rest=rest, clean=clean)
         self.player = player
 
     def create_players(self):

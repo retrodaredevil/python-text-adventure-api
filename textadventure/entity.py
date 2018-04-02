@@ -62,6 +62,8 @@ class Living:
 
     def __str__(self):
         """Should be used in Message to replace named_variables with"""
+        if self.name is None:
+            return self.__class__.__name__ + "(name=None)"
         return self.name
 
 
@@ -103,8 +105,7 @@ class Entity(Living, Holder, Identifiable, HasSavable):
     """
     Represents something that has a location and has health
     """
-    def __init__(self, name: Optional[str], health: Health, location: Optional['Location'], uuid: Optional[UUID],
-                 savable: Optional[Savable]):
+    def __init__(self, name: Optional[str], health: Health, location: Optional['Location'], savable: Optional[Savable]):
         """
         Creates an Entity the the given parameters
 
@@ -114,13 +115,13 @@ class Entity(Living, Holder, Identifiable, HasSavable):
         :param name: The name of the entity. If None, should only be None until initialized
         :param health: The health of the entity
         :param location: The location of the entity. If None, should only be None until initialized
-        :param uuid: The id of the entity or None if you want to create a new id
         :param savable: The Savable object that was loaded or None if it doesn't apply to this class or it doesn't
-                exist. (If None, HasSavable should call _create_savable)
+                exist. (If None, HasSavable should call _create_savable). Also note, that if this is not None and it
+                has the attribute uuid, then self.uuid will be initialized to the uuid in this parameter
         """
         super().__init__(name)
         Holder.__init__(self)
-        Identifiable.__init__(self, uuid)
+        Identifiable.__init__(self, savable.uuid if(savable is not None and hasattr(savable, 'uuid')) else None)
         HasSavable.__init__(self, savable)
 
         self.health = health
@@ -162,8 +163,8 @@ class HostileEntity(Entity):  # abstract
 
     CANNOT_PASS_STRING = "You can't pass because {} wants to eat you."
 
-    def __init__(self, name: str, health: Health, location, uuid: Optional[UUID], savable: Optional[Savable]):
-        super().__init__(name, health, location, uuid, savable)
+    def __init__(self, name: str, health: Health, location, savable: Optional[Savable]):
+        super().__init__(name, health, location, savable)
 
     @abstractmethod
     def can_entity_pass(self, entity: Entity) -> CanDo:
@@ -178,13 +179,14 @@ class HostileEntity(Entity):  # abstract
 
 
 class SimpleHostileEntity(HostileEntity):
-    def __init__(self, name, health, location, hostile_to_types: List[Type[Entity]], uuid: Optional[UUID],
-                 savable: Optional[Savable]):
-        super().__init__(name, health, location, uuid, savable)
+    def __init__(self, name, health, location, hostile_to_types: List[Type[Entity]], savable: Optional[Savable]):
+        super().__init__(name, health, location, savable)
         self.hostile_to_types = hostile_to_types
 
         self.hostile_now = True
-        self.can_not_pass = False, Message(self.__class__.CANNOT_PASS_STRING, named_variables=[self])
+        """Will be used by the instance. When False, can_entity_pass() will return True."""
+        self._can_not_pass = False, Message(self.__class__.CANNOT_PASS_STRING, named_variables=[self])
+        """Usually constant, but it can change if a subclass changes it. It is used as a message in can_entity_pass"""
 
     def _can_pass(self, entity: Entity) -> CanDo:
         """
@@ -225,7 +227,7 @@ class SimpleHostileEntity(HostileEntity):
             return can_pass
 
         if self._is_type_target(entity):
-            return self.can_not_pass
+            return self._can_not_pass
 
         return True, "I don't really want to eat you because you aren't of the type of entity I like."
 
@@ -234,8 +236,8 @@ class SimpleHostileEntity(HostileEntity):
 
 
 class CommunityHostileEntity(SimpleHostileEntity):
-    def __init__(self, name, health, location, hostile_to_types, uuid: Optional[UUID], savable: Optional[Savable]):
-        super().__init__(name, health, location, hostile_to_types, uuid, savable)
+    def __init__(self, name, health, location, hostile_to_types, savable: Optional[Savable]):
+        super().__init__(name, health, location, hostile_to_types, savable)
         self.entities_lost_to = []
         self.entities_won_against = []
 
