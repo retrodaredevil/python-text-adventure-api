@@ -2,13 +2,11 @@ import time
 from pathlib import Path
 from typing import List
 
-from ninjagame.entites import PlayerFriend
 from textadventure.customgame import CustomGame
-from textadventure.handler import Handler, HandlerSavable
+from textadventure.handler import Handler, HandlerSavable, PlayerHandler
 from textadventure.manager import Manager
 from textadventure.player import Player
 from textadventure.saving.saving import SavePath, load_data
-from textadventure.sending.message import Message
 
 
 class Main:
@@ -16,7 +14,8 @@ class Main:
     Used to initialize a CustomGame object along with constructing a Handler object making initializing a game\
     a lot simpler and more abstract
     """
-    def __init__(self, game: CustomGame, custom_managers: List[Manager], save_path: SavePath, rest=0.0, clean=False):
+    def __init__(self, game: CustomGame, custom_managers: List[Manager], save_path: SavePath, rest=0.0, clean=False,
+                 player_handler: PlayerHandler = None):
         """
         Note: Custom managers do not yet call on_action when an action happens. This may be easily implemented in the
         future but, is not needed as of right now
@@ -37,7 +36,8 @@ class Main:
         self.custom_managers = custom_managers
         self.save_path = save_path if save_path is not None else SavePath(Path("./save.dat.d"))
         self.rest = rest
-        self.clean = False
+        self.clean = clean
+        self.player_handler = player_handler
 
     def create_players(self) -> List[Player]:
         """
@@ -94,7 +94,8 @@ class Main:
                 message = "Loaded data successfully."
             else:
                 message = "Tried to load data for handler and got: {}".format(data)
-        self.handler = Handler(list(players), locations, input_handlers, managers, self.save_path, savable)
+        self.handler = Handler(list(players), locations, input_handlers, managers, self.save_path, savable,
+                               player_handler=self.player_handler)
         self.handler.broadcast(message)
 
         self.game.add_other(self.handler)
@@ -130,8 +131,8 @@ class Main:
 
 class ClientSideMain(Main):
     def __init__(self, game: CustomGame, custom_managers: List[Manager], player: Player, save_path: SavePath, rest=0.0,
-                 clean=False):
-        super().__init__(game, custom_managers, save_path, rest=rest, clean=clean)
+                 clean=False, player_handler: PlayerHandler = None):
+        super().__init__(game, custom_managers, save_path, rest=rest, clean=clean, player_handler=player_handler)
         self.player = player
 
     def create_players(self):

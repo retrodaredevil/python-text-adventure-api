@@ -1,7 +1,7 @@
 from typing import TypeVar, Type, Optional, TYPE_CHECKING
 
 from textadventure.entity import Entity, Health
-from textadventure.saving.playersavable import PlayerSavable
+from textadventure.saving.savables import PlayerSavable
 from textadventure.saving.savable import Savable
 from textadventure.sending.commandsender import InputGetter, OutputSender, CommandSender
 from textadventure.item.items import Wallet

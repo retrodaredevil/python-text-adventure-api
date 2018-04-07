@@ -35,8 +35,6 @@ This file is not meant to be imported which is why it is not in any package righ
 """
 
 
-
-
 def create_fancy_player(stdscr, savable):
 
     curses_init()
@@ -63,28 +61,6 @@ def create_fancy_player(stdscr, savable):
     return player, [player_input, output, title_manager], lambda: curses_end()
 
 
-# def setup_fancy(savable):
-#     import curses
-#
-#     # https://docs.python.org/3/whatsnew/3.6.html#pep-526-syntax-for-variable-annotations
-#
-#     def start(stdscr):
-#         player, custom_managers = create_fancy_player(stdscr, savable)
-#
-#         main_instance = ClientSideMain(NinjaGame(), custom_managers, player, save_path)
-#
-#         main_instance.start()
-#         while True:
-#             main_instance.update()
-#             time.sleep(.001)  # let the cpu rest a little bit
-#
-#     try:
-#         scanner = curses.initscr()
-#         start(scanner)
-#     finally:
-#         curses_end()
-
-
 def create_simple_player(savable):
 
     colorama_init()
@@ -98,16 +74,6 @@ def create_simple_player(savable):
     player = Player(player_input, output, savable)
 
     return player, [output], lambda: None
-
-
-# def setup_simple(savable):
-#     player, custom_managers = create_simple_player(savable)
-#
-#     main_instance = ClientSideMain(NinjaGame(), custom_managers, player, save_path)
-#     main_instance.start()
-#     while True:
-#         main_instance.update()
-#         time.sleep(.2)
 
 
 def auto_flag_setup():
@@ -178,7 +144,8 @@ def auto_flag_setup():
 
     player, custom_managers, end_function = information
     try:
-        main_instance = ClientSideMain(NinjaGame(), custom_managers, player, save_path, rest=rest)
+        main_instance = ClientSideMain(NinjaGame(), custom_managers, player, save_path, rest=rest,
+                                       player_handler=player_handler)
         main_instance.start()
 
         while True:

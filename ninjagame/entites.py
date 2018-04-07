@@ -1,8 +1,7 @@
 from typing import Optional
-from uuid import UUID
 
 from ninjagame.data import EventsObject
-from textadventure.entity import Living, CommunityHostileEntity
+from textadventure.entity import Living, SimpleHostileEntity, HostileEntityType
 from textadventure.player import Player
 from textadventure.saving.savable import Savable
 from textadventure.sending.commandsender import CommandSender
@@ -56,8 +55,8 @@ class NinjaDude(Living):
                                   "But really, this is an actual error.")
 
 
-class NinjaEntity(CommunityHostileEntity):
+class NinjaEntity(SimpleHostileEntity):
     def __init__(self, name, health, location, savable: Optional[Savable]):
-        super().__init__(name, health, location, [Player], savable)
+        super().__init__(name, health, location, [Player], savable, HostileEntityType.EVERYONE_MUST_DEFEAT)
 
 

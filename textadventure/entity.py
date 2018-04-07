@@ -1,15 +1,18 @@
 from abc import abstractmethod, ABC
-from typing import Type, List, TYPE_CHECKING, Optional
+from enum import Enum, unique
+from typing import Type, List, TYPE_CHECKING, Optional, Any
 from uuid import UUID, uuid4
 
 from textadventure.action import Action
 from textadventure.item.holder import Holder
 from textadventure.saving.savable import HasSavable, Savable
+from textadventure.saving.savables import EntitySavable
 from textadventure.sending.commandsender import CommandSender
 from textadventure.sending.message import Message
 from textadventure.utils import MessageConstant, CanDo, are_mostly_equal
 
 if TYPE_CHECKING:
+    from textadventure.handler import Handler
     from textadventure.location import Location
 
 
@@ -178,15 +181,55 @@ class HostileEntity(Entity):  # abstract
         pass
 
 
+@unique
+class HostileEntityType(Enum):
+    KILL_ONCE = 1
+    EVERYONE_MUST_DEFEAT = 2
+
+
+class SimpleHostileEntitySavable(EntitySavable):
+    def __init__(self):
+        super().__init__()
+        self.hostile_now = None
+        self.hostile_type = None
+        self.entities_lost_to = None
+        self.entities_won_against = None
+
+    def before_save(self, source: Any, handler: 'Handler'):
+        super().before_save(source, handler)
+        self.hostile_now = source.hostile_now
+        self.hostile_type = source.hostile_type
+        self.entities_lost_to = list(source.entities_lost_to)
+        self.entities_won_against = list(source.entities_won_against)
+
+    def on_load(self, source: Any, handler: 'Handler'):
+        super().on_load(source, handler)
+        source.hostile_type = self.hostile_now
+        source.hostile_type = self.hostile_type
+        source.entities_lost_to.extend(self.entities_lost_to)
+        source.entities_won_against.extend(self.entities_won_against)
+
+
 class SimpleHostileEntity(HostileEntity):
-    def __init__(self, name, health, location, hostile_to_types: List[Type[Entity]], savable: Optional[Savable]):
+    def __init__(self, name, health, location, hostile_to_types: List[Type[Entity]], savable: Optional[Savable],
+                 hostile_type=HostileEntityType.KILL_ONCE):
         super().__init__(name, health, location, savable)
         self.hostile_to_types = hostile_to_types
+        """The types of entities this hostile entity wants to attack"""
 
         self.hostile_now = True
         """Will be used by the instance. When False, can_entity_pass() will return True."""
         self._can_not_pass = False, Message(self.__class__.CANNOT_PASS_STRING, named_variables=[self])
         """Usually constant, but it can change if a subclass changes it. It is used as a message in can_entity_pass"""
+        self.hostile_type = hostile_type
+
+        self.entities_lost_to = []
+        """A list of UUIDs from entities that beat this enemy in battle"""
+        self.entities_won_against = []
+        """A list of UUIDs from entities that have been beaten by this enemy"""
+
+    def _create_savable(self):
+        return SimpleHostileEntitySavable()
 
     def _can_pass(self, entity: Entity) -> CanDo:
         """
@@ -199,6 +242,11 @@ class SimpleHostileEntity(HostileEntity):
         :param entity:
         :return:
         """
+        if self.hostile_type is HostileEntityType.EVERYONE_MUST_DEFEAT:
+            if entity.uuid in self.entities_lost_to:
+                return True, "Sure, you can pass, you already beat me."
+            return False, "You can't pass since you haven't beaten me yet. - Should not be displayed"
+
         if self.health.is_fainted():
             return True, "(Not displayed) I can't fight you because I'm dead."
         return False, "(Not displayed) There is no reason to let this entity pass."
@@ -233,22 +281,6 @@ class SimpleHostileEntity(HostileEntity):
 
     def send_message(self, message):
         pass
-
-
-class CommunityHostileEntity(SimpleHostileEntity):
-    def __init__(self, name, health, location, hostile_to_types, savable: Optional[Savable]):
-        super().__init__(name, health, location, hostile_to_types, savable)
-        self.entities_lost_to = []
-        self.entities_won_against = []
-
-    def _can_pass(self, entity: Entity):
-        # We aren't going to call super because even if this entity is dead, we want them to fight the entity if\
-        #   they haven't beat us yet.
-
-        if entity in self.entities_lost_to:
-            return True, "Sure, you can pass, you already beat me."
-
-        return False, "You can't pass since you haven't beaten me yet. - Should not be displayed"
 
 
 # noinspection PyAbstractClass

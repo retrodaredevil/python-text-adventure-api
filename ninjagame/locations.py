@@ -549,7 +549,7 @@ class CenterSpiderWebForest(Location):
 
 
 class EastCenterSpiderWebForest(Location):
-    ID_WHITE_BELT_NINJA = ("EastCenterSpiderWebForest", 0)  # don't change to avoid loading errors
+    ID_WHITE_BELT_NINJA = ("E CenterSpiderWeb", 0)  # don't change to avoid loading errors
 
     def __init__(self):
         super().__init__("East of the Center of the Spider Web Forest",
@@ -558,9 +558,7 @@ class EastCenterSpiderWebForest(Location):
         self.ninja = None  # right now, this hasn't been initialized
 
         def create_ninja(savable: Optional[Savable]):
-            # uuid = None
-            # if savable is not None:
-            #     uuid = savable.uuid  # TODO make the savable have a uuid or something
+            # print("savable: {}".format(savable))
             self.ninja = NinjaEntity("White Belt Ninja", Health(20, 20), self, savable)
             sword = Sword(SwordType.WOODEN)
             sword.change_holder(None, self.ninja)
@@ -614,6 +612,6 @@ class EastCenterSpiderWebForest(Location):
 
     def on_enter(self, player: Player, previous_location: Optional[Location], handler: Handler):
         self._send_welcome(player)
-        if player not in self.ninja.entities_lost_to:
+        if player.uuid not in self.ninja.entities_lost_to:
             player.send_message(Message("It looks like you are going to have to fight {}.",
                                         named_variables=[self.ninja]))

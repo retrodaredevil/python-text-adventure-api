@@ -11,7 +11,7 @@ from textadventure.input.inputhandling import InputHandler
 from textadventure.location import Location
 from textadventure.manager import Manager
 from textadventure.player import Player
-from textadventure.saving.playersavable import PlayerSavable
+from textadventure.saving.savables import PlayerSavable
 
 
 class NinjaGame(CustomGame):

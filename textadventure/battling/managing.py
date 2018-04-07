@@ -1,16 +1,15 @@
 import warnings
 from abc import abstractmethod
-from typing import List, Tuple, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 from textadventure.action import Action
 from textadventure.battling.battle import Battle
 from textadventure.battling.move import Target
-from textadventure.entity import HostileEntity, Entity, CommunityHostileEntity
+from textadventure.entity import HostileEntity, Entity, SimpleHostileEntity
 from textadventure.handler import Handler
 from textadventure.manager import Manager
 
 if TYPE_CHECKING:
-    from textadventure.battling.team import Team
     from textadventure.battling.effect import Effect
 
 """
@@ -107,19 +106,19 @@ class HostileEntityManager(Manager):
                         action.can_do = can_pass  # set the action's can_do to a CanDo with a [0] value of False
                         return  # we don't need to do anything else
 
-        elif isinstance(action, BattleEnd):  # this part handles CommunityHostileEntities
+        elif isinstance(action, BattleEnd):  # this part handles SimpleHostileEntities
             # future maintainers, this is gonna be a lot of for loops so get used to it
             # print("BattleEnd called")
             battle = action.battle
             winning_team = action.winning_team
-            community_hostiles = []  # type List[Tuple[CommunityHostileEntity, 'Team']]
+            simple_hostiles = []  # type List[Tuple[SimpleHostileEntity, 'Team']]
             for team in battle.teams:
                 for entity in team.members:
-                    if isinstance(entity, CommunityHostileEntity):
-                        community_hostiles.append((entity, team))
+                    if isinstance(entity, SimpleHostileEntity):
+                        simple_hostiles.append((entity, team))
 
-            # now community_hostiles has a list of tuples with each CommunityHostileEntity
-            for hostile_tuple in community_hostiles:
+            # now simple_hostiles has a list of tuples with each SimpleHostileEntity
+            for hostile_tuple in simple_hostiles:
                 hostile = hostile_tuple[0]
                 hostile_team = hostile_tuple[1]
                 for team in battle.teams:
@@ -127,13 +126,13 @@ class HostileEntityManager(Manager):
                         continue
                     for entity in team.members:
                         if winning_team == team:  # entity has beaten hostile
-                            hostile.entities_lost_to.append(entity)
+                            hostile.entities_lost_to.append(entity.uuid)
                             # print("Appended to lost_to: {}".format(entity))
                         elif winning_team == hostile_team:  # extra elif that will only be false if more than 3 teams
-                            hostile.entities_won_against.append(entity)
+                            hostile.entities_won_against.append(entity.uuid)
                             # print("Appended to won_to: {}".format(entity))
                         else:
-                            print("This shouldn't be called unless there are more than 2 teams")
+                            raise Exception("This shouldn't be called unless there are more than 2 teams")
 
 
 class DamageActionManager(Manager):

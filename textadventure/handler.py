@@ -1,12 +1,12 @@
 import sys
-from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any
+from typing import List, Optional, TypeVar, Type, TYPE_CHECKING, Any, Union
 
 from textadventure.action import Action
 from textadventure.entity import Entity, Identifiable, Living
 from textadventure.input.inputhandling import CommandInput, InputHandleType, InputHandler
 from textadventure.manager import Manager
 from textadventure.player import Player
-from textadventure.saving.playersavable import PlayerSavable
+from textadventure.saving.savables import PlayerSavable
 from textadventure.saving.savable import Savable, HasSavable, SaveLoadException
 from textadventure.saving.saving import SavePath, save_data, load_data
 from textadventure.sending.commandsender import CommandSender
@@ -73,24 +73,24 @@ class Handler(HasSavable):
         self.save_path = save_path
 
         # Variables not from the constructor
-        """Can be used by the save and load command to easily save and load things"""
-        if savable is None:
-            self._savables = {}
-            """
-            A Dictionary of savables where the key is something that is usually a tuple with the first value
-            being the name of the class that created it and the second value being a number or id to make sure that
-            that class can create multiple of something. 
-            
-            Note this does not include PlayerSavables. PlayerSavables are handled separately
-            
-            If this is something like a PlayerSavable, you should use their
-            uuid because you aren't going to be creating a Player named Bob at one point in the code like you might
-            create an entity named 'White Belt Ninja' once in the code
-            """
-        else:
-            self._savables = savable.savables
+        self._savables = savable.savables if savable is not None else {}
+        """
+        A Dictionary of savables where the key is something that is usually a tuple with the first value
+        being the name of the class that created it and the second value being a number or id to make sure that
+        that class can create multiple of something. 
+        
+        The value is a Tuple where [0] is the savable, and [1] is the source that is used when saving it
+        
+        Note this does not include PlayerSavables. PlayerSavables are handled separately
+        
+        If this is something like a PlayerSavable, you should use their
+        uuid because you aren't going to be creating a Player named Bob at one point in the code like you might
+        create an entity named 'White Belt Ninja' once in the code
+        """
 
         self.player_handler = player_handler if player_handler is not None else PlayerHandler(None, self)
+        self.player_handler.handler = self
+
         self.living_things = []
         """A list of livings that normally should never change. It's used to keep track of Living
         objects which make them easy to retrieve without using a static variable in the class of the living"""
@@ -223,20 +223,25 @@ class Handler(HasSavable):
         return save_data(self.savable, path)
 
     # region all getters
-    def get_savable(self, key):
+    def get_savable(self, key) -> Union[Savable, Any]:
+        """
+        :return: A Tuple where [0] is the Savable and [1] is the source that should be used when saving. When loading,
+                 this will always be None because it is not actually saved.
+        """
         return self._savables.get(key, None)
 
-    def set_savable(self, key, value: Savable):
+    def set_savable(self, key, savable: Savable, source: Any):
         """
         Sets the savable so get_savable(key) returns value.
 
         :param key: The key. Usually A UUID or a Tuple[str, int]. It should never contain something like a type or
                 an instance of an object because we want it to be something if if saved, won't conflict later while
                 loading
-        :param value:
+        :param savable: The savable
+        :param source: The source when saving the savable
         :return: None
         """
-        self._savables[key] = value
+        self._savables[key] = (savable, source)
 
     def get_savables(self):
         """Should only be used in handler.py and nowhere else."""
@@ -309,11 +314,16 @@ class Handler(HasSavable):
 class HandlerSavable(Savable):
     def __init__(self):
         super().__init__()
-        self.savables = {}  # type Dict[Any, Savable]
+        self.savables = None  # type Dict[Any, Tuple[Savable, NoneType]]
 
     def before_save(self, source: Any, handler: 'Handler'):
         assert source is handler
-        self.savables = dict(handler.get_savables())  # store a clone of Handler's savable dict
+        self.savables = {}
+        for key, value in handler.get_savables().items():
+            savable, source = value
+            savable.before_save(source, handler)
+            self.savables[key] = savable, None
+            # print("saving: '{}' with '{}' as source".format(savable, source))
 
     def on_load(self, source: Any, handler: 'Handler'):
         assert source is handler

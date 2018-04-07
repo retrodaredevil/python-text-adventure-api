@@ -1,4 +1,4 @@
-from typing import Callable, TYPE_CHECKING, Optional
+from typing import Callable, TYPE_CHECKING, Optional, Any, Tuple
 
 from textadventure.entity import Identifiable
 from textadventure.saving.savable import Savable, HasSavable
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class HandlerInitialize:
-    def __init__(self, key, init_callable: Callable[['Handler'], Savable]):
+    def __init__(self, key, init_callable: Callable[['Handler'], Tuple[Savable, Any]]):
         """
 
         :param key: The key the Savable should be saved under or is already saved in the handler savables dict
@@ -19,10 +19,8 @@ class HandlerInitialize:
         self.init_callable = init_callable
 
     def do_init(self, handler: 'Handler'):
-        savable = handler.get_savable(self.key)
-        if savable is None:
-            savable = self.init_callable(handler)
-            handler.set_savable(self.key, savable)
+        savable, source = self.init_callable(handler)
+        handler.set_savable(self.key, savable, source)
 
 
 class IdentifiableInitialize(HandlerInitialize):
@@ -34,12 +32,17 @@ class IdentifiableInitialize(HandlerInitialize):
                 HasSavable
         """
         def init_callable(handler: 'Handler'):
-            created = self.create_callable(handler.get_savable(key))
+            value = handler.get_savable(key)
+            savable, source = value if value is not None else (None, None)
+
+            created = self.create_callable(savable)
             assert isinstance(created, Identifiable) and isinstance(created, HasSavable)
+            if savable is not None:  # if there was saved data, load it
+                savable.on_load(created, handler)
 
             handler.identifiables.append(created)
             # don't call handler.set_savable because the superclass does that
-            return created.savable
+            return created.savable, created  # may be different than savable
 
         super().__init__(key, init_callable)
         self.create_callable = create_callable
