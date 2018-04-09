@@ -13,13 +13,13 @@ from textadventure.sending.message import Message, MessageType
 from textadventure.sending.commandsender import OutputSender, OutputSenderType
 from textadventure.utils import join_list
 from textprint.colors import Color
-from textprint.line import Line
-from textprint.section import Section
-from textprint.textprinter import TextPrinter
 
 if TYPE_CHECKING:
+    from textprint.textprinter import TextPrinter
     from textadventure.input.inputhandling import CommandInput
     from textadventure.sending.commandsender import CommandSender
+    from textprint.line import Line
+    from textprint.section import Section
 
 
 # noinspection PyAbstractClass
@@ -192,7 +192,7 @@ class ImmediateStreamOutput(Manager, BaseStreamOutput):
 
 
 class TextPrinterOutput(Manager, OutputSender):
-    def __init__(self, printer: TextPrinter, section: Section):
+    def __init__(self, printer: 'TextPrinter', section: 'Section'):
         """
         Creates a TextPrinterOutput but does not start the Thread
         """
@@ -343,7 +343,7 @@ class TextPrinterOutput(Manager, OutputSender):
 
 
 class LocationTitleBarManager(Manager):
-    def __init__(self, player: Player, printer: TextPrinter, line: Line):
+    def __init__(self, player: Player, printer: 'TextPrinter', line: 'Line'):
         self.player = player
         self.printer = printer
         self.line = line

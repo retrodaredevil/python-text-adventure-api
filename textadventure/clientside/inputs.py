@@ -2,13 +2,15 @@ import _thread
 import sys
 import threading
 from threading import Thread
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from textadventure.action import Action
 from textadventure.handler import Handler
 from textadventure.manager import Manager
 from textadventure.sending.commandsender import InputGetter, OutputSender, OutputSenderType
-from textprint.input import InputLineUpdater
+
+if TYPE_CHECKING:
+    from textprint.input import InputLineUpdater
 
 
 class KeyboardInputGetter(InputGetter, Thread):
@@ -82,7 +84,7 @@ class TextPrinterInputGetter(InputGetter, Manager):
     Note that you should also probably add an instance of InputLineUpdaterManager to the list of managers in \
         the Handler to show smoother input
     """
-    def __init__(self, updater: InputLineUpdater):
+    def __init__(self, updater: 'InputLineUpdater'):
         """
         Creates a TextPrinterInput which wraps a InputLineUpdater and implements the PlayerInput class to provide\
             ease to getting input even though you will have to create the InputLineUpdater yourself

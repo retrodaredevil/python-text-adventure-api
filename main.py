@@ -23,9 +23,6 @@ from textadventure.mainclass import ClientSideMain
 from textadventure.player import Player
 from textprint.colors import Color
 from textprint.inithelper import curses_init, std_init, curses_end, add_interrupt_handler, colorama_init
-from textprint.input import InputLineUpdater
-from textprint.section import Section
-from textprint.textprinter import TextPrinter
 from textadventure.handler import PlayerHandler
 
 """
@@ -36,6 +33,9 @@ This file is not meant to be imported which is why it is not in any package righ
 
 
 def create_fancy_player(stdscr, savable):
+    from textprint.input import InputLineUpdater
+    from textprint.section import Section
+    from textprint.textprinter import TextPrinter
 
     curses_init()
     std_init(stdscr)
