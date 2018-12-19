@@ -37,7 +37,13 @@ class Section:
         self.lines = []
         """A list of all the lines in this section"""
 
-    def get_lines_taken(self, printer: 'TextPrinter', include_extra_rows=True):
+    def get_lines_taken(self, printer: 'TextPrinter', include_extra_rows=True) -> int:
+        """
+        :param printer: The printer being used
+        :param include_extra_rows: Some lines need more than 1 row to fit. If this is True, it will count all the rows
+                                   each line takes up, False otherwise.
+        :return: The number of lines
+        """
         terminal_width = printer.dimensions[1]
         length = len(self.lines)
         if include_extra_rows:  # most of the time, this is True
@@ -94,6 +100,10 @@ class Section:
         # write to the line that the newly created Line should occupy,\
         #       if a new line was needed, it should have been added
         return line
+
+    def clear_lines(self, text_printer: 'TextPrinter', flush=False):
+        self.lines.clear()
+        self.update_lines(text_printer, flush=flush, force_reprint=True)
 
     def __remove_old_lines(self):
         if len(self.lines) < self.__class__.OLD_LINES_AMOUNT + self.__class__.OLD_LINES_REMOVE_AT_TIME:

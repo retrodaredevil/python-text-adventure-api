@@ -1,13 +1,4 @@
-#!/bin/sh
-''''which python3.5 1>/dev/null 2>&1 && exec python3.5 "$0" "$@" # '''
-''''which python3 1>/dev/null 2>&1 && exec python3 "$0" "$@"     # '''
-''''which python 1>/dev/null 2>&1 && exec python "$0" "$@" # '''
-''''exec echo "You must not have python 3 installed. Make sure you have at least version 3.5" # '''
-# thanks https://stackoverflow.com/a/26056481 for the above!
-
 import sys
-assert sys.version_info >= (3, 5), "Must use python 3.5 or greater. Many of the files use the typing module."
-
 import time
 
 from pathlib import Path
@@ -18,9 +9,11 @@ from textadventure.saving.saving import SavePath
 
 from ninjagame.game import NinjaGame
 from textadventure.clientside.inputs import TextPrinterInputGetter, KeyboardInputGetter
-from textadventure.clientside.outputs import TextPrinterOutput, LocationTitleBarManager, ImmediateStreamOutput
+from textadventure.clientside.outputs import TextPrinterOutput, LocationTitleBarManager, ImmediateStreamOutput, \
+    OutputNotifierSender
 from textadventure.mainclass import ClientSideMain
 from textadventure.player import Player
+from textadventure.sending.message import Message, MessageType
 from textprint.colors import Color
 from textprint.inithelper import curses_init, std_init, curses_end, add_interrupt_handler, colorama_init
 from textadventure.handler import PlayerHandler
@@ -42,23 +35,34 @@ def create_fancy_player(stdscr, savable):
     colorama_init()
 
     input_section = Section(None, fill_up_left_over=False)  # we want to allow it to go for as many lines it needs
+    temp_section = Section(None, fill_up_left_over=False)
     print_section = Section(None, fake_line=(Color.BLUE >> "~"))
     title_section = Section(1)
-    printer = TextPrinter([input_section, print_section, title_section], print_from_top=False, stdscr=stdscr)
+    printer = TextPrinter([input_section, temp_section, print_section, title_section],
+                          print_from_top=False, stdscr=stdscr)
     printer.update_dimensions()
     # print_section.fake_line = Color.RED + Color.BOLD + "|" + (" " * (printer.dimensions[1] - 3)) + "|"
 
     updater = InputLineUpdater(printer, input_section.println(printer, "", flush=True), stdscr)
     player_input = TextPrinterInputGetter(updater)
     # input_manager = InputLineUpdaterManager(updater)  # calls updater's update
-    output = TextPrinterOutput(printer, print_section)
+    output = OutputNotifierSender(TextPrinterOutput(printer, print_section),
+                                  lambda: temp_output.section.clear_lines(printer, flush=True))
+    temp_output = TextPrinterOutput(printer, temp_section)
     player = Player(player_input, output, savable)
 
-    add_interrupt_handler(lambda: updater.current_line().clear())  # clear line when CTRL+C is pressed
+    def interrupt_handler():
+        if updater.current_line().is_clear():
+            temp_output.send_message(Message(Color.YELLOW >> "Press CTRL+D to exit", message_type=MessageType.IMMEDIATE))
+            print_section.update_lines(printer, flush=True, force_reprint=True)
+        else:
+            updater.current_line().clear()
+
+    add_interrupt_handler(interrupt_handler)  # clear line when CTRL+C is pressed
 
     title_manager = LocationTitleBarManager(player, printer, title_section.println(printer, ""))
 
-    return player, [player_input, output, title_manager], lambda: curses_end()
+    return player, [player_input, output, temp_output, title_manager], lambda: curses_end()
 
 
 def create_simple_player(savable):
@@ -83,7 +87,7 @@ def auto_flag_setup():
         ("simple", "windows", "dos"): 0,
         ("file", "f", "save", "path"): 1,
         ("clean", "no_load"): 0,
-        ("user", "u", "player"): 1
+        ("user", "u", "player", "name"): 1
     }
     flag_data = FlagData(command, options)
 
@@ -155,13 +159,17 @@ def auto_flag_setup():
         end_function()
 
 
-
 def main():
     try:
         auto_flag_setup()
     except KeyboardInterrupt:
         print("Ended program with a keyboard interrupt")
         sys.exit(0)
+    finally:
+        try:
+            curses_end()
+        except ImportError:
+            pass
 
 
 if __name__ == '__main__':

@@ -30,6 +30,11 @@ class OutputSenderType(Enum):
 
 
 class OutputSender(ABC):
+    """
+    An interface with default methods like class.
+
+    Represents something you can send a message to
+    """
     @abstractmethod
     def send_message(self, message: Message):
         """

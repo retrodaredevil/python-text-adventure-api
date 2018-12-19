@@ -1,9 +1,8 @@
 import sys
 import time
 import warnings
-from abc import abstractmethod
 from threading import Thread
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Callable
 
 from textadventure.action import Action
 from textadventure.handler import Handler
@@ -236,12 +235,6 @@ class TextPrinterOutput(Manager, OutputSender):
         self.print_immediately()
         return False
 
-    def send_raw_message(self, string_message: str):
-        return False
-
-    def send_raw_flush(self):
-        return False
-
     def print_immediately(self):
         self.__add_messages()  # add the current message we just printed
         self.__print_parts(immediate=True)  # by default, this will change self.is_instant
@@ -342,7 +335,45 @@ class TextPrinterOutput(Manager, OutputSender):
                 self.current_line_parts = None  # we're done printing all available parts
 
 
+class OutputNotifierSender(Manager, OutputSender):
+
+    def __init__(self, manager_sender, to_notify: Callable):
+        self.manager_sender = manager_sender
+        self.to_notify = to_notify
+
+    def on_input(self, sender: 'CommandSender', command_input: 'CommandInput'):
+        return self.manager_sender.on_input(sender, command_input)
+
+    def send_raw_flush(self):
+        return self.manager_sender.send_raw_flush()
+
+    def print_immediately(self):
+        return self.manager_sender.print_immediately()
+
+    def send_raw_message(self, string_message: str):
+        return self.manager_sender.send_raw_message(string_message)
+
+    def get_sender_type(self):
+        return self.manager_sender.get_sender_type()
+
+    def update(self, handler: 'Handler'):
+        self.manager_sender.update(handler)
+
+    def on_action(self, handler: 'Handler', action: Action):
+        self.manager_sender.on_action(handler, action)
+
+    def send_message(self, message: Message):
+        self.manager_sender.send_message(message)
+        self.to_notify()
+
+
 class LocationTitleBarManager(Manager):
+    """
+    Updates a Line with the player's current location.
+
+    This relies on something else to flush the TextPrinter
+    """
+
     def __init__(self, player: Player, printer: 'TextPrinter', line: 'Line'):
         self.player = player
         self.printer = printer

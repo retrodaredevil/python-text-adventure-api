@@ -117,7 +117,7 @@ class TextPrinter:
     def print(self, text="", flush=False, end=""):
         """
         Allows you to print text to self.output. Normally, you would use unix escapes since that what this library \
-        uses. Normally, you shouldn't call this method because you should let
+        uses. Normally, you shouldn't call this method because you should let lines handle this
 
         :param text: The text you want to print
         :param flush: Do you want to flush it?

@@ -17,6 +17,9 @@ if typing.TYPE_CHECKING:
 
 
 class Manager(ABC):
+    """
+    An event handler like object that is updated each frame
+    """
 
     @abstractmethod
     def update(self, handler: 'Handler'):

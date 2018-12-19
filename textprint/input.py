@@ -37,6 +37,9 @@ class EditableLine:
         self.before = ""
         self.after = ""
 
+    def is_clear(self) -> bool:
+        return not self.before and not self.after
+
     def delete(self, amount_delete_forward: int):
         """
         Allows you to delete text forward or backwards depending on the sign of amount_delete_forward
@@ -220,19 +223,22 @@ class InputLineUpdater:
         elif key == curses.KEY_DC:
             current.delete(1)
         elif key == 4 or key == 3:
-            self.should_exit = True  # for a developer who wants to make a clean exit of the program
-        elif key == curses.KEY_LEFT:
+            if current.is_clear():
+                self.should_exit = True  # for a developer who wants to make a clean exit of the program
+            else:
+                current.delete(1)
+        elif key == curses.KEY_LEFT or key == 2:  # left arrow or CTRL+B
             current.move(-1)
-        elif key == curses.KEY_RIGHT:
+        elif key == curses.KEY_RIGHT or key == 6:  # right arrow or CTRL+F
             current.move(1)
         elif key == 545:  # CTRL+LEFT
             current.move_word(True)
         elif key == 560:  # CTRL+RIGHT
             current.move_word(False)
-        elif key == curses.KEY_UP or key == curses.KEY_DOWN:
+        elif key == curses.KEY_UP or key == curses.KEY_DOWN or key == 16 or key == 14:
 
             def go_direction():
-                if key == curses.KEY_UP:
+                if key == curses.KEY_UP or key == 16:  # key 16 is CTRL+P
                     self._line_index += 1  # remember when 0, current line will be self._current_line
                 else:
                     self._line_index -= 1
@@ -245,9 +251,9 @@ class InputLineUpdater:
                 last_index = self._line_index
                 go_direction()
 
-        elif key == curses.KEY_END:
+        elif key == curses.KEY_END or key == 5:  # END or CTRL+E
             current.end()
-        elif key == curses.KEY_HOME:
+        elif key == curses.KEY_HOME or key == 1:  # HOME or CTRL+A
             current.home()
         elif key == curses.KEY_RESIZE:
             # self.stdscr.refresh()  # stops terminal from clearing
@@ -255,12 +261,12 @@ class InputLineUpdater:
             self.stdscr.refresh()  # stops terminal from clearing
             self.text_printer.update_dimensions()  # this is the place where we actually get the new dimensions
             self.text_printer.update_all_lines()  # This will reload all of the sections and lines (Check overflows)
-        elif key == 8 or key == 27 or key == 519:  # ctrl+backspace or alt+backspace or ctrl+delete
-            # TODO this code doesn't work perfectly like most ctrl+backspaces since it stops when it get to a space and
-            #       on other implementations, they have a whole regex worked out
-            backspace = key != 519
-            current.delete_word(backspace)
-            # TODO On some systems, when you use ALT+Backspace, it removes an extra char.
+        elif key == 8 or key == 27:  # ctrl+backspace or alt+backspace
+            current.delete_word(True)
+        elif key == 519:  # CTRL+Delete
+            current.delete_word(False)
+        elif key == 11:  # CTRL+K
+            current.after = ""
         else:
             current.type("[{} ord: {}]".format(curses.keyname(key).decode("utf-8"), key))
 

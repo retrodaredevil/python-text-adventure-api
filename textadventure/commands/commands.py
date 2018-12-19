@@ -143,8 +143,8 @@ class SensesCommandHandler(LocationCommandHandler):
 
 
 class LookCommandHandler(SensesCommandHandler):
-    command_names = ["look", "see", "lok", "find", "se", "ook"]  # yeah I know, magic strings deal with it
-    description = """Allows you to see your surroundings. Aliases: look, see, find\nUsage: look [weapon] """
+    command_names = ["look", "see", "lok", "find", "se", "ook", "ls"]  # yeah I know, magic strings deal with it
+    description = """Allows you to see your surroundings. Aliases: look, see, find\nUsage: look [thing] """
 
     def __init__(self, location: Location):
         super().__init__(self.__class__.command_names, self.__class__.description, location)
@@ -158,7 +158,7 @@ class LookCommandHandler(SensesCommandHandler):
 
 class ListenCommandHandler(SensesCommandHandler):
     command_names = ["listen", "hear", "escucha", "liste", "isten", "hea", "listne"]
-    description = """Allows you to listen to your surroundings. Aliases: listen, hear\nUsage: feel [weapon]"""
+    description = """Allows you to listen to your surroundings. Aliases: listen, hear\nUsage: listen [thing]"""
 
     def __init__(self, location: Location):
         super().__init__(self.__class__.command_names, self.__class__.description, location)
@@ -172,7 +172,7 @@ class ListenCommandHandler(SensesCommandHandler):
 
 class FeelCommandHandler(SensesCommandHandler):
     command_names = ["feel", "touch", "eel", "fee", "tou", "tuch", "toch"]
-    description = """Allows you to feel your surroundings. Aliases: look, touch\nUsage: feel [weapon]"""
+    description = """Allows you to feel your surroundings. Aliases: look, touch\nUsage: feel [item]"""
 
     def __init__(self, location: Location):
         super().__init__(self.__class__.command_names, self.__class__.description, location)
@@ -186,7 +186,7 @@ class FeelCommandHandler(SensesCommandHandler):
 
 class SmellCommandHandler(SensesCommandHandler):
     command_names = ["smell", "nose", "smel", "mell", "nos", "smeel", "smee", "mel"]
-    description = """Allows you to smell your surroundings. Aliases: smell, nose\nUsage: feel [weapon]"""
+    description = """Allows you to smell your surroundings. Aliases: smell, nose\nUsage: smell [item]"""
 
     def __init__(self, location: Location):
         super().__init__(self.__class__.command_names, self.__class__.description, location)
@@ -200,7 +200,7 @@ class SmellCommandHandler(SensesCommandHandler):
 
 class TasteCommandHandler(SensesCommandHandler):
     command_names = ["taste", "tongue", "aste", "tast"]
-    description = """Allows you to taste. Aliases: taste, tongue\nUsage: feel [weapon]"""
+    description = """Allows you to taste. Aliases: taste, tongue\nUsage: taste [item]"""
 
     def __init__(self, location: Location):
         super().__init__(self.__class__.command_names, self.__class__.description, location)

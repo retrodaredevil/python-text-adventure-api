@@ -587,7 +587,7 @@ class EastCenterSpiderWebForest(Location):
 
     def see(self, handler: Handler, player: Player):
         if player not in self.ninja.entities_lost_to:
-            player.send_message("You see {} waiting to fight you. There's no escaping now.")
+            player.send_message("You see {} waiting to fight you. There's no escaping now.".format(self.ninja))
         else:
             player.send_message("You see the path to the fountain to the west.")
 
